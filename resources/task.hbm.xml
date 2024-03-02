@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>  
+<!DOCTYPE hibernate-mapping PUBLIC  
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.assetsense.assetsoft.domain.Task" table="TASK">
+		<id name="taskId" column="task_id">
+			<generator class="native" />
+		</id>
+		
+		<property name="title" column="title"></property>
+		<property name="description" column="description"></property>
+		
+		<many-to-one name="user" class="com.assetsense.assetsoft.domain.User" column="user_id" not-null="true"/>
+		<many-to-one name="product" class="com.assetsense.assetsoft.domain.Product" column="product_id" not-null="true" />
+		<many-to-one name="type" column="typeid" class="com.assetsense.assetsoft.domain.Lookup" not-null="true"/>
+		<many-to-one name="priority" column="priorityid" class="com.assetsense.assetsoft.domain.Lookup" not-null="true"/>
+		<many-to-one name="status" column="statusid" class="com.assetsense.assetsoft.domain.Lookup" not-null="true"/>
+	</class>
+</hibernate-mapping>

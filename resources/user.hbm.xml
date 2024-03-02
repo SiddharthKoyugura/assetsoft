@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC  
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.assetsense.assetsoft.domain.User" table="USERS">
+		<id name="userId" column="user_id">
+			<generator class="native" />
+		</id>
+
+		<property name="name" column="name"></property>
+		<property name="email" column="email"></property>
+		<property name="password" column="password"></property>
+
+
+		<set name="teams" cascade="save-update" table="user_team">
+			<key column="user_id" />
+			<many-to-many column="team_id"
+				class="com.assetsense.assetsoft.domain.Team" />
+		</set>
+	</class>
+</hibernate-mapping>
