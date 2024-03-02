@@ -5,12 +5,16 @@
 body {
 	margin: 0px;
 	padding: 0px;
+	font-family: "Open Sans";
 }
+
+
+/*      START: NAVBAR SECTION         */
 
 .navbar {
     background-color: #1F77B4;
     padding: 10px;
-    font-family: "Open Sans";
+    
 }
 
 .navbar tr {
@@ -37,3 +41,39 @@ body {
 	border: none;
 	font-weight: 700;
 }
+
+/*      END: NAVBAR SECTION         */
+
+
+/*      START: DROPDOWN(TREE) SECTION         */
+
+
+.parentTree table:first-child {
+	
+}
+
+
+.treeHeading tr:first-child{
+	font-weight: 600;
+}
+
+
+.leftSidebar {
+	padding: 15px 10px;
+	border-right: 1px solid black;
+}
+
+.leftSidebar > * {
+	padding: 1.1px;
+}
+
+.hr {
+	background-color: #A59595;
+	margin: 10px 10px;
+	height: 1px;
+	width: 120px;
+}
+
+
+
+/*      END: DROPDOWN(TREE) SECTION         */

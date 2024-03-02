@@ -8,11 +8,17 @@
 	<context:component-scan base-package="com.assetsense.assetsoft" />
 
 	<!-- DataSource Configuration -->
-	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
-		<property name="driverClassName" value="org.postgresql.Driver" />
-		<property name="url" value="jdbc:postgresql://localhost:5432/assetsoft" />
-		<property name="username" value="postgres" />
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="org.postgresql.Driver" />
+		<property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/assetsoft" />
+		<property name="user" value="postgres" />
 		<property name="password" value="root" />
+
+
+		<property name="acquireIncrement" value="5" />
+		<property name="minPoolSize" value="5" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="300" />
 	</bean>
 
 	<!-- Hibernate SessionFactory -->
@@ -32,7 +38,7 @@
 			<props>
 				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
 				<prop key="hibernate.show_sql">false</prop>
-				<prop key="hibernate.hbm2ddl.auto">none</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
 				<prop key="hibernate.flushMode">AUTO</prop>
 			</props>
 		</property>
@@ -48,15 +54,15 @@
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-	<!--  <bean id="d" class="com.demoTodo.shared.TodoDao">
-		<property name="template" ref="template"></property>
-	</bean>  -->
+	<!-- <bean id="d" class="com.demoTodo.shared.TodoDao"> <property name="template" 
+		ref="template"></property> </bean> -->
 
-	<!-- Liquibase Bean Configuration  -->
+	<!-- Liquibase Bean Configuration -->
 	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
-		<property name="changeLog" value="file:/C:/dev/workspace/assetsoft/resources/dbMigrations/changelog-master.xml" />
+		<property name="changeLog"
+			value="file:/C:/dev/workspace/assetsoft/resources/dbMigrations/changelog-master.xml" />
 		<property name="dataSource" ref="dataSource" />
-	</bean> 
+	</bean>
 
 
 </beans>
