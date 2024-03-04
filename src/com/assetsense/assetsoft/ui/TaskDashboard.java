@@ -5,6 +5,8 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -15,23 +17,23 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class TaskDashboard {
-	
+
 	Tree.Resources customTreeResources = new Tree.Resources() {
-        @Override
-        public ImageResource treeClosed() {
-            return MyTreeResources.INSTANCE.treeClosed();
-        }
+		@Override
+		public ImageResource treeClosed() {
+			return MyTreeResources.INSTANCE.treeClosed();
+		}
 
-        @Override
-        public ImageResource treeLeaf() {
-            return MyTreeResources.INSTANCE.treeLeaf();
-        }
+		@Override
+		public ImageResource treeLeaf() {
+			return MyTreeResources.INSTANCE.treeLeaf();
+		}
 
-        @Override
-        public ImageResource treeOpen() {
-            return MyTreeResources.INSTANCE.treeOpen();
-        }
-    };
+		@Override
+		public ImageResource treeOpen() {
+			return MyTreeResources.INSTANCE.treeOpen();
+		}
+	};
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
@@ -86,33 +88,33 @@ public class TaskDashboard {
 		sub25.setText("6.5");
 		TreeItem sub26 = new TreeItem();
 		sub26.setText("6.6");
-		
+
 		TreeItem sub31 = new TreeItem();
 		sub31.setText("Sprint 1");
 		TreeItem sub32 = new TreeItem();
 		sub32.setText("Sprint 2");
-		
+
 		sub25.addItem(sub31);
 		sub25.addItem(sub32);
 		sub25.setState(true);
-		
+
 		item2.addItem(sub21);
 		item2.addItem(sub22);
 		item2.addItem(sub23);
 		item2.addItem(sub24);
 		item2.addItem(sub25);
 		item2.addItem(sub26);
-		
+
 		item2.setState(true);
 
 		mainItem.addItem(item1);
 		mainItem.addItem(item2);
 		mainItem.setState(true);
-		
+
 		tree.addItem(mainItem);
 		return tree;
 	}
-	
+
 	private Tree buildUsersTree() {
 		Tree tree = new Tree(customTreeResources);
 
@@ -152,118 +154,125 @@ public class TaskDashboard {
 		tree.addItem(mainItem);
 		return tree;
 	}
-	
+
 	public VerticalPanel buildLeftSidebar() {
 		VerticalPanel vpanel = new VerticalPanel();
-		
+
 		vpanel.setStyleName("leftSidebar");
 		vpanel.add(buildProductsTree());
 		HTML hrLine = new HTML("<div class='hr' />");
 		vpanel.add(hrLine);
 		vpanel.add(buildUsersTree());
-		
+
 		return vpanel;
 	}
-	
+
 	public VerticalPanel buildTaskDashboard() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
-		
+
 		vpanel.add(buildHeaderPanel());
 		vpanel.add(buildTaskTable());
-		
+
 		return vpanel;
 	}
-	
-	private VerticalPanel buildTaskTable(){
+
+	private VerticalPanel buildTaskTable() {
 		VerticalPanel vpanel = new VerticalPanel();
 		HorizontalPanel hpanel = new HorizontalPanel();
-		
+
 		vpanel.setWidth("100%");
 		hpanel.setWidth(("100%"));
 		hpanel.setStyleName("taskHeading");
+
+		Grid headerGrid = new Grid(1000, 7);
+		headerGrid.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		headerGrid.setWidth("100%");
+		headerGrid.getRowFormatter().setStyleName(0, "taskHeading");
+
+		CheckBox headerCheckBox = new CheckBox();
+		headerGrid.setWidget(0, 0, headerCheckBox);
+		headerGrid.setText(0, 1, "ID");
+		headerGrid.setText(0, 2, "Type");
+		headerGrid.setText(0, 3, "Title");
+		headerGrid.setText(0, 4, "Priority");
+		headerGrid.setText(0, 5, "Assigned to");
+		headerGrid.setText(0, 6, "Project");
 		
-		// Header
-		CheckBox checkBox = new CheckBox();
-		
-		hpanel.add(checkBox);
-		hpanel.add(new Label("ID"));
-		hpanel.add(new Label("Type"));
-		hpanel.add(new Label("Title"));
-		hpanel.add(new Label("Priority"));
-		hpanel.add(new Label("Assigned to"));
-		hpanel.add(new Label("Project"));
-		
-		HorizontalPanel cellPanel = new HorizontalPanel();
-		cellPanel.setStyleName("taskCell");
-		cellPanel.setWidth("100%");
-		
-		CheckBox cb = new CheckBox();
-		
-		cellPanel.add(cb);
-		cellPanel.add(new Label("236"));
-		cellPanel.add(new Label("Bug"));
-		cellPanel.add(new Label("Hibernate Issue"));
-		cellPanel.add(new Label("High"));
-		cellPanel.add(new Label("Siddhardha Koyugura"));
-		cellPanel.add(new Label("C2"));
-		
-		
-		vpanel.add(hpanel);
-		vpanel.add(cellPanel);
+		addRow(headerGrid, 1, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 2, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 3, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 4, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 5, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 6, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 7, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 8, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 9, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 10, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 11, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 12, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 13, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 14, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 15, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(headerGrid, 16, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+
+		vpanel.add(headerGrid);
 		return vpanel;
 	}
-	
-	private HorizontalPanel createTaskCells(Label... labels){
-		// service code takes place Here
-		HorizontalPanel cellPanel = new HorizontalPanel();
-		return cellPanel;
-	}
-	
-	private DockLayoutPanel buildHeaderPanel() {
+
+	private void addRow(Grid grid, int rowIndex, String... contents){
+		grid.getRowFormatter().setStyleName(rowIndex, "taskCell");
+		CheckBox cb = new CheckBox();
+		grid.setWidget(rowIndex, 0, cb);
+		int col = 1;
+		for(String text: contents){
+			grid.setText(rowIndex, col++, text);
+		}
 		
+	}
+
+	private DockLayoutPanel buildHeaderPanel() {
+
 		DockLayoutPanel headerPanel = new DockLayoutPanel(Unit.PX);
 		HorizontalPanel hpanel = new HorizontalPanel();
-		
 
 		headerPanel.getElement().getStyle().setProperty("backgroundColor", "#EFF6FF");
 		headerPanel.setWidth("100%");
 		headerPanel.setHeight("50px");
-		
+
 		Label l1 = new Label("List View");
 		l1.setStyleName("taskLabel");
-		
+
 		Image icon = new Image("public/caret-down.png");
 		icon.setStyleName("icon");
 		icon.setPixelSize(15, 15);
-		
+
 		hpanel.getElement().getStyle().setPadding(15, Unit.PX);
 		hpanel.add(l1);
 		hpanel.add(icon);
-		
+
 		Button addBtn = new Button("Add");
 		Button editBtn = new Button("Edit");
-		
+
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
-		
-		
+
 		headerPanel.addWest(hpanel, 300);
 		headerPanel.addEast(createButtonsPanel(addBtn, editBtn), 200);
-		
+
 		return headerPanel;
 	}
-	
+
 	private HorizontalPanel createButtonsPanel(Button... buttons) {
-	    HorizontalPanel buttonsPanel = new HorizontalPanel();
-	    buttonsPanel.getElement().getStyle().setProperty("padding", "10px");
-	    buttonsPanel.setWidth("100%");
-	    
-	    for (Button button : buttons) {
-	        buttonsPanel.add(button);
-	    }
-	    
-	    buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
-	    return buttonsPanel;
+		HorizontalPanel buttonsPanel = new HorizontalPanel();
+		buttonsPanel.getElement().getStyle().setProperty("padding", "10px");
+		buttonsPanel.setWidth("100%");
+
+		for (Button button : buttons) {
+			buttonsPanel.add(button);
+		}
+
+		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
+		return buttonsPanel;
 	}
 }

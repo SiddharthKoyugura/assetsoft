@@ -100,16 +100,34 @@ body {
 }
 
 .taskHeading {
+	text-align: center;
 	background-color: #1F77B4;
 	font-family: Roboto !important;
 	color: white;
 	font-weight: 500;
+}
+
+.taskHeading td {
 	padding: 10px;
 }
 
+.taskHeading td, .taskHeading tr {
+	border-collapse: collapse;
+}
+
+
 .taskCell {
 	padding: 10px;
-	
+	text-align: center;
 }
+
+.taskCell td {
+	padding: 10px;
+}
+
+
+
+
+
 
 /*      END: TASKDASHBOARD SECTION         */
