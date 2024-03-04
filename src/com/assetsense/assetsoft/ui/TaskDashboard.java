@@ -1,9 +1,14 @@
 package com.assetsense.assetsoft.ui;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -158,5 +163,107 @@ public class TaskDashboard {
 		vpanel.add(buildUsersTree());
 		
 		return vpanel;
+	}
+	
+	public VerticalPanel buildTaskDashboard() {
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setWidth("100%");
+		
+		vpanel.add(buildHeaderPanel());
+		vpanel.add(buildTaskTable());
+		
+		return vpanel;
+	}
+	
+	private VerticalPanel buildTaskTable(){
+		VerticalPanel vpanel = new VerticalPanel();
+		HorizontalPanel hpanel = new HorizontalPanel();
+		
+		vpanel.setWidth("100%");
+		hpanel.setWidth(("100%"));
+		hpanel.setStyleName("taskHeading");
+		
+		// Header
+		CheckBox checkBox = new CheckBox();
+		
+		hpanel.add(checkBox);
+		hpanel.add(new Label("ID"));
+		hpanel.add(new Label("Type"));
+		hpanel.add(new Label("Title"));
+		hpanel.add(new Label("Priority"));
+		hpanel.add(new Label("Assigned to"));
+		hpanel.add(new Label("Project"));
+		
+		HorizontalPanel cellPanel = new HorizontalPanel();
+		cellPanel.setStyleName("taskCell");
+		cellPanel.setWidth("100%");
+		
+		CheckBox cb = new CheckBox();
+		
+		cellPanel.add(cb);
+		cellPanel.add(new Label("236"));
+		cellPanel.add(new Label("Bug"));
+		cellPanel.add(new Label("Hibernate Issue"));
+		cellPanel.add(new Label("High"));
+		cellPanel.add(new Label("Siddhardha Koyugura"));
+		cellPanel.add(new Label("C2"));
+		
+		
+		vpanel.add(hpanel);
+		vpanel.add(cellPanel);
+		return vpanel;
+	}
+	
+	private HorizontalPanel createTaskCells(Label... labels){
+		// service code takes place Here
+		HorizontalPanel cellPanel = new HorizontalPanel();
+		return cellPanel;
+	}
+	
+	private DockLayoutPanel buildHeaderPanel() {
+		
+		DockLayoutPanel headerPanel = new DockLayoutPanel(Unit.PX);
+		HorizontalPanel hpanel = new HorizontalPanel();
+		
+
+		headerPanel.getElement().getStyle().setProperty("backgroundColor", "#EFF6FF");
+		headerPanel.setWidth("100%");
+		headerPanel.setHeight("50px");
+		
+		Label l1 = new Label("List View");
+		l1.setStyleName("taskLabel");
+		
+		Image icon = new Image("public/caret-down.png");
+		icon.setStyleName("icon");
+		icon.setPixelSize(15, 15);
+		
+		hpanel.getElement().getStyle().setPadding(15, Unit.PX);
+		hpanel.add(l1);
+		hpanel.add(icon);
+		
+		Button addBtn = new Button("Add");
+		Button editBtn = new Button("Edit");
+		
+		addBtn.setStyleName("customBtn");
+		editBtn.setStyleName("customBtn");
+		
+		
+		headerPanel.addWest(hpanel, 300);
+		headerPanel.addEast(createButtonsPanel(addBtn, editBtn), 200);
+		
+		return headerPanel;
+	}
+	
+	private HorizontalPanel createButtonsPanel(Button... buttons) {
+	    HorizontalPanel buttonsPanel = new HorizontalPanel();
+	    buttonsPanel.getElement().getStyle().setProperty("padding", "10px");
+	    buttonsPanel.setWidth("100%");
+	    
+	    for (Button button : buttons) {
+	        buttonsPanel.add(button);
+	    }
+	    
+	    buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
+	    return buttonsPanel;
 	}
 }
