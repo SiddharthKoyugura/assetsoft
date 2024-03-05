@@ -35,8 +35,7 @@ public class AddEditForm {
 
 	public DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
-		dpanel.getElement().getStyle().setProperty("borderBottom", "1px solid black");
-		dpanel.getElement().getStyle().setProperty("backgroundColor", "#F5F9FF");
+		dpanel.getElement().getStyle().setProperty("boxShadow", "0 2px 2px -2px rgba(0,0,0,.4)");
 		dpanel.setHeight("50px");
 		dpanel.setWidth("100%");
 
