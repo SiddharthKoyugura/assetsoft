@@ -1,6 +1,12 @@
 @CHARSET "ISO-8859-1";
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Rubik:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+@import
+	url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Rubik:wght@400;500;600;700;800;900&display=swap')
+	;
+
+@import
+	url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap')
+	;
 
 body {
 	margin: 0px !important;
@@ -8,12 +14,10 @@ body {
 	font-family: "Open Sans";
 }
 
-
 /*      START: NAVBAR SECTION         */
-
 .navbar {
-    background-color: #1F77B4;
-    padding: 10px;
+	background-color: #1F77B4;
+	padding: 10px;
 }
 
 .navbar tr {
@@ -42,21 +46,17 @@ body {
 }
 
 /*      END: NAVBAR SECTION         */
-
-
 /*      START: DROPDOWN(TREE) SECTION         */
-
-.treeHeading tr:first-child{
+.treeHeading tr:first-child {
 	font-weight: 600;
 }
-
 
 .leftSidebar {
 	padding: 15px 10px;
 	border-right: 1px solid black;
 }
 
-.leftSidebar > * {
+.leftSidebar>* {
 	padding: 1.1px;
 }
 
@@ -71,8 +71,6 @@ body {
 
 
 /*      START: TASKDASHBOARD SECTION         */
-
-
 .customBtn {
 	padding: 5px 15px;
 	margin: 0 10px;
@@ -115,7 +113,6 @@ body {
 	border-collapse: collapse;
 }
 
-
 .taskCell {
 	padding: 10px;
 	text-align: center;
@@ -127,7 +124,51 @@ body {
 
 
 
-
-
-
 /*      END: TASKDASHBOARD SECTION         */
+
+
+
+
+/*      START: ADD-EDIT PAGE SECTION         */
+
+
+.listBoxStyle {
+	width: 200px;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: #fff;
+	color: #333;
+	font-size: 14px;
+	outline: none;
+}
+
+.listBoxStyle option {
+	background-color: #fff;
+	color: #333;
+}
+
+.listBoxStyle:hover, .listBoxStyle:focus {
+	border-color: #3498db;
+	box-shadow: 0 0 5px rgba(52, 152, 219, 0.7);
+}
+
+.formField {
+	margin-bottom: 10px;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.mr-5 {
+	margin-right: 50px;
+}
+
+
+/*      END: ADD-EDIT PAGE SECTION          */
+
+
+
+
+
