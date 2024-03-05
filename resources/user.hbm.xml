@@ -4,7 +4,7 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-	<class name="com.assetsense.assetsoft.domain.User" table="USERS">
+	<class name="com.assetsense.assetsoft.domain.User" table="USER_">
 		<id name="userId" column="user_id">
 			<generator class="native" />
 		</id>
@@ -16,8 +16,7 @@
 
 		<set name="teams" cascade="save-update" table="user_team">
 			<key column="user_id" />
-			<many-to-many column="team_id"
-				class="com.assetsense.assetsoft.domain.Team" />
+			<many-to-many column="team_id" class="com.assetsense.assetsoft.domain.Team" />
 		</set>
 	</class>
 </hibernate-mapping>
