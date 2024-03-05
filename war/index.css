@@ -168,7 +168,15 @@ body {
 
 /*      END: ADD-EDIT PAGE SECTION          */
 
-
+.form-container {
+	width: 40vw !important;
+	margin: 100px auto 0;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
 
 

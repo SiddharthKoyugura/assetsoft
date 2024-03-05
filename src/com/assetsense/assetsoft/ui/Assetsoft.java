@@ -8,6 +8,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
+	private final AddEditForm addEditForm = new AddEditForm();
+	private final LoginForm loginForm = new LoginForm();
 
 	@Override
 	public void onModuleLoad() {		
@@ -17,13 +19,26 @@ public class Assetsoft implements EntryPoint {
 		// Add Edit form page
 //		RootLayoutPanel.get().add(buildAddEditForm());
 		
+		RootLayoutPanel.get().add(buildLoginForm());
 		
 	}
 	
+	private DockLayoutPanel buildLoginForm() {
+		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		VerticalPanel vpanel = new VerticalPanel();
+		
+		vpanel.setWidth("100%");
+		
+		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
+		
+		vpanel.add(loginForm.buildLoginForm());
+		
+		dpanel.add(vpanel);
+
+		return dpanel;
+	}
+	
 	private DockLayoutPanel buildAddEditForm() {
-		
-		AddEditForm addEditForm = new AddEditForm();
-		
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
@@ -37,7 +52,7 @@ public class Assetsoft implements EntryPoint {
 		return dpanel;
 	}
 	
-	public DockLayoutPanel buildTaskPage() {
+	private DockLayoutPanel buildTaskPage() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		
 		dpanel.setSize("100%", "100%");
@@ -48,4 +63,5 @@ public class Assetsoft implements EntryPoint {
 		
 		return dpanel;
 	}
+
 }

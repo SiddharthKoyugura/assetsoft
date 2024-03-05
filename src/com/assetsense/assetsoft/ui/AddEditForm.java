@@ -29,9 +29,7 @@ public class AddEditForm {
 	private ListBox priorityField;
 	private TextBox remainingEstField;
 	private IntegerBox percentField;
-	
-	
-	
+
 
 	public DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
@@ -82,7 +80,7 @@ public class AddEditForm {
 		l1.getElement().getStyle().setProperty("marginBottom", "10px");
 		descriptionField = new TextArea();
 		descriptionField.setStyleName("listBoxStyle");
-		descriptionField.setHeight("200px");
+		descriptionField.setHeight("150px");
 		descriptionField.setWidth("90vw");
 		
         vpanel.add(l1);
@@ -144,6 +142,7 @@ public class AddEditForm {
 		dueDateField.setStyleName("listBoxStyle");
 
 		Grid grid = new Grid(5, 2);
+		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
 		
@@ -203,6 +202,7 @@ public class AddEditForm {
 		percentField.setStyleName("listBoxStyle");
 
 		Grid grid = new Grid(5, 2);
+		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
 		
