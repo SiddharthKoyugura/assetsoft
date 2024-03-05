@@ -5,7 +5,6 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -34,6 +33,18 @@ public class TaskDashboard {
 			return MyTreeResources.INSTANCE.treeOpen();
 		}
 	};
+	
+	public DockLayoutPanel getTaskDashboard() {
+		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		
+		dpanel.setSize("100%", "100%");
+
+		dpanel.addNorth(buildNavBar(), 48);
+		dpanel.addWest(buildLeftSidebar(), 240);
+		dpanel.add(buildTaskDashboard());
+		
+		return dpanel;
+	}
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
