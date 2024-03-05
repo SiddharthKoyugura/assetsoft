@@ -34,17 +34,7 @@ public class TaskDashboard {
 		}
 	};
 	
-	public DockLayoutPanel getTaskDashboard() {
-		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
-		
-		dpanel.setSize("100%", "100%");
-
-		dpanel.addNorth(buildNavBar(), 48);
-		dpanel.addWest(buildLeftSidebar(), 240);
-		dpanel.add(buildTaskDashboard());
-		
-		return dpanel;
-	}
+	
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
