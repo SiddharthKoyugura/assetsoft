@@ -24,14 +24,13 @@ public class AddEditForm {
 	private TextBox initialEstField;
 	// Todo: Need to update
 	private TextBox dueDateField;
+	private TextBox titleField;
 	
 	private ListBox productField;
 	private ListBox priorityField;
 	private TextBox remainingEstField;
 	private IntegerBox percentField;
-	
-	
-	
+
 
 	public DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
@@ -82,7 +81,7 @@ public class AddEditForm {
 		l1.getElement().getStyle().setProperty("marginBottom", "10px");
 		descriptionField = new TextArea();
 		descriptionField.setStyleName("listBoxStyle");
-		descriptionField.setHeight("200px");
+		descriptionField.setHeight("150px");
 		descriptionField.setWidth("90vw");
 		
         vpanel.add(l1);
@@ -138,26 +137,38 @@ public class AddEditForm {
 		initialEstField.setStyleName("listBoxStyle");
 
 
-		Label l5 = new Label("Due Date:");
+		Label l5 = new Label("Title:");
 		l5.setStyleName("mr-5");
-		dueDateField = new TextBox();
-		dueDateField.setStyleName("listBoxStyle");
+		titleField = new TextBox();
+		titleField.setStyleName("listBoxStyle");
+		
+		l1.setStyleName("taskLabel");
+		l2.setStyleName("taskLabel");
+		l3.setStyleName("taskLabel");
+		l4.setStyleName("taskLabel");
+		l5.setStyleName("taskLabel");
+		
+		l1.addStyleName("imp");
+		l2.addStyleName("imp");
+		l5.addStyleName("imp");
 
 		Grid grid = new Grid(5, 2);
+		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
 		
-		grid.setWidget(0, 0, l1);
-		grid.setWidget(1, 0, l2);
-		grid.setWidget(2, 0, l3);
-		grid.setWidget(3, 0, l4);
-		grid.setWidget(4, 0, l5);
+		grid.setWidget(0, 0, l5);
+		grid.setWidget(1, 0, l1);
+		grid.setWidget(2, 0, l2);
+		grid.setWidget(3, 0, l3);
+		grid.setWidget(4, 0, l4);
 		
-		grid.setWidget(0, 1, workItemTypeField);
-		grid.setWidget(1, 1, workFlowStepField);
-		grid.setWidget(2, 1, assignedToField);
-		grid.setWidget(3, 1, initialEstField);
-		grid.setWidget(4, 1, dueDateField);
+		grid.setWidget(0, 1, titleField);
+		grid.setWidget(1, 1, workItemTypeField);
+		grid.setWidget(2, 1, workFlowStepField);
+		grid.setWidget(3, 1, assignedToField);
+		grid.setWidget(4, 1, initialEstField);
+		
 		
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
 		grid.getCellFormatter().setStyleName(1, 0, "text-right");
@@ -201,8 +212,20 @@ public class AddEditForm {
 		l4.setStyleName("mr-5");
 		percentField = new IntegerBox();
 		percentField.setStyleName("listBoxStyle");
+		
+		Label l5 = new Label("Due Date:");
+		l5.setStyleName("mr-5");
+		dueDateField = new TextBox();
+		dueDateField.setStyleName("listBoxStyle");
+		
+		l1.setStyleName("taskLabel");
+		l2.setStyleName("taskLabel");
+		l3.setStyleName("taskLabel");
+		l4.setStyleName("taskLabel");
+		l5.setStyleName("taskLabel");
 
 		Grid grid = new Grid(5, 2);
+		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
 		
@@ -210,11 +233,13 @@ public class AddEditForm {
 		grid.setWidget(1, 0, l2);
 		grid.setWidget(3, 0, l3);
 		grid.setWidget(2, 0, l4);
+		grid.setWidget(4, 0, l5);
 		
 		grid.setWidget(0, 1, productField);
 		grid.setWidget(1, 1, priorityField);
 		grid.setWidget(3, 1, remainingEstField);
 		grid.setWidget(2, 1, percentField);
+		grid.setWidget(4, 1, dueDateField);
 		
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
 		grid.getCellFormatter().setStyleName(1, 0, "text-right");

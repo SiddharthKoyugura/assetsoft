@@ -3,6 +3,7 @@ package com.assetsense.assetsoft.domain;
 import java.io.Serializable;
 
 public class Task implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private long taskId;
 	private String title;
 	private Lookup type;

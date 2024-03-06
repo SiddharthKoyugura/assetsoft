@@ -64,5 +64,28 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
+	<!-- DAO beans -->
+	<bean id="userDao" class="com.assetsense.assetsoft.dao.UserDao">
+		<property name="template" ref="template"></property>
+	</bean>
 
+	<bean id="teamDao" class="com.assetsense.assetsoft.dao.TeamDao">
+		<property name="template" ref="template"></property>
+	</bean>
+
+	<bean id="taskDao" class="com.assetsense.assetsoft.dao.TaskDao">
+		<property name="template" ref="template"></property>
+	</bean>
+
+	<bean id="productDao" class="com.assetsense.assetsoft.dao.ProductDao">
+		<property name="template" ref="template"></property>
+	</bean>
+
+	<bean id="lookupDao" class="com.assetsense.assetsoft.dao.LookupDao">
+		<property name="template" ref="template"></property>
+	</bean>
+
+
+	<!-- Spring Security configuration -->
+	<import resource="classpath:security-config.xml/security-config.xml" />
 </beans>
