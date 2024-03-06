@@ -2,6 +2,7 @@ package com.assetsense.assetsoft.ui;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -19,7 +20,16 @@ public class Assetsoft implements EntryPoint {
 		// Add Edit form page
 //		RootLayoutPanel.get().add(buildAddEditForm());
 		
-		RootLayoutPanel.get().add(buildLoginForm());
+//		RootLayoutPanel.get().add(buildLoginForm());
+		String page = Window.Location.getParameter("page");
+		
+		if("add".equals(page)){
+			RootLayoutPanel.get().add(buildAddEditForm());
+		}else if("home".equals(page)){
+			RootLayoutPanel.get().add(buildTaskPage());
+		}else{
+			RootLayoutPanel.get().add(buildLoginForm());
+		}
 		
 	}
 	

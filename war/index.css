@@ -92,6 +92,11 @@ body {
 	font-weight: 600;
 }
 
+.imp:before {
+	content: "* ";
+	color: red;
+}
+
 .icon {
 	margin: 3px 0 0 3px;
 	cursor: pointer;
@@ -168,6 +173,9 @@ body {
 
 /*      END: ADD-EDIT PAGE SECTION          */
 
+
+/*      START: ADD-EDIT PAGE SECTION         */
+
 .form-container {
 	width: 40vw !important;
 	margin: 100px auto 0;
@@ -177,6 +185,9 @@ body {
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+
+/*      END: ADD-EDIT PAGE SECTION         */
 
 
 
