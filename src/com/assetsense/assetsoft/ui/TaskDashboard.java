@@ -5,12 +5,13 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -33,8 +34,6 @@ public class TaskDashboard {
 			return MyTreeResources.INSTANCE.treeOpen();
 		}
 	};
-	
-	
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
@@ -186,50 +185,56 @@ public class TaskDashboard {
 		hpanel.setWidth(("100%"));
 		hpanel.setStyleName("taskHeading");
 
-		Grid headerGrid = new Grid(1000, 7);
-		headerGrid.getElement().getStyle().setProperty("borderCollapse", "collapse");
-		headerGrid.setWidth("100%");
-		headerGrid.getRowFormatter().setStyleName(0, "taskHeading");
+		ScrollPanel spanel = new ScrollPanel();
+		spanel.setSize("100vw-800px", "100vh");
+		spanel.getElement().getStyle().setProperty("overflow", "scroll");
+//		Grid headerGrid = new Grid(17, 7);
+		FlexTable flexTable = new FlexTable();
+		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
+		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		flexTable.setWidth("100%");
+		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
 
 		CheckBox headerCheckBox = new CheckBox();
-		headerGrid.setWidget(0, 0, headerCheckBox);
-		headerGrid.setText(0, 1, "ID");
-		headerGrid.setText(0, 2, "Type");
-		headerGrid.setText(0, 3, "Title");
-		headerGrid.setText(0, 4, "Priority");
-		headerGrid.setText(0, 5, "Assigned to");
-		headerGrid.setText(0, 6, "Project");
-		
-		addRow(headerGrid, 1, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 2, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 3, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 4, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 5, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 6, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 7, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 8, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 9, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 10, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 11, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 12, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 13, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 14, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 15, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(headerGrid, 16, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		flexTable.setWidget(0, 0, headerCheckBox);
+		flexTable.setText(0, 1, "ID");
+		flexTable.setText(0, 2, "Type");
+		flexTable.setText(0, 3, "Title");
+		flexTable.setText(0, 4, "Priority");
+		flexTable.setText(0, 5, "Assigned to");
+		flexTable.setText(0, 6, "Project");
 
-		vpanel.add(headerGrid);
+		addRow(flexTable, 1, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 2, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 3, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 4, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 5, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 6, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 7, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 8, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 9, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 10, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 11, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 12, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 13, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 14, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 15, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		addRow(flexTable, 16, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+
+		spanel.add(flexTable);
+		vpanel.add(spanel);
 		return vpanel;
 	}
 
-	private void addRow(Grid grid, int rowIndex, String... contents){
-		grid.getRowFormatter().setStyleName(rowIndex, "taskCell");
+	private void addRow(FlexTable flexTable, int rowIndex, String... contents) {
+		flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 		CheckBox cb = new CheckBox();
-		grid.setWidget(rowIndex, 0, cb);
+		flexTable.setWidget(rowIndex, 0, cb);
 		int col = 1;
-		for(String text: contents){
-			grid.setText(rowIndex, col++, text);
+		for (String text : contents) {
+			flexTable.setText(rowIndex, col++, text);
 		}
-		
+
 	}
 
 	private DockLayoutPanel buildHeaderPanel() {
