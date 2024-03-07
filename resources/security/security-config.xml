@@ -16,11 +16,7 @@
 
 	<!-- Authentication Manager -->
 	<authentication-manager>
-		<authentication-provider>
-			<user-service>
-				<user name="yourUsername" password="yourPassword" authorities="ROLE_USER" />
-			</user-service>
-		</authentication-provider>
+		<authentication-provider user-service-ref="userServiceImpl" />
 	</authentication-manager>
 
 </beans:beans>

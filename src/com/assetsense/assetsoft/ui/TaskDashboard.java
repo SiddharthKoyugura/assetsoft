@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -33,8 +34,6 @@ public class TaskDashboard {
 			return MyTreeResources.INSTANCE.treeOpen();
 		}
 	};
-	
-	
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
@@ -186,7 +185,10 @@ public class TaskDashboard {
 		hpanel.setWidth(("100%"));
 		hpanel.setStyleName("taskHeading");
 
-		Grid headerGrid = new Grid(1000, 7);
+		ScrollPanel spanel = new ScrollPanel();
+		spanel.setSize("100vw", "100vh");
+		spanel.getElement().getStyle().setProperty("overflow", "scroll");
+		Grid headerGrid = new Grid(17, 7);
 		headerGrid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		headerGrid.setWidth("100%");
 		headerGrid.getRowFormatter().setStyleName(0, "taskHeading");
@@ -199,7 +201,7 @@ public class TaskDashboard {
 		headerGrid.setText(0, 4, "Priority");
 		headerGrid.setText(0, 5, "Assigned to");
 		headerGrid.setText(0, 6, "Project");
-		
+
 		addRow(headerGrid, 1, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
 		addRow(headerGrid, 2, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
 		addRow(headerGrid, 3, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
@@ -217,19 +219,20 @@ public class TaskDashboard {
 		addRow(headerGrid, 15, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
 		addRow(headerGrid, 16, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
 
-		vpanel.add(headerGrid);
+		spanel.add(headerGrid);
+		vpanel.add(spanel);
 		return vpanel;
 	}
 
-	private void addRow(Grid grid, int rowIndex, String... contents){
+	private void addRow(Grid grid, int rowIndex, String... contents) {
 		grid.getRowFormatter().setStyleName(rowIndex, "taskCell");
 		CheckBox cb = new CheckBox();
 		grid.setWidget(rowIndex, 0, cb);
 		int col = 1;
-		for(String text: contents){
+		for (String text : contents) {
 			grid.setText(rowIndex, col++, text);
 		}
-		
+
 	}
 
 	private DockLayoutPanel buildHeaderPanel() {

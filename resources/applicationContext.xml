@@ -87,5 +87,10 @@
 
 
 	<!-- Spring Security configuration -->
+	<bean id="userServiceImpl" class="com.assetsense.assetsoft.server.UserServiceImpl">
+	    
+	</bean>
+	
+	
 	<import resource="classpath:security-config.xml/security-config.xml" />
 </beans>
