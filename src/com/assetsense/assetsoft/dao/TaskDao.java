@@ -1,48 +1,147 @@
 package com.assetsense.assetsoft.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.orm.hibernate5.HibernateTemplate;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import com.assetsense.assetsoft.domain.Task;
 
+@SuppressWarnings("deprecation")
 public class TaskDao {
-	HibernateTemplate template;
+	private SessionFactory sessionFactory;
 
-	public HibernateTemplate getTemplate() {
-		return template;
+	public SessionFactory getSessionFactory() {
+		return sessionFactory;
 	}
 
-	public void setTemplate(HibernateTemplate template) {
-		this.template = template;
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
 	}
 
 	// method to add task
 	public void saveTask(Task task) {
-		template.save(task);
-	}
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			session.save(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
 
-	// method to update task
-	public void updateTask(Task task) {
-		template.save(task);
 	}
 
 	// method to delete task
 	public void deleteTask(Task task) {
-		template.delete(task);
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			session.delete(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
 	}
 
 	// method to return one task of given id
 	public Task getTaskById(long id) {
-		Task task = (Task) template.get(Task.class, id);
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		Task task = null;
+		try {
+			tx = session.beginTransaction();
+			task = session.get(Task.class, id);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
 		return task;
+	}
+
+	// method to return tasks of given user_id
+	public List<Task> getTasksByUserId(long userId) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		List<Task> tasks = null;
+		try {
+			tx = session.beginTransaction();
+			@SuppressWarnings("unchecked")
+			Query<Task> query = session.createQuery("from task where user_id=" + userId);
+			tasks = query.getResultList();
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return tasks;
+	}
+
+	// method to return tasks of given priority_id
+	public List<Task> getTasksByPriroityId(long priorityId) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		List<Task> tasks = null;
+		try {
+			tx = session.beginTransaction();
+			@SuppressWarnings("unchecked")
+			Query<Task> query = session.createQuery("from task where priority_id=" + priorityId);
+			tasks = query.getResultList();
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return tasks;
 	}
 
 	// method to return all tasks
 	public List<Task> getTasks() {
-		List<Task> tasks = new ArrayList<Task>();
-		tasks = template.loadAll(Task.class);
+		List<Task> tasks = null;
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			@SuppressWarnings({ "unchecked" })
+			Query<Task> query = (Query<Task>) session.createQuery("from team");
+			tasks = query.getResultList();
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
 		return tasks;
 	}
 }
