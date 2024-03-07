@@ -186,7 +186,7 @@ public class TaskDashboard {
 		hpanel.setStyleName("taskHeading");
 
 		ScrollPanel spanel = new ScrollPanel();
-		spanel.setSize("100vw", "100vh");
+		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
 //		Grid headerGrid = new Grid(17, 7);
 		FlexTable flexTable = new FlexTable();
