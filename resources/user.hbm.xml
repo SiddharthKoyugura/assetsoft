@@ -14,7 +14,7 @@
 		<property name="password" column="password"></property>
 
 
-		<set name="teams" cascade="save-update" table="user_team">
+		<set name="teams" cascade="all" table="user_team" lazy="true">
 			<key column="user_id" />
 			<many-to-many column="team_id" class="com.assetsense.assetsoft.domain.Team" />
 		</set>

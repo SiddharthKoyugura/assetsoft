@@ -1,7 +1,17 @@
 package com.assetsense.assetsoft.ui;
 
+import java.util.List;
+
+import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.dto.TeamDTO;
+import com.assetsense.assetsoft.service.TeamService;
+import com.assetsense.assetsoft.service.TeamServiceAsync;
+import com.assetsense.assetsoft.service.UserService;
+import com.assetsense.assetsoft.service.UserServiceAsync;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -15,8 +25,31 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.event.dom.client.ClickHandler;
 
 public class TaskDashboard {
+
+	private final UserServiceAsync userService = GWT.create(UserService.class);
+	private final TeamServiceAsync teamService = GWT.create(TeamService.class);
+
+	private Button navBtn;
+	private Button addBtn;
+	private Button editBtn;
+
+	public void setNavBtnName(String name) {
+		getNavBtn().setText(name);
+	}
+
+	private Button getNavBtn() {
+		if (navBtn == null) {
+			navBtn = new Button();
+		}
+		return navBtn;
+	}
+
+	public void setBtnHandler(ClickHandler handler) {
+		addBtn.addClickHandler(handler);
+	}
 
 	Tree.Resources customTreeResources = new Tree.Resources() {
 		@Override
@@ -42,11 +75,12 @@ public class TaskDashboard {
 		Label l1 = new Label("Assetsoft");
 		l1.setStyleName("navLabel");
 
-		Button btn = new Button("Sai kiran");
-		btn.setStyleName("navBtn");
-
 		navbar.add(l1);
-		navbar.add(btn);
+
+		if (navBtn != null) {
+			navBtn.setStyleName("navBtn");
+			navbar.add(navBtn);
+		}
 
 		// Style the navbar
 		navbar.setStyleName("navbar");
@@ -124,28 +158,72 @@ public class TaskDashboard {
 		mainItem.setText("Users & Teams");
 		mainItem.setStyleName("treeHeading");
 
-		TreeItem item1 = new TreeItem();
-		item1.setText("All Users");
-		TreeItem item2 = new TreeItem();
-		item2.setText("All Teams");
-
-		TreeItem sub1 = new TreeItem();
-		sub1.setText("Siddhardha Koyugura");
-		TreeItem sub2 = new TreeItem();
-		sub2.setText("Goutham Mandala");
-
-		item1.addItem(sub1);
-		item1.addItem(sub2);
+		final TreeItem item1 = new TreeItem();
 		item1.setState(true);
-
-		TreeItem sub21 = new TreeItem();
-		sub21.setText("Frontend Team");
-		TreeItem sub22 = new TreeItem();
-		sub22.setText("Backend Team");
-
-		item2.addItem(sub21);
-		item2.addItem(sub22);
+		item1.setText("All Users");
+		
+		final TreeItem item2 = new TreeItem();
 		item2.setState(true);
+		item2.setText("All Teams");
+		
+		
+		userService.getUsers(new AsyncCallback<List<UserDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(List<UserDTO> users) {
+				// TODO Auto-generated method stub
+				for (UserDTO user : users) {
+					TreeItem sub = new TreeItem();
+					sub.setText(user.getName());
+					item1.addItem(sub);
+				}
+			}
+
+		});
+		
+		teamService.getTeams(new AsyncCallback<List<TeamDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onSuccess(List<TeamDTO> teams) {
+				// TODO Auto-generated method stub
+				for(TeamDTO team: teams){
+					GWT.log("IM here");
+					TreeItem sub = new TreeItem();
+					sub.setText(team.getName());
+					item2.addItem(sub);
+				}
+			}
+			
+		});
+		
+//		TreeItem sub1 = new TreeItem();
+//		sub1.setText("Siddhardha Koyugura");
+//		TreeItem sub2 = new TreeItem();
+//		sub2.setText("Goutham Mandala");
+//
+//		item1.addItem(sub1);
+//		item1.addItem(sub2);
+		
+
+//		TreeItem sub21 = new TreeItem();
+//		sub21.setText("Frontend Team");
+//		TreeItem sub22 = new TreeItem();
+//		sub22.setText("Backend Team");
+//
+//		item2.addItem(sub21);
+//		item2.addItem(sub22);
 
 		mainItem.addItem(item1);
 		mainItem.addItem(item2);
@@ -188,7 +266,7 @@ public class TaskDashboard {
 		ScrollPanel spanel = new ScrollPanel();
 		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
-//		Grid headerGrid = new Grid(17, 7);
+		// Grid headerGrid = new Grid(17, 7);
 		FlexTable flexTable = new FlexTable();
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
@@ -257,8 +335,8 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 
-		Button addBtn = new Button("Add");
-		Button editBtn = new Button("Edit");
+		addBtn = new Button("Add");
+		editBtn = new Button("Edit");
 
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");

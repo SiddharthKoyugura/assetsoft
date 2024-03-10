@@ -1,5 +1,10 @@
 package com.assetsense.assetsoft.service;
 
-public interface LookupServiceAsync {
+import java.util.List;
 
+import com.assetsense.assetsoft.domain.Lookup;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+public interface LookupServiceAsync {
+	void getLookupsByCatId(long catId, AsyncCallback<List<Lookup>> callback);
 }

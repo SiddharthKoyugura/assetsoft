@@ -86,8 +86,7 @@ public class TaskDao {
 		List<Task> tasks = null;
 		try {
 			tx = session.beginTransaction();
-			@SuppressWarnings("unchecked")
-			Query<Task> query = session.createQuery("from task where user_id=" + userId);
+			Query<Task> query = session.createQuery("from Task where user_id=" + userId, Task.class);
 			tasks = query.getResultList();
 			tx.commit();
 		} catch (HibernateException e) {
@@ -108,8 +107,7 @@ public class TaskDao {
 		List<Task> tasks = null;
 		try {
 			tx = session.beginTransaction();
-			@SuppressWarnings("unchecked")
-			Query<Task> query = session.createQuery("from task where priority_id=" + priorityId);
+			Query<Task> query = session.createQuery("from Task where priority_id=" + priorityId, Task.class);
 			tasks = query.getResultList();
 			tx.commit();
 		} catch (HibernateException e) {
@@ -130,8 +128,7 @@ public class TaskDao {
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			@SuppressWarnings({ "unchecked" })
-			Query<Task> query = (Query<Task>) session.createQuery("from team");
+			Query<Task> query = (Query<Task>) session.createQuery("from Task", Task.class);
 			tasks = query.getResultList();
 			tx.commit();
 		} catch (HibernateException e) {

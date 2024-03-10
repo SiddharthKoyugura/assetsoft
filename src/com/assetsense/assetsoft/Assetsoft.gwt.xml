@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
-<module>
+<module rename-to="assetsoft">
 	<inherits name="com.google.gwt.user.User" />
 	<entry-point class="com.assetsense.assetsoft.ui.Assetsoft" />
-	<source path="ui" />
-	<public path="public" />
 	
-	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
-	<add-linker name="xsiframe"/>
+	<source path="ui" />
+	<source path="server" />
+	<source path="service" />
+	<source path="domain" />
+	<source path="dto" />
+	
+	<public path="public" />
+
+	<set-configuration-property name='xsiframe.failIfScriptTag'
+		value='FALSE' />
+	<add-linker name="xsiframe" />
+	
+	
 </module>

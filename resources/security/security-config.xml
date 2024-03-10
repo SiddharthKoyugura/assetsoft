@@ -1,10 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:security="http://www.springframework.org/schema/security"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-                       http://www.springframework.org/schema/beans/spring-beans.xsd
-                       http://www.springframework.org/schema/security
-                       http://www.springframework.org/schema/security/spring-security.xsd">
+<!-- <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springsource.org/dtd/spring-beans.dtd"> -->
 
+
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+   			http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+	
+
+
+	<!-- Authentication Manager -->
+	<bean id="authenticationManager"
+		class="org.springframework.security.authentication.ProviderManager">
+		<constructor-arg>
+			<list>
+				<ref bean="authenticationProvider" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="authenticationProvider"
+		class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+		<property name="userDetailsService" ref="userDetailsService" />
+	</bean>
+
+	<security:http auto-config="true">
+		<security:intercept-url pattern="/assetsoft/user" access="IS_AUTHENTICATED_FULLY" />
+		<security:intercept-url pattern="/assetsoft/authService" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+
+		<security:custom-filter ref="filterInvocationInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
+	</security:http>
 
 </beans>

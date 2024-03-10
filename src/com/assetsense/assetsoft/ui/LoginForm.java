@@ -1,5 +1,6 @@
 package com.assetsense.assetsoft.ui;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -12,7 +13,19 @@ public class LoginForm {
 	private PasswordTextBox passwordField;
 	private Button loginBtn;
 	
+	public void setLoginHandler(ClickHandler handler) {
+        loginBtn.addClickHandler(handler);
+    }
 	
+	public String getEmail() {
+		return emailField.getText();
+	}
+
+	public String getPassword(){
+		return passwordField.getText();
+	}
+ 
+
 	public VerticalPanel buildLoginForm(){
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setStyleName("form-container");
@@ -32,6 +45,8 @@ public class LoginForm {
 		
 		loginBtn = new Button("Login");
 		loginBtn.setStyleName("customBtn");
+		
+		
 
 		Grid grid = new Grid(5, 2);
 		grid.setCellPadding(10);

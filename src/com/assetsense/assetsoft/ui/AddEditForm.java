@@ -1,6 +1,7 @@
 package com.assetsense.assetsoft.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -31,6 +32,65 @@ public class AddEditForm {
 	private TextBox remainingEstField;
 	private IntegerBox percentField;
 
+	public void setSaveBtnHandler(ClickHandler handler) {
+        saveBtn.addClickHandler(handler);
+    }
+	
+	public void setCloseBtnHandler(ClickHandler handler) {
+		closeBtn.addClickHandler(handler);
+	}
+	
+	public Button getSaveBtn() {
+		return saveBtn;
+	}
+
+	public Button getCloseBtn() {
+		return closeBtn;
+	}
+
+	public TextArea getDescriptionField() {
+		return descriptionField;
+	}
+
+	public ListBox getWorkItemTypeField() {
+		return workItemTypeField;
+	}
+
+	public ListBox getWorkFlowStepField() {
+		return workFlowStepField;
+	}
+
+	public ListBox getAssignedToField() {
+		return assignedToField;
+	}
+
+	public TextBox getInitialEstField() {
+		return initialEstField;
+	}
+
+	public TextBox getDueDateField() {
+		return dueDateField;
+	}
+
+	public TextBox getTitleField() {
+		return titleField;
+	}
+
+	public ListBox getProductField() {
+		return productField;
+	}
+
+	public ListBox getPriorityField() {
+		return priorityField;
+	}
+
+	public TextBox getRemainingEstField() {
+		return remainingEstField;
+	}
+
+	public IntegerBox getPercentField() {
+		return percentField;
+	}
 
 	public DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
