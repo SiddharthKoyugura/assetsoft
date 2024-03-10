@@ -8,6 +8,10 @@ public class Task implements Serializable {
 	private String title;
 	private Lookup type;
 	private String description;
+	private String initialEstimate;
+	private String percentComplete;
+	private String remainingEstimate;
+	private String dueDate;
 	private Lookup priority;
 	private Lookup status;
 	private User user;
@@ -15,6 +19,56 @@ public class Task implements Serializable {
 
 	public Task() {
 	}
+	
+	
+	
+	public String getInitialEstimate() {
+		return initialEstimate;
+	}
+
+
+
+	public void setInitialEstimate(String initialEstimate) {
+		this.initialEstimate = initialEstimate;
+	}
+
+
+
+	public String getPercentComplete() {
+		return percentComplete;
+	}
+
+
+
+	public void setPercentComplete(String percentComplete) {
+		this.percentComplete = percentComplete;
+	}
+
+
+
+	public String getRemainingEstimate() {
+		return remainingEstimate;
+	}
+
+
+
+	public void setRemainingEstimate(String remainingEstimate) {
+		this.remainingEstimate = remainingEstimate;
+	}
+
+
+
+	public String getDueDate() {
+		return dueDate;
+	}
+
+
+
+	public void setDueDate(String dueDate) {
+		this.dueDate = dueDate;
+	}
+
+
 
 	public long getTaskId() {
 		return taskId;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.assetsense.assetsoft.dao.UserDao;
 import com.assetsense.assetsoft.domain.User;
+import com.assetsense.assetsoft.dto.UserDTO;
 import com.assetsense.assetsoft.service.UserService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -25,7 +26,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
 	}
 
 	@Override
-	public User getUserByEmail(String email) {
+	public UserDTO getUserByEmail(String email) {
 		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
 		return userDao.getUserByEmail(email);
 	}
@@ -37,7 +38,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
 	}
 
 	@Override
-	public List<User> getUsers() {
+	public List<UserDTO> getUsers() {
 		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
 		return userDao.getUsers();
 	}

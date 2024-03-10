@@ -1,17 +1,18 @@
-package com.assetsense.assetsoft.domain;
+package com.assetsense.assetsoft.dto;
 
 import java.io.Serializable;
 import java.util.Set;
 
-public class User implements Serializable {
+public class UserDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
+
 	private long userId;
 	private String name;
 	private String email;
 	private String password;
-	private Set<Team> teams;
+	private Set<TeamDTO> teams;
 
-	public User() {
+	public UserDTO() {
 	}
 
 	public long getUserId() {
@@ -38,6 +39,14 @@ public class User implements Serializable {
 		this.email = email;
 	}
 
+	public Set<TeamDTO> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(Set<TeamDTO> teams) {
+		this.teams = teams;
+	}
+	
 	public String getPassword() {
 		return password;
 	}
@@ -48,16 +57,8 @@ public class User implements Serializable {
 
 	@Override
 	public String toString() {
-		return "User [userId=" + userId + ", name=" + name + ", email=" + email + ", password=" + password + ", tasks="
-				+ "]";
+		return "UserDTO [userId=" + userId + ", name=" + name + ", email=" + email + ", teams=" + teams + "]";
 	}
 
-	public Set<Team> getTeams() {
-		return teams;
-	}
-
-	public void setTeams(Set<Team> teams) {
-		this.teams = teams;
-	}
 
 }

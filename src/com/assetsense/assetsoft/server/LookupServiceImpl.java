@@ -17,5 +17,4 @@ public class LookupServiceImpl extends RemoteServiceServlet implements LookupSer
 		lookupDao = (LookupDao) ApplicationContextListener.applicationContext.getBean("lookupDao");
 		return lookupDao.getLookupsByCatId(catId);
 	}
-
 }

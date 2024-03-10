@@ -1,5 +1,6 @@
 package com.assetsense.assetsoft.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -9,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.assetsense.assetsoft.domain.Team;
+import com.assetsense.assetsoft.dto.TeamDTO;
 
 @SuppressWarnings("deprecation")
 public class TeamDao {
@@ -80,15 +82,20 @@ public class TeamDao {
 	}
 
 	// method to return all teams
-	public List<Team> getTeams() {
-		List<Team> teams = null;
+	public List<TeamDTO> getTeams() {
+		List<TeamDTO> teamDTOs = new ArrayList<>();
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			@SuppressWarnings({ "unchecked" })
-			Query<Team> query = (Query<Team>) session.createQuery("from team");
-			teams = query.getResultList();
+			Query<Team> query = (Query<Team>) session.createQuery("from Team", Team.class);
+			List<Team> teams = query.getResultList();
+			for(Team team: teams){
+				TeamDTO teamDTO = new TeamDTO();
+				teamDTO.setName(team.getName());
+				teamDTO.setTeamId(team.getTeamId());
+				teamDTOs.add(teamDTO);
+			}
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -98,7 +105,7 @@ public class TeamDao {
 		} finally {
 			session.close();
 		}
-		return teams;
+		return teamDTOs;
 	}
 
 }

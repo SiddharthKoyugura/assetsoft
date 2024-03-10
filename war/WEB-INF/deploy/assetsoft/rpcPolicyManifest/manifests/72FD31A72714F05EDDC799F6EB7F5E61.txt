@@ -1,0 +1,2 @@
+serviceClass: com.assetsense.assetsoft.service.AuthService
+path: DD79EE8ADAA61A0FD788E5113268804A.gwt.rpc

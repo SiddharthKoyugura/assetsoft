@@ -40,7 +40,8 @@
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">none</prop>
 				<prop key="hibernate.flushMode">AUTO</prop>
-				<prop key="hibernate.c3p0.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider</prop>
+				<prop key="hibernate.c3p0.provider_class">org.hibernate.c3p0.internal.C3P0ConnectionProvider
+				</prop>
 			</props>
 		</property>
 	</bean>
@@ -54,11 +55,9 @@
 		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
-	
-	<bean id="applicationContext" class="com.assetsense.assetsoft.server.ApplicationContextListener"/>
 
-	<!-- <bean id="d" class="com.demoTodo.shared.TodoDao"> <property name="template" 
-		ref="template"></property> </bean> -->
+	<bean id="applicationContext"
+		class="com.assetsense.assetsoft.server.ApplicationContextListener" />
 
 	<!-- Liquibase Bean Configuration -->
 	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
@@ -88,6 +87,6 @@
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
+	<!-- <import resource="classpath:security/*.xml" />  -->
 
-	<import resource="classpath:/security/security-config.xml" />
 </beans>
