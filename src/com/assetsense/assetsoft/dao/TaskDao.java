@@ -1,5 +1,6 @@
 package com.assetsense.assetsoft.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -9,10 +10,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.assetsense.assetsoft.domain.Task;
+import com.assetsense.assetsoft.dto.TaskDTO;
 
 @SuppressWarnings("deprecation")
 public class TaskDao {
 	private SessionFactory sessionFactory;
+	private DaoToDto daoToDto = new DaoToDto();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -80,14 +83,17 @@ public class TaskDao {
 	}
 
 	// method to return tasks of given user_id
-	public List<Task> getTasksByUserId(long userId) {
+	public List<TaskDTO> getTasksByUserId(long userId) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
-		List<Task> tasks = null;
+		List<TaskDTO> taskDTOs = new ArrayList<>();
 		try {
 			tx = session.beginTransaction();
 			Query<Task> query = session.createQuery("from Task where user_id=" + userId, Task.class);
-			tasks = query.getResultList();
+			List<Task> tasks = query.getResultList();
+			for (Task task : tasks) {
+				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+			}
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -97,18 +103,21 @@ public class TaskDao {
 		} finally {
 			session.close();
 		}
-		return tasks;
+		return taskDTOs;
 	}
 
 	// method to return tasks of given priority_id
-	public List<Task> getTasksByPriroityId(long priorityId) {
+	public List<TaskDTO> getTasksByPriroityId(long priorityId) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
-		List<Task> tasks = null;
+		List<TaskDTO> taskDTOs = new ArrayList<>();
 		try {
 			tx = session.beginTransaction();
 			Query<Task> query = session.createQuery("from Task where priority_id=" + priorityId, Task.class);
-			tasks = query.getResultList();
+			List<Task> tasks = query.getResultList();
+			for (Task task : tasks) {
+				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+			}
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -118,18 +127,21 @@ public class TaskDao {
 		} finally {
 			session.close();
 		}
-		return tasks;
+		return taskDTOs;
 	}
 
 	// method to return all tasks
-	public List<Task> getTasks() {
-		List<Task> tasks = null;
+	public List<TaskDTO> getTasks() {
+		List<TaskDTO> taskDTOs = new ArrayList<>();
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
 			Query<Task> query = (Query<Task>) session.createQuery("from Task", Task.class);
-			tasks = query.getResultList();
+			List<Task> tasks = query.getResultList();
+			for (Task task : tasks) {
+				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+			}
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -139,6 +151,7 @@ public class TaskDao {
 		} finally {
 			session.close();
 		}
-		return tasks;
+		return taskDTOs;
 	}
+
 }

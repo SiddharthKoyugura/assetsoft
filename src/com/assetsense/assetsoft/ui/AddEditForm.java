@@ -169,17 +169,19 @@ public class AddEditForm {
 		l1.setStyleName("mr-5");
 		workItemTypeField = new ListBox();
 		workItemTypeField.setStyleName("listBoxStyle");
-		workItemTypeField.addItem("Hello");
-		workItemTypeField.addItem("Hey");
-		workItemTypeField.addItem("Hello dude");
+		workItemTypeField.addItem("TASK");
+		workItemTypeField.addItem("BUG");
+		workItemTypeField.addItem("FEATURE");
 
 		Label l2 = new Label("Workflow step:");
 		l2.setStyleName("mr-5");
 		workFlowStepField = new ListBox();
 		workFlowStepField.setStyleName("listBoxStyle");
-		workFlowStepField.addItem("Hello");
-		workFlowStepField.addItem("Hey");
-		workFlowStepField.addItem("Hello dude");
+		workFlowStepField.addItem("NEW");
+		workFlowStepField.addItem("APPROVED");
+		workFlowStepField.addItem("IN_PROGRESS");
+		workFlowStepField.addItem("DEV_COMPLETE");
+		workFlowStepField.addItem("READY_FOR_TESTING");
 
 		
 		Label l3 = new Label("Assigned To:");
@@ -257,9 +259,9 @@ public class AddEditForm {
 		l2.setStyleName("mr-5");
 		priorityField = new ListBox();
 		priorityField.setStyleName("listBoxStyle");
-		priorityField.addItem("Hello");
-		priorityField.addItem("Hey");
-		priorityField.addItem("Hello dude");
+		priorityField.addItem("HIGH");
+		priorityField.addItem("MEDIUM");
+		priorityField.addItem("LOW");
 
 
 		Label l3 = new Label("Remaining Estimate:");

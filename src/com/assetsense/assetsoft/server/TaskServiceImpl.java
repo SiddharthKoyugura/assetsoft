@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.assetsense.assetsoft.dao.TaskDao;
 import com.assetsense.assetsoft.domain.Task;
+import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.service.TaskService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -34,20 +35,20 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 	}
 
 	@Override
-	public List<Task> getTasksByUserId(long userId) {
+	public List<TaskDTO> getTasksByUserId(long userId) {
 		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasksByUserId(userId);
 	}
 
 	@Override
-	public List<Task> getTasksByPriorityId(long priorityId) {
+	public List<TaskDTO> getTasksByPriorityId(long priorityId) {
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasksByPriroityId(priorityId);
 	}
 
 	@Override
-	public List<Task> getTasks() {
+	public List<TaskDTO> getTasks() {
 		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasks();

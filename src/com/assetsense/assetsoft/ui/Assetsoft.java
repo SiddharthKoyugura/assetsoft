@@ -1,8 +1,11 @@
 package com.assetsense.assetsoft.ui;
 
+import com.assetsense.assetsoft.domain.Lookup;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.service.AuthService;
 import com.assetsense.assetsoft.service.AuthServiceAsync;
+import com.assetsense.assetsoft.service.LookupService;
+import com.assetsense.assetsoft.service.LookupServiceAsync;
 import com.assetsense.assetsoft.service.TaskService;
 import com.assetsense.assetsoft.service.TaskServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
@@ -23,53 +26,13 @@ public class Assetsoft implements EntryPoint {
 
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
+	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
+	
 
 	@Override
 	public void onModuleLoad() {
-		// checkAuthentication();
-		// User user = new User();
-		// user.setName("sid");
-		// user.setEmail("sid@gmail.com");
-		// user.setPassword("123");
-		// user.setTeams(null);
-		// Window.alert("Hello");
-		// userService.saveUser(user, new AsyncCallback<Void>(){
-		//
-		// @Override
-		// public void onFailure(Throwable caught) {
-		// // TODO Auto-generated method stub
-		// Window.alert("Error");
-		// }
-		//
-		// @Override
-		// public void onSuccess(Void result) {
-		// // TODO Auto-generated method stub
-		// Window.alert("NO error");
-		// }
-		//
-		// });
 		redirectToLoginPage();
 	}
-
-	// private void checkAuthentication() {
-	// athService.checkAuthentication(new AsyncCallback<Boolean>() {
-	// @Override
-	// public void onSuccess(Boolean isAuthenticated) {
-	// if (isAuthenticated) {
-	// loadMainPage();
-	// } else {
-	// RootLayoutPanel.get().add(buildLoginForm());
-	// }
-	// }
-	//
-	// @Override
-	// public void onFailure(Throwable caught) {
-	// // Handle RPC call failure
-	// Window.alert("Failed to authenticate. Please try again later.");
-	// redirectToLoginPage();
-	// }
-	// });
-	// }
 
 	private void redirectToLoginPage() {
 		RootLayoutPanel.get().clear();
@@ -166,6 +129,7 @@ public class Assetsoft implements EntryPoint {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 
 		dpanel.setSize("100%", "100%");
+		
 
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
@@ -190,7 +154,7 @@ public class Assetsoft implements EntryPoint {
 		String type = addEditForm.getWorkItemTypeField().getValue(typeIndex);
 
 		int stepIndex = addEditForm.getWorkFlowStepField().getSelectedIndex();
-		String step = addEditForm.getWorkFlowStepField().getValue(stepIndex);
+		final String step = addEditForm.getWorkFlowStepField().getValue(stepIndex);
 
 		int assignIndex = addEditForm.getAssignedToField().getSelectedIndex();
 		String assign = addEditForm.getAssignedToField().getValue(assignIndex);
@@ -199,7 +163,7 @@ public class Assetsoft implements EntryPoint {
 		String product = addEditForm.getAssignedToField().getValue(productIndex);
 
 		int priorityIndex = addEditForm.getPriorityField().getSelectedIndex();
-		String priority = addEditForm.getPriorityField().getValue(priorityIndex);
+		final String priority = addEditForm.getPriorityField().getValue(priorityIndex);
 
 		String percent = addEditForm.getPercentField().getText();
 		String initialEst = addEditForm.getInitialEstField().getText();
@@ -207,29 +171,75 @@ public class Assetsoft implements EntryPoint {
 		String dueDate = addEditForm.getDueDateField().getText();
 		String description = addEditForm.getDescriptionField().getText();
 
-		Task task = new Task();
+		final Task task = new Task();
 		task.setDescription(description);
 		task.setTitle(title);
 		task.setPercentComplete(percent);
 		task.setInitialEstimate(initialEst);
 		task.setRemainingEstimate(remainEst);
 		task.setDueDate(dueDate);
-
-		taskService.saveTask(task, new AsyncCallback<Void>() {
+		
+		lookupService.getLookupByValue(type, new AsyncCallback<Lookup>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
-				Window.alert("Error at adding task");
+				Window.alert("Error at 1");
 			}
 
 			@Override
-			public void onSuccess(Void result) {
+			public void onSuccess(Lookup typeLookup) {
 				// TODO Auto-generated method stub
-				Window.alert("Task Added");
-				loadMainPage();
-			}
+				task.setType(typeLookup);
+				lookupService.getLookupByValue(step, new AsyncCallback<Lookup>() {
 
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						Window.alert("Error at 2");
+					}
+
+					@Override
+					public void onSuccess(Lookup stepLookup) {
+						// TODO Auto-generated method stub
+						task.setStatus(stepLookup);
+						lookupService.getLookupByValue(priority, new AsyncCallback<Lookup>(){
+
+							@Override
+							public void onFailure(Throwable caught) {
+								// TODO Auto-generated method stub
+								Window.alert("Error at 3");
+							}
+
+							@Override
+							public void onSuccess(Lookup priorityLookup) {
+								// TODO Auto-generated method stub
+								task.setPriority(priorityLookup);
+								taskService.saveTask(task, new AsyncCallback<Void>() {
+
+									@Override
+									public void onFailure(Throwable caught) {
+										// TODO Auto-generated method stub
+										Window.alert("Error at adding task");
+									}
+
+									@Override
+									public void onSuccess(Void result) {
+										// TODO Auto-generated method stub
+										Window.alert("Task Added");
+										loadMainPage();
+									}
+
+								});
+							}
+							
+						});
+					}
+					
+				});
+			}
+			
 		});
+		
 	}
 }

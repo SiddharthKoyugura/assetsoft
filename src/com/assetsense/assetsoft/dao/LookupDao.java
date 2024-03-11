@@ -13,6 +13,7 @@ import com.assetsense.assetsoft.domain.Lookup;
 @SuppressWarnings("deprecation")
 public class LookupDao {
 	private SessionFactory sessionFactory;
+	private DaoToDto daoToDto = new DaoToDto();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -21,15 +22,15 @@ public class LookupDao {
 	public void setSessionFactory(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 	}
-	
+
 	public List<Lookup> getLookupsByCatId(long catId) {
 		List<Lookup> lookups = null;
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			@SuppressWarnings({ "unchecked" })
-			Query<Lookup> query = (Query<Lookup>) session.createQuery("from lookup where catId="+catId);
+			Query<Lookup> query = (Query<Lookup>) session.createQuery("from Lookup where catId=:catId", Lookup.class);
+			query.setParameter("catId", catId);
 			lookups = query.getResultList();
 			tx.commit();
 		} catch (HibernateException e) {
@@ -41,5 +42,26 @@ public class LookupDao {
 			session.close();
 		}
 		return lookups;
+	}
+
+	public Lookup getLookupByValue(String value) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		Lookup lookup = null;
+		try {
+			tx = session.beginTransaction();
+			Query<Lookup> query = (Query<Lookup>) session.createQuery("from Lookup where value=:value", Lookup.class);
+			query.setParameter("value", value);
+			lookup = query.uniqueResult();
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return lookup;
 	}
 }

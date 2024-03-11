@@ -3,7 +3,10 @@ package com.assetsense.assetsoft.ui;
 import java.util.List;
 
 import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.dto.TeamDTO;
+import com.assetsense.assetsoft.service.TaskService;
+import com.assetsense.assetsoft.service.TaskServiceAsync;
 import com.assetsense.assetsoft.service.TeamService;
 import com.assetsense.assetsoft.service.TeamServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
@@ -31,6 +34,9 @@ public class TaskDashboard {
 
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final TeamServiceAsync teamService = GWT.create(TeamService.class);
+	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
+
+	private int rowIndex = 1;
 
 	private Button navBtn;
 	private Button addBtn;
@@ -161,12 +167,11 @@ public class TaskDashboard {
 		final TreeItem item1 = new TreeItem();
 		item1.setState(true);
 		item1.setText("All Users");
-		
+
 		final TreeItem item2 = new TreeItem();
 		item2.setState(true);
 		item2.setText("All Teams");
-		
-		
+
 		userService.getUsers(new AsyncCallback<List<UserDTO>>() {
 
 			@Override
@@ -186,44 +191,27 @@ public class TaskDashboard {
 			}
 
 		});
-		
+
 		teamService.getTeams(new AsyncCallback<List<TeamDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void onSuccess(List<TeamDTO> teams) {
 				// TODO Auto-generated method stub
-				for(TeamDTO team: teams){
+				for (TeamDTO team : teams) {
 					GWT.log("IM here");
 					TreeItem sub = new TreeItem();
 					sub.setText(team.getName());
 					item2.addItem(sub);
 				}
 			}
-			
-		});
-		
-//		TreeItem sub1 = new TreeItem();
-//		sub1.setText("Siddhardha Koyugura");
-//		TreeItem sub2 = new TreeItem();
-//		sub2.setText("Goutham Mandala");
-//
-//		item1.addItem(sub1);
-//		item1.addItem(sub2);
-		
 
-//		TreeItem sub21 = new TreeItem();
-//		sub21.setText("Frontend Team");
-//		TreeItem sub22 = new TreeItem();
-//		sub22.setText("Backend Team");
-//
-//		item2.addItem(sub21);
-//		item2.addItem(sub22);
+		});
 
 		mainItem.addItem(item1);
 		mainItem.addItem(item2);
@@ -267,7 +255,7 @@ public class TaskDashboard {
 		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
 		// Grid headerGrid = new Grid(17, 7);
-		FlexTable flexTable = new FlexTable();
+		final FlexTable flexTable = new FlexTable();
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
@@ -278,42 +266,94 @@ public class TaskDashboard {
 		flexTable.setText(0, 1, "ID");
 		flexTable.setText(0, 2, "Type");
 		flexTable.setText(0, 3, "Title");
-		flexTable.setText(0, 4, "Priority");
-		flexTable.setText(0, 5, "Assigned to");
-		flexTable.setText(0, 6, "Project");
+		flexTable.setText(0, 4, "Work flow step");
+		flexTable.setText(0, 5, "Priority");
+		flexTable.setText(0, 6, "Assigned to");
+		flexTable.setText(0, 7, "Project");
 
-		addRow(flexTable, 1, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 2, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 3, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 4, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 5, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 6, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 7, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 8, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 9, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 10, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 11, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 12, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 13, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 14, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 15, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
-		addRow(flexTable, 16, "236", "Bug", "Hibernate Issue", "High", "Siddhardha Koyugura", "C2");
+		taskService.getTasks(new AsyncCallback<List<TaskDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void onSuccess(List<TaskDTO> tasks) {
+				for (TaskDTO task : tasks) {
+					// addRow(flexTable, rowIndex++,
+					// String.valueOf(task.getTaskId()),
+					// task.getType().getValue(),
+					// task.getTitle(), task.getPriority().getValue(),
+					// task.getUser().getName());
+					flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
+					int col = 0;
+					CheckBox cb = new CheckBox();
+					flexTable.setWidget(rowIndex, col++, cb);
+
+					flexTable.setText(rowIndex, col++, String.valueOf(task.getTaskId()));
+					flexTable.setText(rowIndex, col++, task.getType() != null ? task.getType().getValue() : "NULL");
+					flexTable.setText(rowIndex, col++, task.getTitle() != null ? task.getTitle() : "NULL");
+					flexTable.setText(rowIndex, col++, task.getStatus() != null ? task.getStatus().getValue() : "NULL");
+					flexTable.setText(rowIndex, col++, task.getPriority()!= null ? task.getPriority().getValue() : "NULL");
+					flexTable.setText(rowIndex, col++, task.getUser() != null ? task.getUser().getName() : "NULL");
+					flexTable.setText(rowIndex, col++, task.getProduct() != null ? task.getProduct().getName() : "NULL");
+
+					rowIndex++;
+				}
+			}
+
+		});
+
+		// addRow(flexTable, 1, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 2, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 3, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 4, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 5, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 6, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 7, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 8, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 9, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 10, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 11, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 12, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 13, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 14, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 15, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
+		// addRow(flexTable, 16, "236", "Bug", "Hibernate Issue", "High",
+		// "Siddhardha Koyugura", "C2");
 
 		spanel.add(flexTable);
 		vpanel.add(spanel);
 		return vpanel;
 	}
 
-	private void addRow(FlexTable flexTable, int rowIndex, String... contents) {
-		flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
-		CheckBox cb = new CheckBox();
-		flexTable.setWidget(rowIndex, 0, cb);
-		int col = 1;
-		for (String text : contents) {
-			flexTable.setText(rowIndex, col++, text);
-		}
-
-	}
+//	private void addRow(FlexTable flexTable, int rowIndex, String... contents) {
+//		flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
+//		int col = 0;
+//		CheckBox cb = new CheckBox();
+//		flexTable.setWidget(rowIndex, col++, cb);
+//
+//		for (String text : contents) {
+//			flexTable.setText(rowIndex, col++, text);
+//		}
+//
+//	}
 
 	private DockLayoutPanel buildHeaderPanel() {
 
