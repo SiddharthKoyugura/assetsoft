@@ -1,22 +1,22 @@
-package com.assetsense.assetsoft.domain;
+package com.assetsense.assetsoft.dto;
 
 import java.io.Serializable;
 
-public class Lookup implements Serializable {
+public class LookupDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private long lookupId;
 	private long catId;
 	private String value;
 
-	public Lookup() {
+	public LookupDTO() {
 	}
 
 	public long getLookupId() {
 		return lookupId;
 	}
 
-	public void setLookupId(long id) {
-		this.lookupId = id;
+	public void setLookupId(long lookupId) {
+		this.lookupId = lookupId;
 	}
 
 	public long getCatId() {
@@ -37,7 +37,7 @@ public class Lookup implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Lookup [lookupId=" + lookupId + ", catId=" + catId + ", value=" + value + "]";
+		return "LookupDTO [lookupId=" + lookupId + ", catId=" + catId + ", value=" + value + "]";
 	}
 
 }

@@ -1,0 +1,2 @@
+serviceClass: com.assetsense.assetsoft.service.TeamService
+path: 54D6CF53ABA515E88BA5E1856FB507E5.gwt.rpc

@@ -1,2 +1,2 @@
 serviceClass: com.assetsense.assetsoft.service.TaskService
-path: 65B34B4CBD869840C2D3B5473EE3F79C.gwt.rpc
+path: 92278C542734433B18D8161CE86543E2.gwt.rpc

@@ -35,6 +35,17 @@ public class Product implements Serializable {
 		this.parentProduct = parentProduct;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "Product [productId=" + productId + ", name=" + name + ", parentProduct=" + parentProduct + "]";
+	}
+
+	public Product findTopMostParent() {
+	    if (parentProduct == null) {
+	        return this;
+	    } else {
+	        return parentProduct.findTopMostParent();
+	    }
+	}
 
 }

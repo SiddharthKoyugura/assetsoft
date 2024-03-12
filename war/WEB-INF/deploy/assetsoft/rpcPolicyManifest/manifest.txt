@@ -1,5 +1,7 @@
 # Module assetsoft
 # RPC service class, partial path of RPC policy file
-com.assetsense.assetsoft.service.TaskService, 65B34B4CBD869840C2D3B5473EE3F79C.gwt.rpc
 com.assetsense.assetsoft.service.UserService, 78ED0B7D017C096949BF2E598A17CB4A.gwt.rpc
 com.assetsense.assetsoft.service.AuthService, DD79EE8ADAA61A0FD788E5113268804A.gwt.rpc
+com.assetsense.assetsoft.service.TaskService, 92278C542734433B18D8161CE86543E2.gwt.rpc
+com.assetsense.assetsoft.service.TeamService, 54D6CF53ABA515E88BA5E1856FB507E5.gwt.rpc
+com.assetsense.assetsoft.service.LookupService, EB09868338611C85361DE0465A510249.gwt.rpc

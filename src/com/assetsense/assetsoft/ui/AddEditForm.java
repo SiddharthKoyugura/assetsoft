@@ -1,7 +1,18 @@
 package com.assetsense.assetsoft.ui;
 
+import java.util.List;
+
+import com.assetsense.assetsoft.dto.ProductDTO;
+import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.service.ProductService;
+import com.assetsense.assetsoft.service.ProductServiceAsync;
+import com.assetsense.assetsoft.service.UserService;
+import com.assetsense.assetsoft.service.UserServiceAsync;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -14,6 +25,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AddEditForm {
+	private final UserServiceAsync userService = GWT.create(UserService.class);
+	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 	
 	private Button saveBtn;
 	private Button closeBtn;
@@ -127,8 +140,6 @@ public class AddEditForm {
 		vpanel.add(buildDescField());
 		
 		return vpanel;
-		
-
 	}
 	
 	private VerticalPanel buildDescField() {
@@ -169,26 +180,23 @@ public class AddEditForm {
 		l1.setStyleName("mr-5");
 		workItemTypeField = new ListBox();
 		workItemTypeField.setStyleName("listBoxStyle");
-		workItemTypeField.addItem("Hello");
-		workItemTypeField.addItem("Hey");
-		workItemTypeField.addItem("Hello dude");
+		workItemTypeField.addItem("TASK");
+		workItemTypeField.addItem("BUG");
+		workItemTypeField.addItem("FEATURE");
 
 		Label l2 = new Label("Workflow step:");
 		l2.setStyleName("mr-5");
 		workFlowStepField = new ListBox();
 		workFlowStepField.setStyleName("listBoxStyle");
-		workFlowStepField.addItem("Hello");
-		workFlowStepField.addItem("Hey");
-		workFlowStepField.addItem("Hello dude");
+		workFlowStepField.addItem("NEW");
+		workFlowStepField.addItem("APPROVED");
+		workFlowStepField.addItem("IN_PROGRESS");
+		workFlowStepField.addItem("DEV_COMPLETE");
+		workFlowStepField.addItem("READY_FOR_TESTING");
 
-		
 		Label l3 = new Label("Assigned To:");
 		l3.setStyleName("mr-5");
-		assignedToField = new ListBox();
-		assignedToField.setStyleName("listBoxStyle");
-		assignedToField.addItem("Hello");
-		assignedToField.addItem("Hey");
-		assignedToField.addItem("Hello dude");
+		
 
 
 		Label l4 = new Label("Initial Estimate:");
@@ -212,7 +220,7 @@ public class AddEditForm {
 		l2.addStyleName("imp");
 		l5.addStyleName("imp");
 
-		Grid grid = new Grid(5, 2);
+		final Grid grid = new Grid(5, 2);
 		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
@@ -226,8 +234,33 @@ public class AddEditForm {
 		grid.setWidget(0, 1, titleField);
 		grid.setWidget(1, 1, workItemTypeField);
 		grid.setWidget(2, 1, workFlowStepField);
-		grid.setWidget(3, 1, assignedToField);
+//		grid.setWidget(3, 1, assignedToField);
 		grid.setWidget(4, 1, initialEstField);
+		
+		
+		assignedToField = new ListBox();
+		assignedToField.setStyleName("listBoxStyle");
+//		assignedToField.addItem("Hello");
+//		assignedToField.addItem("Hey");
+//		assignedToField.addItem("Hello dude");
+		
+		userService.getUsers(new AsyncCallback<List<UserDTO>>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				Window.alert("error at users lookup");
+			}
+
+			@Override
+			public void onSuccess(List<UserDTO> users) {
+				for(UserDTO user: users){
+					assignedToField.addItem(user.getName());
+				}
+				grid.setWidget(3, 1, assignedToField);
+			}
+			
+		});
 		
 		
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
@@ -245,21 +278,20 @@ public class AddEditForm {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
 		
-		Label l1 = new Label("Product:");
-		l1.setStyleName("mr-5");
 		productField = new ListBox();
 		productField.setStyleName("listBoxStyle");
-		productField.addItem("Hello");
-		productField.addItem("Hey");
-		productField.addItem("Hello dude");
+		
+		Label l1 = new Label("Product:");
+		l1.setStyleName("mr-5");
+		
 
 		Label l2 = new Label("Priority:");
 		l2.setStyleName("mr-5");
 		priorityField = new ListBox();
 		priorityField.setStyleName("listBoxStyle");
-		priorityField.addItem("Hello");
-		priorityField.addItem("Hey");
-		priorityField.addItem("Hello dude");
+		priorityField.addItem("HIGH");
+		priorityField.addItem("MEDIUM");
+		priorityField.addItem("LOW");
 
 
 		Label l3 = new Label("Remaining Estimate:");
@@ -284,7 +316,7 @@ public class AddEditForm {
 		l4.setStyleName("taskLabel");
 		l5.setStyleName("taskLabel");
 
-		Grid grid = new Grid(5, 2);
+		final Grid grid = new Grid(5, 2);
 		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
@@ -295,11 +327,35 @@ public class AddEditForm {
 		grid.setWidget(2, 0, l4);
 		grid.setWidget(4, 0, l5);
 		
-		grid.setWidget(0, 1, productField);
 		grid.setWidget(1, 1, priorityField);
 		grid.setWidget(3, 1, remainingEstField);
 		grid.setWidget(2, 1, percentField);
 		grid.setWidget(4, 1, dueDateField);
+		
+		
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void onSuccess(List<ProductDTO> products) {
+				// TODO Auto-generated method stub
+				for(ProductDTO product: products){
+					String topMostParentName = product.findTopMostParent().getName();
+					String childName = product.getName();
+					if(topMostParentName.equals(childName)){
+						productField.addItem(childName);
+					}else{
+						productField.addItem(topMostParentName + " >> " + childName);
+					}
+				}
+				grid.setWidget(0, 1, productField);
+			}
+			
+		});
 		
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
 		grid.getCellFormatter().setStyleName(1, 0, "text-right");
@@ -312,5 +368,4 @@ public class AddEditForm {
 
 		return vpanel;
 	}
-
 }

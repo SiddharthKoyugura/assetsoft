@@ -1,9 +1,7 @@
 package com.assetsense.assetsoft.dao;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -11,14 +9,13 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
-import com.assetsense.assetsoft.dto.TeamDTO;
 import com.assetsense.assetsoft.dto.UserDTO;
 
 @SuppressWarnings("deprecation")
 public class UserDao {
 	private SessionFactory sessionFactory;
+	private DaoToDto daoToDto = new DaoToDto();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -97,13 +94,7 @@ public class UserDao {
 			query.setParameter("email", email);
 			user = query.uniqueResult();
 			if(user != null){
-				userDTO = new UserDTO();
-	            userDTO.setUserId(user.getUserId());
-	            userDTO.setName(user.getName());
-	            userDTO.setEmail(user.getEmail());
-	            userDTO.setPassword(user.getPassword());
-	            // Convert teams to TeamDTOs
-	            userDTO.setTeams(convertTeamsToDTOs(user.getTeams()));
+				userDTO = daoToDto.convertToUserDTO(user);
 			}
 			tx.commit();
 		} catch(HibernateException e) {
@@ -117,20 +108,31 @@ public class UserDao {
 		return userDTO;
 	}
 	
-	private Set<TeamDTO> convertTeamsToDTOs(Set<Team> teams) {
-        if (teams != null && !teams.isEmpty()) {
-            Set<TeamDTO> teamDTOs = new HashSet<>();
-            for (Team team : teams) {
-                TeamDTO teamDTO = new TeamDTO();
-                teamDTO.setTeamId(team.getTeamId());
-                teamDTO.setName(team.getName());
-                teamDTOs.add(teamDTO);
-            }
-            return teamDTOs;
-        } else {
-            return null;
-        }
-    }
+	public UserDTO getUserByName(String name){
+		UserDTO userDTO = null;
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<User> query = (Query<User>) session.createQuery("from User where name=:name", User.class);
+			query.setParameter("name", name);
+			User user = query.uniqueResult();
+			if(user != null){
+				userDTO = daoToDto.convertToUserDTO(user);
+			}
+			tx.commit();
+		} catch(HibernateException e) {
+			if(tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+				
+		return userDTO;
+	}
+	
 
 	// method to return all users
 	public List<UserDTO> getUsers() {
@@ -142,14 +144,7 @@ public class UserDao {
 			Query<User> query = (Query<User>) session.createQuery("from User", User.class);
 			List<User> users = query.getResultList();
 			for(User user: users){
-				UserDTO userDTO = new UserDTO();
-				userDTO.setUserId(user.getUserId());
-	            userDTO.setName(user.getName());
-	            userDTO.setEmail(user.getEmail());
-	            userDTO.setPassword(user.getPassword());
-	            // Convert teams to TeamDTOs
-	            userDTO.setTeams(convertTeamsToDTOs(user.getTeams()));
-	            userDTOs.add(userDTO);
+	            userDTOs.add(daoToDto.convertToUserDTO(user));
 			}
 			tx.commit();
 		}catch(HibernateException e){
@@ -162,4 +157,7 @@ public class UserDao {
 		}
 		return userDTOs;
 	}
+	
+	
+	
 }

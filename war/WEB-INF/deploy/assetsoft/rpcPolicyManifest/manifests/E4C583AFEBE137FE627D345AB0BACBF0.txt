@@ -1,0 +1,2 @@
+serviceClass: com.assetsense.assetsoft.service.LookupService
+path: EB09868338611C85361DE0465A510249.gwt.rpc

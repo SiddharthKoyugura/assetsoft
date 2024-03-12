@@ -2,9 +2,14 @@
 com.assetsense.assetsoft.domain.Lookup, true, true, true, true, com.assetsense.assetsoft.domain.Lookup/659876333, 659876333
 com.assetsense.assetsoft.domain.Product, true, true, true, true, com.assetsense.assetsoft.domain.Product/3363723314, 3363723314
 com.assetsense.assetsoft.domain.Task, true, true, true, true, com.assetsense.assetsoft.domain.Task/4023319643, 4023319643
-[Lcom.assetsense.assetsoft.domain.Task;, true, true, false, false, [Lcom.assetsense.assetsoft.domain.Task;/1619679578, 1619679578
 com.assetsense.assetsoft.domain.Team, true, true, true, true, com.assetsense.assetsoft.domain.Team/3959914721, 3959914721
 com.assetsense.assetsoft.domain.User, true, true, true, true, com.assetsense.assetsoft.domain.User/2811738305, 2811738305
+com.assetsense.assetsoft.dto.LookupDTO, true, true, false, false, com.assetsense.assetsoft.dto.LookupDTO/1539269714, 1539269714
+com.assetsense.assetsoft.dto.ProductDTO, true, true, false, false, com.assetsense.assetsoft.dto.ProductDTO/3592675169, 3592675169
+com.assetsense.assetsoft.dto.TaskDTO, true, true, false, false, com.assetsense.assetsoft.dto.TaskDTO/1322504383, 1322504383
+[Lcom.assetsense.assetsoft.dto.TaskDTO;, true, true, false, false, [Lcom.assetsense.assetsoft.dto.TaskDTO;/3345426813, 3345426813
+com.assetsense.assetsoft.dto.TeamDTO, true, true, false, false, com.assetsense.assetsoft.dto.TeamDTO/3451558720, 3451558720
+com.assetsense.assetsoft.dto.UserDTO, true, true, false, false, com.assetsense.assetsoft.dto.UserDTO/141655381, 141655381
 com.assetsense.assetsoft.service.TaskService, false, false, false, false, _, 483643059
 com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException, true, true, true, true, com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException/3936916533, 3936916533
 com.google.gwt.user.client.rpc.RpcTokenException, true, true, false, false, com.google.gwt.user.client.rpc.RpcTokenException/2345075298, 2345075298
