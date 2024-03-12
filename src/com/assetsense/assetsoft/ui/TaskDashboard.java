@@ -2,9 +2,12 @@ package com.assetsense.assetsoft.ui;
 
 import java.util.List;
 
-import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.dto.ProductDTO;
 import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.dto.TeamDTO;
+import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.service.ProductService;
+import com.assetsense.assetsoft.service.ProductServiceAsync;
 import com.assetsense.assetsoft.service.TaskService;
 import com.assetsense.assetsoft.service.TaskServiceAsync;
 import com.assetsense.assetsoft.service.TeamService;
@@ -13,6 +16,7 @@ import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -28,13 +32,13 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.event.dom.client.ClickHandler;
 
 public class TaskDashboard {
 
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final TeamServiceAsync teamService = GWT.create(TeamService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
+	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 
 	private int rowIndex = 1;
 
@@ -94,66 +98,64 @@ public class TaskDashboard {
 	}
 
 	private Tree buildProductsTree() {
-		Tree tree = new Tree(customTreeResources);
+		final Tree tree = new Tree(customTreeResources);
 
 		tree.setStyleName("parentTree");
+		
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
 
-		TreeItem mainItem = new TreeItem();
-		mainItem.setText("Products");
-		mainItem.setStyleName("treeHeading");
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
 
-		TreeItem item1 = new TreeItem();
-		item1.setText("A2");
-		TreeItem item2 = new TreeItem();
-		item2.setText("C2");
+			@Override
+			public void onSuccess(List<ProductDTO> products) {
+				// TODO Auto-generated method stub
+				for(ProductDTO product : products){
+					if(product.getParentProductDTO() == null){
+						TreeItem rootItem = new TreeItem(createProductWidget(product));
+						rootItem.setStyleName("treeHeading");
+		                buildSubProductsTree(product, rootItem);
+		                tree.addItem(rootItem);
+					}
+				}
+			}
+			
+		});
 
-		TreeItem sub1 = new TreeItem();
-		sub1.setText("ML Sprint");
-		TreeItem sub2 = new TreeItem();
-		sub2.setText("RAG Sprint");
-
-		item1.addItem(sub1);
-		item1.addItem(sub2);
-		item1.setState(true);
-
-		TreeItem sub21 = new TreeItem();
-		sub21.setText("6.1");
-		TreeItem sub22 = new TreeItem();
-		sub22.setText("6.2");
-		TreeItem sub23 = new TreeItem();
-		sub23.setText("6.3");
-		TreeItem sub24 = new TreeItem();
-		sub24.setText("6.4");
-		TreeItem sub25 = new TreeItem();
-		sub25.setText("6.5");
-		TreeItem sub26 = new TreeItem();
-		sub26.setText("6.6");
-
-		TreeItem sub31 = new TreeItem();
-		sub31.setText("Sprint 1");
-		TreeItem sub32 = new TreeItem();
-		sub32.setText("Sprint 2");
-
-		sub25.addItem(sub31);
-		sub25.addItem(sub32);
-		sub25.setState(true);
-
-		item2.addItem(sub21);
-		item2.addItem(sub22);
-		item2.addItem(sub23);
-		item2.addItem(sub24);
-		item2.addItem(sub25);
-		item2.addItem(sub26);
-
-		item2.setState(true);
-
-		mainItem.addItem(item1);
-		mainItem.addItem(item2);
-		mainItem.setState(true);
-
-		tree.addItem(mainItem);
 		return tree;
 	}
+	
+	private void buildSubProductsTree(final ProductDTO product, final TreeItem parentItem) {
+        
+        productService.getChildProductsByParentId(product.getProductId(), new AsyncCallback<List<ProductDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onSuccess(List<ProductDTO> products) {
+				// TODO Auto-generated method stub
+				for (ProductDTO child : products) {
+		            TreeItem childItem = new TreeItem(createProductWidget(child));
+		            parentItem.addItem(childItem);
+		            buildSubProductsTree(child, childItem);
+		        }
+			}
+			
+		});
+    }
+	
+	
+	private Label createProductWidget(ProductDTO product) {
+        Label label = new Label(product.getName());
+        return label;
+    }
 
 	private Tree buildUsersTree() {
 		Tree tree = new Tree(customTreeResources);
@@ -295,9 +297,11 @@ public class TaskDashboard {
 					flexTable.setText(rowIndex, col++, task.getType() != null ? task.getType().getValue() : "NULL");
 					flexTable.setText(rowIndex, col++, task.getTitle() != null ? task.getTitle() : "NULL");
 					flexTable.setText(rowIndex, col++, task.getStatus() != null ? task.getStatus().getValue() : "NULL");
-					flexTable.setText(rowIndex, col++, task.getPriority()!= null ? task.getPriority().getValue() : "NULL");
+					flexTable.setText(rowIndex, col++,
+							task.getPriority() != null ? task.getPriority().getValue() : "NULL");
 					flexTable.setText(rowIndex, col++, task.getUser() != null ? task.getUser().getName() : "NULL");
-					flexTable.setText(rowIndex, col++, task.getProduct() != null ? task.getProduct().getName() : "NULL");
+					flexTable.setText(rowIndex, col++,
+							task.getProduct() != null ? task.getProduct().getName() : "NULL");
 
 					rowIndex++;
 				}
@@ -342,18 +346,6 @@ public class TaskDashboard {
 		vpanel.add(spanel);
 		return vpanel;
 	}
-
-//	private void addRow(FlexTable flexTable, int rowIndex, String... contents) {
-//		flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
-//		int col = 0;
-//		CheckBox cb = new CheckBox();
-//		flexTable.setWidget(rowIndex, col++, cb);
-//
-//		for (String text : contents) {
-//			flexTable.setText(rowIndex, col++, text);
-//		}
-//
-//	}
 
 	private DockLayoutPanel buildHeaderPanel() {
 

@@ -108,6 +108,31 @@ public class UserDao {
 		return userDTO;
 	}
 	
+	public UserDTO getUserByName(String name){
+		UserDTO userDTO = null;
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<User> query = (Query<User>) session.createQuery("from User where name=:name", User.class);
+			query.setParameter("name", name);
+			User user = query.uniqueResult();
+			if(user != null){
+				userDTO = daoToDto.convertToUserDTO(user);
+			}
+			tx.commit();
+		} catch(HibernateException e) {
+			if(tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+				
+		return userDTO;
+	}
+	
 
 	// method to return all users
 	public List<UserDTO> getUsers() {
@@ -132,4 +157,7 @@ public class UserDao {
 		}
 		return userDTOs;
 	}
+	
+	
+	
 }

@@ -40,5 +40,13 @@ public class ProductDTO implements Serializable {
 	public String toString() {
 		return "ProductDTO [productId=" + productId + ", name=" + name + ", parentProductDTO=" + parentProductDTO + "]";
 	}
+	
+	public ProductDTO findTopMostParent() {
+	    if (parentProductDTO == null) {
+	        return this;
+	    } else {
+	        return parentProductDTO.findTopMostParent();
+	    }
+	}
 
 }

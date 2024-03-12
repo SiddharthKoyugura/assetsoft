@@ -10,4 +10,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface LookupService extends RemoteService {
 	List<Lookup> getLookupsByCatId(long catId);
 	Lookup getLookupByValue(String value);
+	List<Lookup> getLookupsByValues(List<String> values);
 }

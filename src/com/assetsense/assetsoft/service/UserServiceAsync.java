@@ -13,4 +13,5 @@ public interface UserServiceAsync {
 	void getUserByEmail(String email, AsyncCallback<UserDTO> callback);
 	void getUserById(long id, AsyncCallback<User> callback);
 	void getUsers(AsyncCallback<List<UserDTO>> callback);
+	void getUserByName(String name, AsyncCallback<UserDTO> callback);
 }

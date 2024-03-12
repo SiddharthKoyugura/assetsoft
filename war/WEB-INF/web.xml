@@ -60,6 +60,17 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 		<servlet-name>lookupService</servlet-name>
 		<url-pattern>/assetsoft/lookup</url-pattern>
 	</servlet-mapping>
+	
+	<!-- Product Service -->
+	<servlet>
+		<servlet-name>productService</servlet-name>
+		<servlet-class>com.assetsense.assetsoft.server.ProductServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>productService</servlet-name>
+		<url-pattern>/assetsoft/product</url-pattern>
+	</servlet-mapping>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>

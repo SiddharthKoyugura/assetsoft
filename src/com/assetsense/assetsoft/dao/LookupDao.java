@@ -1,5 +1,6 @@
 package com.assetsense.assetsoft.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -13,7 +14,6 @@ import com.assetsense.assetsoft.domain.Lookup;
 @SuppressWarnings("deprecation")
 public class LookupDao {
 	private SessionFactory sessionFactory;
-	private DaoToDto daoToDto = new DaoToDto();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -63,5 +63,32 @@ public class LookupDao {
 			session.close();
 		}
 		return lookup;
+	}
+	
+	public List<Lookup> getLookupsByValues(List<String> values){
+		List<Lookup> lookups = new ArrayList<>();
+		
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+			
+			for(String value: values){
+				Query<Lookup> query = (Query<Lookup>) session.createQuery("from Lookup where value=:value", Lookup.class);
+				query.setParameter("value", value);
+				Lookup lookup = query.uniqueResult();
+				lookups.add(lookup);
+			}
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		
+		return lookups;
 	}
 }

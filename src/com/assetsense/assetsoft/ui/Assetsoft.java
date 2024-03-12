@@ -1,13 +1,28 @@
 package com.assetsense.assetsoft.ui;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
+import com.assetsense.assetsoft.domain.Team;
+import com.assetsense.assetsoft.domain.User;
+import com.assetsense.assetsoft.dto.ProductDTO;
+import com.assetsense.assetsoft.dto.TeamDTO;
+import com.assetsense.assetsoft.dto.UserDTO;
 import com.assetsense.assetsoft.service.AuthService;
 import com.assetsense.assetsoft.service.AuthServiceAsync;
 import com.assetsense.assetsoft.service.LookupService;
 import com.assetsense.assetsoft.service.LookupServiceAsync;
+import com.assetsense.assetsoft.service.ProductService;
+import com.assetsense.assetsoft.service.ProductServiceAsync;
 import com.assetsense.assetsoft.service.TaskService;
 import com.assetsense.assetsoft.service.TaskServiceAsync;
+import com.assetsense.assetsoft.service.UserService;
+import com.assetsense.assetsoft.service.UserServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -27,7 +42,8 @@ public class Assetsoft implements EntryPoint {
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
-	
+	private final UserServiceAsync userService = GWT.create(UserService.class);
+	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 
 	@Override
 	public void onModuleLoad() {
@@ -81,7 +97,7 @@ public class Assetsoft implements EntryPoint {
 		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
 
 		vpanel.add(loginForm.buildLoginForm());
-		
+
 		loginForm.setLoginHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -129,7 +145,6 @@ public class Assetsoft implements EntryPoint {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 
 		dpanel.setSize("100%", "100%");
-		
 
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
@@ -146,6 +161,22 @@ public class Assetsoft implements EntryPoint {
 
 		return dpanel;
 	}
+	
+	
+	private Product convertToProductDao(ProductDTO productDTO){
+		Product product = new Product();
+		
+		product.setProductId(productDTO.getProductId());
+		product.setName(productDTO.getName());
+		
+		if(product.getParentProduct() != null){
+			product.setParentProduct(convertToProductDao(productDTO.getParentProductDTO()));
+		}
+		
+		return product;
+	}
+	
+	
 
 	private void saveTask() {
 		String title = addEditForm.getTitleField().getText();
@@ -157,10 +188,10 @@ public class Assetsoft implements EntryPoint {
 		final String step = addEditForm.getWorkFlowStepField().getValue(stepIndex);
 
 		int assignIndex = addEditForm.getAssignedToField().getSelectedIndex();
-		String assign = addEditForm.getAssignedToField().getValue(assignIndex);
+		final String assign = addEditForm.getAssignedToField().getValue(assignIndex);
 
 		int productIndex = addEditForm.getProductField().getSelectedIndex();
-		String product = addEditForm.getAssignedToField().getValue(productIndex);
+		final String product = addEditForm.getProductField().getValue(productIndex);
 
 		int priorityIndex = addEditForm.getPriorityField().getSelectedIndex();
 		final String priority = addEditForm.getPriorityField().getValue(priorityIndex);
@@ -178,43 +209,75 @@ public class Assetsoft implements EntryPoint {
 		task.setInitialEstimate(initialEst);
 		task.setRemainingEstimate(remainEst);
 		task.setDueDate(dueDate);
-		
-		lookupService.getLookupByValue(type, new AsyncCallback<Lookup>() {
+
+		List<String> values = new ArrayList<>();
+		values.add(type);
+		values.add(step);
+		values.add(priority);
+
+		lookupService.getLookupsByValues(values, new AsyncCallback<List<Lookup>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
-				Window.alert("Error at 1");
+				Window.alert("Error at lookupservice");
 			}
 
 			@Override
-			public void onSuccess(Lookup typeLookup) {
+			public void onSuccess(List<Lookup> lookups) {
 				// TODO Auto-generated method stub
-				task.setType(typeLookup);
-				lookupService.getLookupByValue(step, new AsyncCallback<Lookup>() {
+				task.setType(lookups.get(0));
+				task.setStatus(lookups.get(1));
+				task.setPriority(lookups.get(2));
+
+				userService.getUserByName(assign, new AsyncCallback<UserDTO>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
-						Window.alert("Error at 2");
+						Window.alert("Error at userService");
 					}
 
 					@Override
-					public void onSuccess(Lookup stepLookup) {
+					public void onSuccess(UserDTO userDTO) {
 						// TODO Auto-generated method stub
-						task.setStatus(stepLookup);
-						lookupService.getLookupByValue(priority, new AsyncCallback<Lookup>(){
+						User user = new User();
+						user.setUserId(userDTO.getUserId());
+						user.setName(userDTO.getName());
+						user.setEmail(userDTO.getEmail());
+						user.setPassword(userDTO.getPassword());
+
+						if (user.getTeams() != null) {
+							Set<Team> teams = new HashSet<>();
+
+							for (TeamDTO team : userDTO.getTeams()) {
+								Team teamDao = new Team();
+								teamDao.setTeamId(team.getTeamId());
+								teamDao.setName(team.getName());
+								teams.add(teamDao);
+							}
+
+							user.setTeams(teams);
+						}
+
+						task.setUser(user);
+
+						String[] wordsArray = product.split(" >> ");
+						String productName = wordsArray[wordsArray.length - 1];
+
+						productService.getProductByName(productName, new AsyncCallback<ProductDTO>() {
 
 							@Override
 							public void onFailure(Throwable caught) {
 								// TODO Auto-generated method stub
-								Window.alert("Error at 3");
+								Window.alert("Error at product Service");
 							}
 
 							@Override
-							public void onSuccess(Lookup priorityLookup) {
-								// TODO Auto-generated method stub
-								task.setPriority(priorityLookup);
+							public void onSuccess(ProductDTO productDTO) {
+								Product product = convertToProductDao(productDTO.findTopMostParent());
+								task.setProduct(product.findTopMostParent());
+
 								taskService.saveTask(task, new AsyncCallback<Void>() {
 
 									@Override
@@ -225,21 +288,18 @@ public class Assetsoft implements EntryPoint {
 
 									@Override
 									public void onSuccess(Void result) {
-										// TODO Auto-generated method stub
-										Window.alert("Task Added");
 										loadMainPage();
 									}
 
 								});
 							}
-							
 						});
 					}
-					
+
 				});
+
 			}
-			
 		});
-		
+
 	}
 }

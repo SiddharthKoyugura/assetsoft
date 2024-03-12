@@ -15,4 +15,5 @@ public interface UserService extends RemoteService {
 	UserDTO getUserByEmail(String email);
 	User getUserById(long id);
 	List<UserDTO> getUsers();
+	UserDTO getUserByName(String name);
 }

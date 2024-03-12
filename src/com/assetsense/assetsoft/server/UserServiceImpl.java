@@ -43,4 +43,10 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
 		return userDao.getUsers();
 	}
 
+	@Override
+	public UserDTO getUserByName(String name) {
+		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
+		return userDao.getUserByName(name);
+	}
+
 }
