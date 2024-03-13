@@ -53,6 +53,7 @@ public class Assetsoft implements EntryPoint {
 	private void redirectToLoginPage() {
 		RootLayoutPanel.get().clear();
 		RootLayoutPanel.get().add(buildLoginForm());
+		loginForm.getEmailField().setFocus(true);
 	}
 
 	private void authenticateUser() {

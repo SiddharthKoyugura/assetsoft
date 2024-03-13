@@ -15,4 +15,5 @@ public interface ProductService extends RemoteService {
 	List<ProductDTO> getProducts();
 	ProductDTO getProductByName(String name);
 	List<ProductDTO> getChildProductsByParentId(long id);
+	List<ProductDTO> getTopMostParentProducts();
 }

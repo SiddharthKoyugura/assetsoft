@@ -154,4 +154,27 @@ public class ProductDao {
 		}
 		return productDTOs;
 	}
+	
+	public List<ProductDTO> getTopMostParentProducts(){
+		List<ProductDTO> productDTOs = new ArrayList<>();
+		Transaction tx =null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<Product> query = (Query<Product>) session.createQuery("from Product where parent_product_id=NULL", Product.class);
+			List<Product> products = query.getResultList();
+			for(Product product: products) {
+				productDTOs.add(daoToDto.convertToProductDTO(product));
+			}
+			tx.commit();
+		}catch(HibernateException e){
+			if(tx != null){
+				tx.rollback();
+			}
+			e.printStackTrace();
+		}finally {
+			session.close();
+		}
+		return productDTOs;
+	}
 }

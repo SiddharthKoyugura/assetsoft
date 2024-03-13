@@ -11,7 +11,7 @@
 
 		<property name="catId" column="cat_id"></property>
 		
-		<property name="value" column="value"></property>
+		<property name="value" column="value" unique="true"></property>
 		
 	</class>
 </hibernate-mapping>
