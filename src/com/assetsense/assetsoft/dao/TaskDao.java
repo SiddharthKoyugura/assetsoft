@@ -9,7 +9,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
+import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.TaskDTO;
 
 @SuppressWarnings("deprecation")
@@ -137,7 +140,7 @@ public class TaskDao {
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			Query<Task> query = (Query<Task>) session.createQuery("from Task", Task.class);
+			Query<Task> query = (Query<Task>) session.createQuery("from Task ORDER BY id ASC", Task.class);
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
 				taskDTOs.add(daoToDto.convertToTaskDTO(task));
@@ -152,6 +155,113 @@ public class TaskDao {
 			session.close();
 		}
 		return taskDTOs;
+	}
+
+	public void editTaskTitle(long id, String title) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
+			query.setParameter("id", id);
+			Task task = (Task) query.uniqueResult();
+			task.setTitle(title);
+			session.save(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+	}
+
+	public void editTaskLookup(long id, String name, String value) {
+		Transaction tx = null;
+		name = name.toLowerCase();
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
+			query.setParameter("id", id);
+			Task task = (Task) query.uniqueResult();
+
+			Query<Lookup> lookupQuery = (Query<Lookup>) session.createQuery("from Lookup where value=:value",
+					Lookup.class);
+			lookupQuery.setParameter("value", value);
+			Lookup lookup = (Lookup) lookupQuery.getResultList().get(0);
+
+			if ("type".equals(name)) {
+				task.setType(lookup);
+			} else if ("priority".equals(name)) {
+				task.setPriority(lookup);
+			} else if ("status".equals(name)) {
+				task.setStatus(lookup);
+			}
+			session.save(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+	}
+
+	public void editTaskUser(long id, String username) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
+			query.setParameter("id", id);
+			Task task = (Task) query.uniqueResult();
+
+			Query<User> userQuery = (Query<User>) session.createQuery("from User where name=:name", User.class);
+			userQuery.setParameter("name", username);
+			User user = (User) userQuery.getResultList().get(0);
+			
+			task.setUser(user);
+			session.save(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+	}
+	
+	public void editTaskProduct(long id, String productName){
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
+			query.setParameter("id", id);
+			Task task = (Task) query.uniqueResult();
+
+			Query<Product> productQuery = (Query<Product>) session.createQuery("from Product where name=:name", Product.class);
+			productQuery.setParameter("name", productName);
+			Product product = (Product) productQuery.getResultList().get(0);
+			
+			task.setProduct(product);
+			session.save(task);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
 	}
 
 }

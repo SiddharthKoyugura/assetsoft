@@ -54,4 +54,10 @@ public class ProductServiceImpl extends RemoteServiceServlet implements ProductS
 		return productDao.getChildProductsByParentId(id);
 	}
 
+	@Override
+	public List<ProductDTO> getTopMostParentProducts() {
+		productDao = (ProductDao) ApplicationContextListener.applicationContext.getBean("productDao");
+		return productDao.getTopMostParentProducts();
+	}
+
 }

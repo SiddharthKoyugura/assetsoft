@@ -13,4 +13,5 @@ public interface ProductServiceAsync {
 	void getProducts(AsyncCallback<List<ProductDTO>> callaback);
 	void getProductByName(String name, AsyncCallback<ProductDTO> callback);
 	void getChildProductsByParentId(long id, AsyncCallback<List<ProductDTO>> callback);
+	void getTopMostParentProducts(AsyncCallback<List<ProductDTO>> callaback);
 }

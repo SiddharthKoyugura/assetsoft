@@ -17,6 +17,10 @@ public class LoginForm {
         loginBtn.addClickHandler(handler);
     }
 	
+	public TextBox getEmailField(){
+		return emailField;
+	}
+	
 	public String getEmail() {
 		return emailField.getText();
 	}
@@ -68,7 +72,6 @@ public class LoginForm {
 		grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
 		
 		vpanel.add(grid);
-
 		return vpanel;
 	}
 }
