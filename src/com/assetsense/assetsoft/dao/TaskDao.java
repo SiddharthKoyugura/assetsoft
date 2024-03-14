@@ -82,7 +82,30 @@ public class TaskDao {
 			session.close();
 		}
 	}
-
+	
+	public void deleteTasksByIds(List<Long> taskIds){
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			
+			for(long taskId: taskIds){
+				Task task = session.get(Task.class, taskId);
+				session.delete(task);
+			}
+			
+			tx.commit();
+		}catch(HibernateException e){
+			if(tx != null){
+				tx.rollback();
+			}
+			e.printStackTrace();
+		}finally{
+			session.close();
+		}
+	}
+	
+	
 	// method to return one task of given id
 	public TaskDTO getTaskById(long id) {
 		Transaction tx = null;

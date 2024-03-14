@@ -15,28 +15,24 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 	
 	@Override
 	public void saveTask(Task task) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.saveTask(task);
 	}
 
 	@Override
 	public void deleteTask(Task task) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.deleteTask(task);
 	}
 
 	@Override
 	public TaskDTO getTaskById(long id) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTaskById(id);
 	}
 
 	@Override
 	public List<TaskDTO> getTasksByUserId(long userId) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasksByUserId(userId);
 	}
@@ -49,21 +45,18 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 
 	@Override
 	public List<TaskDTO> getTasks() {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasks();
 	}
 
 	@Override
 	public void editTaskTitle(long id, String title) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.editTaskTitle(id, title);
 	}
 
 	@Override
 	public void editTaskLookup(long id, String name, String value) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.editTaskLookup(id, name, value);
 	}
@@ -76,8 +69,13 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 
 	@Override
 	public void editTaskProduct(long id, String productName) {
-		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.editTaskProduct(id, productName);
+	}
+
+	@Override
+	public void deleteTasksByIds(List<Long> taskIds) {
+		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
+		taskDao.deleteTasksByIds(taskIds);	
 	}
 }

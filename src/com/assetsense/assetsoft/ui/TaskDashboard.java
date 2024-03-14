@@ -35,7 +35,6 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -60,6 +59,8 @@ public class TaskDashboard {
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
+	private CheckBox headerCheckBox = new CheckBox();
+	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
 	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
 
@@ -81,10 +82,23 @@ public class TaskDashboard {
 	public void setEditBtnHandler(ClickHandler handler) {
 		editBtn.addClickHandler(handler);
 	}
+	
+	public void setDeleteBtnHandler(ClickHandler handler) {
+		deleteBtn.addClickHandler(handler);
+	}
+	
+	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
+		headerCheckBox.addValueChangeHandler(handler);
+	}
+	
+	public Map<Long, CheckBox> getCheckBoxes(){
+		return taskCheckBoxes;
+	}
 
 	public Map<Long, Boolean> getCheckedBoxes() {
 		return checkedBoxes;
 	}
+	
 
 	Tree.Resources customTreeResources = new Tree.Resources() {
 		@Override
@@ -288,8 +302,7 @@ public class TaskDashboard {
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
 		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
-
-		CheckBox headerCheckBox = new CheckBox();
+	
 		flexTable.setWidget(0, 0, headerCheckBox);
 		flexTable.setText(0, 1, "ID");
 		flexTable.setText(0, 2, "Type");
@@ -298,7 +311,9 @@ public class TaskDashboard {
 		flexTable.setText(0, 5, "Priority");
 		flexTable.setText(0, 6, "Assigned to");
 		flexTable.setText(0, 7, "Project");
-
+		
+		headerCheckBox.setValue(false);
+		
 		taskService.getTasks(new AsyncCallback<List<TaskDTO>>() {
 
 			@Override
@@ -328,7 +343,8 @@ public class TaskDashboard {
 					flexTable.setWidget(rowIndex, col++, priority);
 					flexTable.setWidget(rowIndex, col++, assignedTo);
 					flexTable.setWidget(rowIndex, col++, product);
-
+					
+					taskCheckBoxes.put(task.getTaskId(), cb);
 
 					cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 						private final long id = task.getTaskId();
@@ -729,7 +745,7 @@ public class TaskDashboard {
 		deleteBtn.setStyleName("customBtn");
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 200);
+		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
 
 		return headerPanel;
 	}
@@ -743,7 +759,7 @@ public class TaskDashboard {
 			buttonsPanel.add(button);
 		}
 
-		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
+//		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
 		return buttonsPanel;
 	}
 }
