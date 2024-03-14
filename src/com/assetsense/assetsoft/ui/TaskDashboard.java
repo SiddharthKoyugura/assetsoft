@@ -30,7 +30,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -61,6 +60,7 @@ public class TaskDashboard {
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
+	private Button addProductBtn;
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
@@ -87,6 +87,10 @@ public class TaskDashboard {
 	
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
+	}
+	
+	public void setAddProductBtnHandler(ClickHandler handler){
+		addProductBtn.addClickHandler(handler);
 	}
 	
 	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
@@ -769,7 +773,10 @@ public class TaskDashboard {
 		hpanel.getElement().getStyle().setPadding(15, Unit.PX);
 		hpanel.add(l1);
 		hpanel.add(icon);
-
+		
+		addProductBtn = new Button("Add Product");
+		addProductBtn.setStyleName("customBtn");
+		
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
@@ -777,9 +784,10 @@ public class TaskDashboard {
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
+		
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+		headerPanel.addEast(createButtonsPanel(addProductBtn, addBtn, editBtn, deleteBtn), 450);
 
 		return headerPanel;
 	}
