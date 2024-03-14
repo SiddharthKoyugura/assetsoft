@@ -2,7 +2,9 @@ package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
@@ -11,6 +13,7 @@ import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.ProductDTO;
+import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.dto.TeamDTO;
 import com.assetsense.assetsoft.dto.UserDTO;
 import com.assetsense.assetsoft.service.AuthService;
@@ -28,9 +31,13 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -84,9 +91,90 @@ public class Assetsoft implements EntryPoint {
 		RootLayoutPanel.get().add(buildTaskPage());
 	}
 
-	private void loadAddEditPage() {
+	private void loadAddPage() {
 		RootLayoutPanel.get().clear();
-		RootLayoutPanel.get().add(buildAddEditForm());
+		RootLayoutPanel.get().add(buildAddForm());
+	}
+	
+	private void loadEditPage(long id) {
+		RootLayoutPanel.get().clear();
+		RootLayoutPanel.get().add(buildEditForm(id));
+	}
+	
+	private DockLayoutPanel buildEditForm(final long id) {
+		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		final VerticalPanel vpanel = new VerticalPanel();
+
+		vpanel.setWidth("100%");
+
+		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
+
+		vpanel.add(addEditForm.buildFormHeader());
+		vpanel.add(addEditForm.buildForm());
+		
+		addEditForm.setSaveBtnHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				saveTask(id);
+			}
+		});
+
+		addEditForm.setCloseBtnHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				loadMainPage();
+			}
+
+		});
+		
+		taskService.getTaskById(id, new AsyncCallback<TaskDTO>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onSuccess(TaskDTO task) {
+				
+				addEditForm.getDescriptionField().setText(task.getDescription());
+				addEditForm.getInitialEstField().setText(task.getInitialEstimate());
+				addEditForm.getDueDateField().setText(task.getDueDate());
+				addEditForm.getTitleField().setText(task.getTitle());
+				addEditForm.getRemainingEstField().setText(task.getRemainingEstimate());
+				addEditForm.getPercentField().setText(task.getPercentComplete());
+				
+				String selectedWorkType = task.getType().getValue();
+				selectListBoxItem(addEditForm.getWorkItemTypeField(), selectedWorkType);
+				
+				String selectedStatus = task.getStatus().getValue();
+				selectListBoxItem(addEditForm.getWorkFlowStepField(), selectedStatus);
+				
+				String selectedUser = task.getUser().getName();
+				selectListBoxItem(addEditForm.getAssignedToField(), selectedUser);
+				
+				String selectedProduct = task.getProduct().getName();
+		        selectListBoxItem(addEditForm.getProductField(), selectedProduct);
+		        
+		        String selectedPriority = task.getPriority().getValue();
+		        selectListBoxItem(addEditForm.getPriorityField(), selectedPriority);
+		        dpanel.add(vpanel);
+			}
+			
+		});
+
+		return dpanel;
+	}
+	
+	private void selectListBoxItem(ListBox listBox, String value) {
+	    for (int i = 0; i < listBox.getItemCount(); i++) {
+	        if (listBox.getValue(i).equals(value)) {
+	            listBox.setSelectedIndex(i);
+	            break;
+	        }
+	    }
 	}
 
 	private DockLayoutPanel buildLoginForm() {
@@ -111,7 +199,7 @@ public class Assetsoft implements EntryPoint {
 		return dpanel;
 	}
 
-	private DockLayoutPanel buildAddEditForm() {
+	private DockLayoutPanel buildAddForm() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
@@ -150,14 +238,85 @@ public class Assetsoft implements EntryPoint {
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
 		dpanel.add(taskDashboard.buildTaskDashboard());
+		
+		taskDashboard.getCheckedBoxes().clear();
 
-		taskDashboard.setBtnHandler(new ClickHandler() {
+		taskDashboard.setAddBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				loadAddEditPage();
+				loadAddPage();
 			}
 
+		});
+		
+		taskDashboard.setEditBtnHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+				if(checkedBoxes.size() == 1){
+					Iterator<Long> iterator = checkedBoxes.keySet().iterator();
+					loadEditPage(iterator.next());
+					
+				}else{
+					Window.alert("Please select exactly one checkbox");
+				}
+			}
+			
+		});
+		
+		taskDashboard.setDeleteBtnHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+				if(checkedBoxes.size() == 0){
+					Window.alert("Please select atleast one checkbox");
+				}else {
+					Set<Long> keys = checkedBoxes.keySet();
+					List<Long> taskIds = new ArrayList<>();
+					for(long key: keys){
+						taskIds.add(key);
+					}
+					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>(){
+						@Override
+						public void onFailure(Throwable caught) {
+							
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							Window.alert("Task[s] deleted");
+							loadMainPage();
+						}
+					});
+				}
+			}
+			
+		});
+		
+		taskDashboard.setHeaderCheckBoxHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				// TODO Auto-generated method stub
+				Map<Long, CheckBox> checkBoxes = taskDashboard.getCheckBoxes();
+				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+				if(event.getValue()){
+					for(long id : checkBoxes.keySet()){
+						CheckBox cb = checkBoxes.get(id);
+						cb.setValue(true);
+						checkedBoxes.put(id, true);
+					}
+				}else{
+					for(long id : checkBoxes.keySet()){
+						CheckBox cb = checkBoxes.get(id);
+						cb.setValue(false);
+						checkedBoxes.remove(id);
+					}
+				}
+			}
+			
 		});
 
 		return dpanel;
@@ -177,9 +336,8 @@ public class Assetsoft implements EntryPoint {
 		return product;
 	}
 	
-	
 
-	private void saveTask() {
+	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();
 
 		int typeIndex = addEditForm.getWorkItemTypeField().getSelectedIndex();
@@ -204,12 +362,16 @@ public class Assetsoft implements EntryPoint {
 		String description = addEditForm.getDescriptionField().getText();
 
 		final Task task = new Task();
+		if(id.length == 1){
+			task.setTaskId(id[0]);
+		}
 		task.setDescription(description);
 		task.setTitle(title);
 		task.setPercentComplete(percent);
 		task.setInitialEstimate(initialEst);
 		task.setRemainingEstimate(remainEst);
 		task.setDueDate(dueDate);
+		
 
 		List<String> values = new ArrayList<>();
 		values.add(type);
@@ -301,6 +463,5 @@ public class Assetsoft implements EntryPoint {
 
 			}
 		});
-
 	}
 }

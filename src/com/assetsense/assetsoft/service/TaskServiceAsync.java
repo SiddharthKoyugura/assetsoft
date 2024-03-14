@@ -9,7 +9,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface TaskServiceAsync {
 	void saveTask(Task task, AsyncCallback<Void> callback);
 	void deleteTask(Task task, AsyncCallback<Void> callback);
-	void getTaskById(long id, AsyncCallback<Task> callback);
+	void deleteTasksByIds(List<Long> taskIds, AsyncCallback<Void> callback);
+	void getTaskById(long taskIds, AsyncCallback<TaskDTO> callback);
 	void getTasksByUserId(long userId, AsyncCallback<List<TaskDTO>> callback);
 	void getTasksByPriorityId(long priorityId, AsyncCallback<List<TaskDTO>> callback);
 	void getTasks(AsyncCallback<List<TaskDTO>> callback);

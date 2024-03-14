@@ -1,7 +1,9 @@
 package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.assetsense.assetsoft.dto.ProductDTO;
 import com.assetsense.assetsoft.dto.TaskDTO;
@@ -22,19 +24,17 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -58,6 +58,11 @@ public class TaskDashboard {
 	private Button navBtn;
 	private Button addBtn;
 	private Button editBtn;
+	private Button deleteBtn;
+	private CheckBox headerCheckBox = new CheckBox();
+	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
+
+	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
 
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
@@ -70,9 +75,30 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
-	public void setBtnHandler(ClickHandler handler) {
+	public void setAddBtnHandler(ClickHandler handler) {
 		addBtn.addClickHandler(handler);
 	}
+
+	public void setEditBtnHandler(ClickHandler handler) {
+		editBtn.addClickHandler(handler);
+	}
+	
+	public void setDeleteBtnHandler(ClickHandler handler) {
+		deleteBtn.addClickHandler(handler);
+	}
+	
+	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
+		headerCheckBox.addValueChangeHandler(handler);
+	}
+	
+	public Map<Long, CheckBox> getCheckBoxes(){
+		return taskCheckBoxes;
+	}
+
+	public Map<Long, Boolean> getCheckedBoxes() {
+		return checkedBoxes;
+	}
+	
 
 	Tree.Resources customTreeResources = new Tree.Resources() {
 		@Override
@@ -276,8 +302,7 @@ public class TaskDashboard {
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
 		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
-
-		CheckBox headerCheckBox = new CheckBox();
+	
 		flexTable.setWidget(0, 0, headerCheckBox);
 		flexTable.setText(0, 1, "ID");
 		flexTable.setText(0, 2, "Type");
@@ -286,12 +311,13 @@ public class TaskDashboard {
 		flexTable.setText(0, 5, "Priority");
 		flexTable.setText(0, 6, "Assigned to");
 		flexTable.setText(0, 7, "Project");
-
+		
+		headerCheckBox.setValue(false);
+		
 		taskService.getTasks(new AsyncCallback<List<TaskDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -317,6 +343,22 @@ public class TaskDashboard {
 					flexTable.setWidget(rowIndex, col++, priority);
 					flexTable.setWidget(rowIndex, col++, assignedTo);
 					flexTable.setWidget(rowIndex, col++, product);
+					
+					taskCheckBoxes.put(task.getTaskId(), cb);
+
+					cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+						private final long id = task.getTaskId();
+
+						@Override
+						public void onValueChange(ValueChangeEvent<Boolean> event) {
+							// TODO Auto-generated method stub
+							if (event.getValue()) {
+								checkedBoxes.put(id, true);
+							} else {
+								checkedBoxes.remove(id);
+							}
+						}
+					});
 
 					title.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
@@ -563,7 +605,8 @@ public class TaskDashboard {
 										@Override
 										public void onClick(ClickEvent event) {
 											if (!product.getText().equals(listBox.getSelectedValue()))
-												updateTaskProduct(task.getTaskId(), listBox, index, 7, flexTable, product);
+												updateTaskProduct(task.getTaskId(), listBox, index, 7, flexTable,
+														product);
 										}
 
 									}, ClickEvent.getType());
@@ -587,14 +630,14 @@ public class TaskDashboard {
 
 	private void updateTaskProduct(final long id, final ListBox listBox, final int row, final int col,
 			final FlexTable flexTable, final Label label) {
-		
+
 		final String productName = listBox.getSelectedValue();
-		taskService.editTaskProduct(id, productName, new AsyncCallback<Void>(){
+		taskService.editTaskProduct(id, productName, new AsyncCallback<Void>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
@@ -603,7 +646,7 @@ public class TaskDashboard {
 				flexTable.setWidget(row, col, label);
 				label.setText(productName);
 			}
-			
+
 		});
 	}
 
@@ -695,12 +738,14 @@ public class TaskDashboard {
 
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
+		deleteBtn = new Button("Delete");
 
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
+		deleteBtn.setStyleName("customBtn");
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn), 200);
+		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
 
 		return headerPanel;
 	}
@@ -714,7 +759,7 @@ public class TaskDashboard {
 			buttonsPanel.add(button);
 		}
 
-		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
+//		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
 		return buttonsPanel;
 	}
 }
