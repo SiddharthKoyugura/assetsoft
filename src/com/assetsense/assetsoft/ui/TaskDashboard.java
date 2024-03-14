@@ -63,7 +63,7 @@ public class TaskDashboard {
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
 	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
-
+	
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
 	}

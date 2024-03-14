@@ -270,7 +270,7 @@ public class Assetsoft implements EntryPoint {
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+				final Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
 				if(checkedBoxes.size() == 0){
 					Window.alert("Please select atleast one checkbox");
 				}else {
