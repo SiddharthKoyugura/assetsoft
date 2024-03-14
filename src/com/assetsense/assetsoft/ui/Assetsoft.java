@@ -37,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -45,7 +46,7 @@ public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
 	private final AddEditForm addEditForm = new AddEditForm();
 	private final LoginForm loginForm = new LoginForm();
-	private final AddProduct addProduct = new AddProduct();
+	private final AdminPage adminPage = new AdminPage();
 
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
@@ -109,19 +110,19 @@ public class Assetsoft implements EntryPoint {
 
 	private DockLayoutPanel buildAddProductPage() {
 		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
-		VerticalPanel vpanel = new VerticalPanel();
+		HorizontalPanel vpanel = new HorizontalPanel();
 
 		vpanel.setWidth("100%");
 		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
 
-		vpanel.add(addProduct.buildAddProductForm());
+		vpanel.add(adminPage.buildAddProductForm());
 
-		addProduct.setSubmitBtnHandler(new ClickHandler() {
+		adminPage.setSubmitBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				String parentProductText = addProduct.getProductField().getSelectedValue();
-				final String newProduct = addProduct.getNewProductField().getText();
+				String parentProductText = adminPage.getProductField().getSelectedValue();
+				final String newProduct = adminPage.getNewProductField().getText();
 				if (newProduct.trim().length() == 0) {
 					loadMainPage();
 				} else {
@@ -153,6 +154,41 @@ public class Assetsoft implements EntryPoint {
 						product.setName(newProduct);
 						saveProduct(product);
 					}
+				}
+			}
+
+		});
+
+		vpanel.add(adminPage.buildUsersForm());
+
+		adminPage.setAddUserBtnHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				String name = adminPage.getNameField().getText();
+				String email = adminPage.getEmailField().getText();
+				String password = adminPage.getPasswordField().getText();
+				if (name.trim().length() == 0 || email.trim().length() == 0 || password.trim().length() == 0) {
+					loadMainPage();
+				} else {
+					User user = new User();
+					user.setName(name);
+					user.setEmail(email);
+					user.setPassword(password);
+					userService.saveUser(user, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							loadMainPage();
+						}
+
+					});
 				}
 			}
 
@@ -376,7 +412,7 @@ public class Assetsoft implements EntryPoint {
 
 		});
 
-		taskDashboard.setAddProductBtnHandler(new ClickHandler() {
+		taskDashboard.setAdminBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {

@@ -15,12 +15,19 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class AddProduct {
+public class AdminPage {
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
-	
+
+	// Product section
 	private ListBox productField;
 	private TextBox newProductField;
 	private Button submitBtn;
+
+	// User Section
+	private TextBox nameField;
+	private TextBox emailField;
+	private TextBox passwordField;
+	private Button addUserBtn;
 
 	public ListBox getProductField() {
 		return productField;
@@ -28,6 +35,22 @@ public class AddProduct {
 
 	public TextBox getNewProductField() {
 		return newProductField;
+	}
+
+	public TextBox getNameField() {
+		return nameField;
+	}
+
+	public TextBox getEmailField() {
+		return emailField;
+	}
+
+	public TextBox getPasswordField() {
+		return passwordField;
+	}
+	
+	public void setAddUserBtnHandler(ClickHandler handler){
+		addUserBtn.addClickHandler(handler);
 	}
 
 	public void setSubmitBtnHandler(ClickHandler handler) {
@@ -42,19 +65,17 @@ public class AddProduct {
 		Label l1 = new Label("Select Parent:");
 		l1.setStyleName("mr-5");
 		l1.addStyleName("taskLabel");
-		
+
 		productField = new ListBox();
 		productField.setStyleName("listBoxStyle");
 		productField.addItem("NULL");
-		
 
 		Label l2 = new Label("New Product:");
 		l2.setStyleName("mr-5");
 		l2.addStyleName("taskLabel");
 		newProductField = new TextBox();
 		newProductField.setStyleName("listBoxStyle");
-		
-		
+
 		submitBtn = new Button("Submit");
 		submitBtn.setStyleName("customBtn");
 
@@ -67,11 +88,10 @@ public class AddProduct {
 		grid.setWidget(0, 0, l1);
 		grid.setWidget(1, 0, l2);
 
-		
 		grid.setWidget(1, 1, newProductField);
 		grid.setWidget(3, 1, submitBtn);
-		
-		productService.getProducts(new AsyncCallback<List<ProductDTO>>(){
+
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -81,18 +101,18 @@ public class AddProduct {
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
 				// TODO Auto-generated method stub
-				for(ProductDTO product: products){
+				for (ProductDTO product : products) {
 					String topMostParentName = product.findTopMostParent().getName();
 					String childName = product.getName();
-					if(topMostParentName.equals(childName)){
+					if (topMostParentName.equals(childName)) {
 						productField.addItem(childName);
-					}else{
+					} else {
 						productField.addItem(topMostParentName + " >> " + childName);
 					}
 				}
 				grid.setWidget(0, 1, productField);
 			}
-			
+
 		});
 
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
@@ -104,4 +124,59 @@ public class AddProduct {
 		vpanel.add(grid);
 		return vpanel;
 	}
+
+	public VerticalPanel buildUsersForm() {
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setStyleName("form-container");
+		vpanel.setWidth("100%");
+
+		Label l1 = new Label("Name:");
+		l1.setStyleName("mr-5");
+		l1.addStyleName("taskLabel");
+		nameField = new TextBox();
+		nameField.setStyleName("listBoxStyle");
+		
+		
+		Label l2 = new Label("Email:");
+		l2.setStyleName("mr-5");
+		l2.addStyleName("taskLabel");
+		emailField = new TextBox();
+		emailField.setStyleName("listBoxStyle");
+		
+
+		Label l3 = new Label("Password:");
+		l3.setStyleName("mr-5");
+		l3.addStyleName("taskLabel");
+		passwordField = new TextBox();
+		passwordField.setStyleName("listBoxStyle");
+
+		addUserBtn = new Button("Submit");
+		addUserBtn.setStyleName("customBtn");
+
+		Grid grid = new Grid(5, 2);
+		grid.setCellPadding(10);
+		grid.getElement().getStyle().setProperty("margin", "100px 0 0 0");
+		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		grid.setWidth("100%");
+
+		grid.setWidget(0, 0, l1);
+		grid.setWidget(1, 0, l2);
+		grid.setWidget(2, 0, l3);
+
+		grid.setWidget(0, 1, nameField);
+		grid.setWidget(1, 1, emailField);
+		grid.setWidget(2, 1, passwordField);
+		grid.setWidget(3, 1, addUserBtn);
+
+		grid.getCellFormatter().setStyleName(0, 0, "text-right");
+		grid.getCellFormatter().setStyleName(1, 0, "text-right");
+		grid.getCellFormatter().setStyleName(2, 0, "text-right");
+		grid.getCellFormatter().setStyleName(3, 0, "text-right");
+
+		grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
+
+		vpanel.add(grid);
+		return vpanel;
+	}
+
 }

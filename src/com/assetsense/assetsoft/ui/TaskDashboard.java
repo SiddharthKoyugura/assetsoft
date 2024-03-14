@@ -60,7 +60,7 @@ public class TaskDashboard {
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
-	private Button addProductBtn;
+	private Button adminBtn;
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
@@ -89,8 +89,8 @@ public class TaskDashboard {
 		deleteBtn.addClickHandler(handler);
 	}
 	
-	public void setAddProductBtnHandler(ClickHandler handler){
-		addProductBtn.addClickHandler(handler);
+	public void setAdminBtnHandler(ClickHandler handler){
+		adminBtn.addClickHandler(handler);
 	}
 	
 	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
@@ -774,8 +774,8 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 		
-		addProductBtn = new Button("Add Product");
-		addProductBtn.setStyleName("customBtn");
+		adminBtn = new Button("Admin Page");
+		adminBtn.setStyleName("customBtn");
 		
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
@@ -787,7 +787,7 @@ public class TaskDashboard {
 		
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addProductBtn, addBtn, editBtn, deleteBtn), 450);
+		headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 450);
 
 		return headerPanel;
 	}
