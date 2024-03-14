@@ -69,7 +69,7 @@ public class Assetsoft implements EntryPoint {
 		String email = loginForm.getEmail();
 		String password = loginForm.getPassword();
 
-		authService.authenticateUser(email, password, new AsyncCallback<String>() {
+		authService.authenticateUser(email, password, new AsyncCallback<UserDTO>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -77,9 +77,10 @@ public class Assetsoft implements EntryPoint {
 			}
 
 			@Override
-			public void onSuccess(String username) {
-				if (username != null) {
-					taskDashboard.setNavBtnName(username);
+			public void onSuccess(UserDTO user) {
+				if (user != null) {
+					taskDashboard.setNavBtnName(user.getName());
+					taskDashboard.setIsAdmin(user.getUserId() == 1);
 					loadMainPage();
 				} else {
 					Window.alert("Invalid Credentials");

@@ -55,6 +55,7 @@ public class TaskDashboard {
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 
 	private int rowIndex = 1;
+	private Boolean isAdmin = false;
 
 	private Button navBtn;
 	private Button addBtn;
@@ -65,7 +66,7 @@ public class TaskDashboard {
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
 	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
-	
+
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
 	}
@@ -77,6 +78,10 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
+	public void setIsAdmin(Boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+
 	public void setAddBtnHandler(ClickHandler handler) {
 		addBtn.addClickHandler(handler);
 	}
@@ -84,27 +89,26 @@ public class TaskDashboard {
 	public void setEditBtnHandler(ClickHandler handler) {
 		editBtn.addClickHandler(handler);
 	}
-	
+
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
 	}
-	
-	public void setAdminBtnHandler(ClickHandler handler){
+
+	public void setAdminBtnHandler(ClickHandler handler) {
 		adminBtn.addClickHandler(handler);
 	}
-	
-	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
+
+	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler) {
 		headerCheckBox.addValueChangeHandler(handler);
 	}
-	
-	public Map<Long, CheckBox> getCheckBoxes(){
+
+	public Map<Long, CheckBox> getCheckBoxes() {
 		return taskCheckBoxes;
 	}
 
 	public Map<Long, Boolean> getCheckedBoxes() {
 		return checkedBoxes;
 	}
-	
 
 	Tree.Resources customTreeResources = new Tree.Resources() {
 		@Override
@@ -308,7 +312,7 @@ public class TaskDashboard {
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
 		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
-	
+
 		flexTable.setWidget(0, 0, headerCheckBox);
 		flexTable.setText(0, 1, "ID");
 		flexTable.setText(0, 2, "Type");
@@ -317,9 +321,9 @@ public class TaskDashboard {
 		flexTable.setText(0, 5, "Priority");
 		flexTable.setText(0, 6, "Assigned to");
 		flexTable.setText(0, 7, "Project");
-		
+
 		headerCheckBox.setValue(false);
-		
+
 		taskService.getTasks(new AsyncCallback<List<TaskDTO>>() {
 
 			@Override
@@ -349,7 +353,7 @@ public class TaskDashboard {
 					flexTable.setWidget(rowIndex, col++, priority);
 					flexTable.setWidget(rowIndex, col++, assignedTo);
 					flexTable.setWidget(rowIndex, col++, product);
-					
+
 					taskCheckBoxes.put(task.getTaskId(), cb);
 
 					cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -391,11 +395,11 @@ public class TaskDashboard {
 								}
 
 							});
-							
-							if(clickHandlerRegistration != null){
+
+							if (clickHandlerRegistration != null) {
 								clickHandlerRegistration.removeHandler();
 							}
-							
+
 							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
@@ -411,7 +415,7 @@ public class TaskDashboard {
 					type.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
 						private HandlerRegistration clickHandlerRegistration;
-						
+
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
 							final ListBox listBox = new ListBox();
@@ -434,16 +438,16 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 2, listBox);
 							listBox.setFocus(true);
-							
-							if(clickHandlerRegistration != null){
+
+							if (clickHandlerRegistration != null) {
 								clickHandlerRegistration.removeHandler();
 							}
-							
+
 							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
 								public void onClick(ClickEvent event) {
-									if (listBox != null && !type.getText().equals(listBox.getSelectedValue())){
+									if (listBox != null && !type.getText().equals(listBox.getSelectedValue())) {
 										updateTaskLookup(task.getTaskId(), "type", listBox, index, 2, flexTable, type);
 									}
 								}
@@ -456,7 +460,7 @@ public class TaskDashboard {
 					step.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
 						private HandlerRegistration clickHandlerRegistration;
-						
+
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
 							// TODO Auto-generated method stub
@@ -482,8 +486,8 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 4, listBox);
 							listBox.setFocus(true);
-							
-							if(clickHandlerRegistration != null){
+
+							if (clickHandlerRegistration != null) {
 								clickHandlerRegistration.removeHandler();
 							}
 
@@ -528,8 +532,8 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 5, listBox);
 							listBox.setFocus(true);
-							
-							if(clickHandlerRegistration != null){
+
+							if (clickHandlerRegistration != null) {
 								clickHandlerRegistration.removeHandler();
 							}
 
@@ -579,8 +583,8 @@ public class TaskDashboard {
 									}
 									flexTable.setWidget(index, 6, listBox);
 									listBox.setFocus(true);
-									
-									if(clickHandlerRegistration != null){
+
+									if (clickHandlerRegistration != null) {
 										clickHandlerRegistration.removeHandler();
 									}
 
@@ -633,8 +637,8 @@ public class TaskDashboard {
 
 									flexTable.setWidget(index, 7, listBox);
 									listBox.setFocus(true);
-									
-									if(clickHandlerRegistration != null){
+
+									if (clickHandlerRegistration != null) {
 										clickHandlerRegistration.removeHandler();
 									}
 
@@ -665,7 +669,7 @@ public class TaskDashboard {
 		vpanel.add(spanel);
 		return vpanel;
 	}
-	
+
 	private void updateTaskProduct(final long id, final ListBox listBox, final int row, final int col,
 			final FlexTable flexTable, final Label label) {
 
@@ -773,10 +777,10 @@ public class TaskDashboard {
 		hpanel.getElement().getStyle().setPadding(15, Unit.PX);
 		hpanel.add(l1);
 		hpanel.add(icon);
-		
+
 		adminBtn = new Button("Admin Page");
 		adminBtn.setStyleName("customBtn");
-		
+
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
@@ -784,11 +788,13 @@ public class TaskDashboard {
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
-		
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 450);
-
+		if (isAdmin) {
+			headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 420);
+		} else {
+			headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+		}
 		return headerPanel;
 	}
 
@@ -801,7 +807,8 @@ public class TaskDashboard {
 			buttonsPanel.add(button);
 		}
 
-//		buttonsPanel.setCellHorizontalAlignment(buttons[0], HasHorizontalAlignment.ALIGN_RIGHT);
+		// buttonsPanel.setCellHorizontalAlignment(buttons[0],
+		// HasHorizontalAlignment.ALIGN_RIGHT);
 		return buttonsPanel;
 	}
 }
