@@ -234,15 +234,11 @@ public class AddEditForm {
 		grid.setWidget(0, 1, titleField);
 		grid.setWidget(1, 1, workItemTypeField);
 		grid.setWidget(2, 1, workFlowStepField);
-//		grid.setWidget(3, 1, assignedToField);
 		grid.setWidget(4, 1, initialEstField);
 		
 		
 		assignedToField = new ListBox();
 		assignedToField.setStyleName("listBoxStyle");
-//		assignedToField.addItem("Hello");
-//		assignedToField.addItem("Hey");
-//		assignedToField.addItem("Hello dude");
 		
 		userService.getUsers(new AsyncCallback<List<UserDTO>>(){
 

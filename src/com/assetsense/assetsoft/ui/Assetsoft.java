@@ -37,6 +37,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -45,6 +46,7 @@ public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
 	private final AddEditForm addEditForm = new AddEditForm();
 	private final LoginForm loginForm = new LoginForm();
+	private final AdminPage adminPage = new AdminPage();
 
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
@@ -95,12 +97,126 @@ public class Assetsoft implements EntryPoint {
 		RootLayoutPanel.get().clear();
 		RootLayoutPanel.get().add(buildAddForm());
 	}
-	
+
 	private void loadEditPage(long id) {
 		RootLayoutPanel.get().clear();
 		RootLayoutPanel.get().add(buildEditForm(id));
 	}
-	
+
+	private void loadAddProductPage() {
+		RootLayoutPanel.get().clear();
+		RootLayoutPanel.get().add(buildAddProductPage());
+	}
+
+	private DockLayoutPanel buildAddProductPage() {
+		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		HorizontalPanel vpanel = new HorizontalPanel();
+
+		vpanel.setWidth("100%");
+		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
+
+		vpanel.add(adminPage.buildAddProductForm());
+
+		adminPage.setSubmitBtnHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				String parentProductText = adminPage.getProductField().getSelectedValue();
+				final String newProduct = adminPage.getNewProductField().getText();
+				if (newProduct.trim().length() == 0) {
+					loadMainPage();
+				} else {
+					if (parentProductText != "NULL") {
+						String[] wordsArray = parentProductText.split(" >> ");
+						final String parentProductName = wordsArray[wordsArray.length - 1];
+
+						productService.getProductByName(parentProductName, new AsyncCallback<ProductDTO>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								// TODO Auto-generated method stub
+
+							}
+
+							@Override
+							public void onSuccess(ProductDTO productDTO) {
+								Product parentProduct = convertToProductDao(productDTO);
+								Product product = new Product();
+								product.setName(newProduct);
+								product.setParentProduct(parentProduct);
+								saveProduct(product);
+							}
+
+						});
+					} else {
+
+						Product product = new Product();
+						product.setName(newProduct);
+						saveProduct(product);
+					}
+				}
+			}
+
+		});
+
+		vpanel.add(adminPage.buildUsersForm());
+
+		adminPage.setAddUserBtnHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				String name = adminPage.getNameField().getText();
+				String email = adminPage.getEmailField().getText();
+				String password = adminPage.getPasswordField().getText();
+				if (name.trim().length() == 0 || email.trim().length() == 0 || password.trim().length() == 0) {
+					loadMainPage();
+				} else {
+					User user = new User();
+					user.setName(name);
+					user.setEmail(email);
+					user.setPassword(password);
+					userService.saveUser(user, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							loadMainPage();
+						}
+
+					});
+				}
+			}
+
+		});
+
+		dpanel.add(vpanel);
+
+		return dpanel;
+	}
+
+	private void saveProduct(Product product) {
+		productService.saveProduct(product, new AsyncCallback<Void>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(Void result) {
+				// TODO Auto-generated method stub
+				loadMainPage();
+			}
+
+		});
+	}
+
 	private DockLayoutPanel buildEditForm(final long id) {
 		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		final VerticalPanel vpanel = new VerticalPanel();
@@ -111,7 +227,7 @@ public class Assetsoft implements EntryPoint {
 
 		vpanel.add(addEditForm.buildFormHeader());
 		vpanel.add(addEditForm.buildForm());
-		
+
 		addEditForm.setSaveBtnHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -127,54 +243,54 @@ public class Assetsoft implements EntryPoint {
 			}
 
 		});
-		
-		taskService.getTaskById(id, new AsyncCallback<TaskDTO>(){
+
+		taskService.getTaskById(id, new AsyncCallback<TaskDTO>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void onSuccess(TaskDTO task) {
-				
+
 				addEditForm.getDescriptionField().setText(task.getDescription());
 				addEditForm.getInitialEstField().setText(task.getInitialEstimate());
 				addEditForm.getDueDateField().setText(task.getDueDate());
 				addEditForm.getTitleField().setText(task.getTitle());
 				addEditForm.getRemainingEstField().setText(task.getRemainingEstimate());
 				addEditForm.getPercentField().setText(task.getPercentComplete());
-				
+
 				String selectedWorkType = task.getType().getValue();
 				selectListBoxItem(addEditForm.getWorkItemTypeField(), selectedWorkType);
-				
+
 				String selectedStatus = task.getStatus().getValue();
 				selectListBoxItem(addEditForm.getWorkFlowStepField(), selectedStatus);
-				
+
 				String selectedUser = task.getUser().getName();
 				selectListBoxItem(addEditForm.getAssignedToField(), selectedUser);
-				
+
 				String selectedProduct = task.getProduct().getName();
-		        selectListBoxItem(addEditForm.getProductField(), selectedProduct);
-		        
-		        String selectedPriority = task.getPriority().getValue();
-		        selectListBoxItem(addEditForm.getPriorityField(), selectedPriority);
-		        dpanel.add(vpanel);
+				selectListBoxItem(addEditForm.getProductField(), selectedProduct);
+
+				String selectedPriority = task.getPriority().getValue();
+				selectListBoxItem(addEditForm.getPriorityField(), selectedPriority);
+				dpanel.add(vpanel);
 			}
-			
+
 		});
 
 		return dpanel;
 	}
-	
+
 	private void selectListBoxItem(ListBox listBox, String value) {
-	    for (int i = 0; i < listBox.getItemCount(); i++) {
-	        if (listBox.getValue(i).equals(value)) {
-	            listBox.setSelectedIndex(i);
-	            break;
-	        }
-	    }
+		for (int i = 0; i < listBox.getItemCount(); i++) {
+			if (listBox.getValue(i).equals(value)) {
+				listBox.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 
 	private DockLayoutPanel buildLoginForm() {
@@ -238,7 +354,7 @@ public class Assetsoft implements EntryPoint {
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
 		dpanel.add(taskDashboard.buildTaskDashboard());
-		
+
 		taskDashboard.getCheckedBoxes().clear();
 
 		taskDashboard.setAddBtnHandler(new ClickHandler() {
@@ -249,40 +365,40 @@ public class Assetsoft implements EntryPoint {
 			}
 
 		});
-		
-		taskDashboard.setEditBtnHandler(new ClickHandler(){
+
+		taskDashboard.setEditBtnHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if(checkedBoxes.size() == 1){
+				if (checkedBoxes.size() == 1) {
 					Iterator<Long> iterator = checkedBoxes.keySet().iterator();
 					loadEditPage(iterator.next());
-					
-				}else{
+
+				} else {
 					Window.alert("Please select exactly one checkbox");
 				}
 			}
-			
+
 		});
-		
-		taskDashboard.setDeleteBtnHandler(new ClickHandler(){
+
+		taskDashboard.setDeleteBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				// TODO Auto-generated method stub
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if(checkedBoxes.size() == 0){
+				final Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+				if (checkedBoxes.size() == 0) {
 					Window.alert("Please select atleast one checkbox");
-				}else {
+				} else {
 					Set<Long> keys = checkedBoxes.keySet();
 					List<Long> taskIds = new ArrayList<>();
-					for(long key: keys){
+					for (long key : keys) {
 						taskIds.add(key);
 					}
-					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>(){
+					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>() {
 						@Override
 						public void onFailure(Throwable caught) {
-							
+
 						}
 
 						@Override
@@ -293,49 +409,56 @@ public class Assetsoft implements EntryPoint {
 					});
 				}
 			}
-			
+
 		});
-		
+
+		taskDashboard.setAdminBtnHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				loadAddProductPage();
+			}
+
+		});
+
 		taskDashboard.setHeaderCheckBoxHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				// TODO Auto-generated method stub
 				Map<Long, CheckBox> checkBoxes = taskDashboard.getCheckBoxes();
 				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if(event.getValue()){
-					for(long id : checkBoxes.keySet()){
+				if (event.getValue()) {
+					for (long id : checkBoxes.keySet()) {
 						CheckBox cb = checkBoxes.get(id);
 						cb.setValue(true);
 						checkedBoxes.put(id, true);
 					}
-				}else{
-					for(long id : checkBoxes.keySet()){
+				} else {
+					for (long id : checkBoxes.keySet()) {
 						CheckBox cb = checkBoxes.get(id);
 						cb.setValue(false);
 						checkedBoxes.remove(id);
 					}
 				}
 			}
-			
+
 		});
 
 		return dpanel;
 	}
-	
-	
-	private Product convertToProductDao(ProductDTO productDTO){
+
+	private Product convertToProductDao(ProductDTO productDTO) {
 		Product product = new Product();
-		
+
 		product.setProductId(productDTO.getProductId());
 		product.setName(productDTO.getName());
-		
-		if(product.getParentProduct() != null){
+
+		if (product.getParentProduct() != null) {
 			product.setParentProduct(convertToProductDao(productDTO.getParentProductDTO()));
 		}
-		
+
 		return product;
 	}
-	
 
 	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();
@@ -362,7 +485,7 @@ public class Assetsoft implements EntryPoint {
 		String description = addEditForm.getDescriptionField().getText();
 
 		final Task task = new Task();
-		if(id.length == 1){
+		if (id.length == 1) {
 			task.setTaskId(id[0]);
 		}
 		task.setDescription(description);
@@ -371,7 +494,6 @@ public class Assetsoft implements EntryPoint {
 		task.setInitialEstimate(initialEst);
 		task.setRemainingEstimate(remainEst);
 		task.setDueDate(dueDate);
-		
 
 		List<String> values = new ArrayList<>();
 		values.add(type);

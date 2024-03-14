@@ -28,6 +28,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -59,11 +60,12 @@ public class TaskDashboard {
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
+	private Button adminBtn;
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
 	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
-
+	
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
 	}
@@ -85,6 +87,10 @@ public class TaskDashboard {
 	
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
+	}
+	
+	public void setAdminBtnHandler(ClickHandler handler){
+		adminBtn.addClickHandler(handler);
 	}
 	
 	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler){
@@ -362,6 +368,7 @@ public class TaskDashboard {
 
 					title.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
+						private HandlerRegistration clickHandlerRegistration;
 
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
@@ -384,7 +391,12 @@ public class TaskDashboard {
 								}
 
 							});
-							RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+							
+							if(clickHandlerRegistration != null){
+								clickHandlerRegistration.removeHandler();
+							}
+							
+							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
 								public void onClick(ClickEvent event) {
@@ -398,7 +410,8 @@ public class TaskDashboard {
 
 					type.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
-
+						private HandlerRegistration clickHandlerRegistration;
+						
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
 							final ListBox listBox = new ListBox();
@@ -421,13 +434,18 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 2, listBox);
 							listBox.setFocus(true);
-
-							RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+							
+							if(clickHandlerRegistration != null){
+								clickHandlerRegistration.removeHandler();
+							}
+							
+							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
 								public void onClick(ClickEvent event) {
-									if (!type.getText().equals(listBox.getSelectedValue()))
+									if (listBox != null && !type.getText().equals(listBox.getSelectedValue())){
 										updateTaskLookup(task.getTaskId(), "type", listBox, index, 2, flexTable, type);
+									}
 								}
 
 							}, ClickEvent.getType());
@@ -437,7 +455,8 @@ public class TaskDashboard {
 
 					step.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
-
+						private HandlerRegistration clickHandlerRegistration;
+						
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
 							// TODO Auto-generated method stub
@@ -463,8 +482,12 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 4, listBox);
 							listBox.setFocus(true);
+							
+							if(clickHandlerRegistration != null){
+								clickHandlerRegistration.removeHandler();
+							}
 
-							RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
 								public void onClick(ClickEvent event) {
@@ -480,6 +503,7 @@ public class TaskDashboard {
 
 					priority.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
+						private HandlerRegistration clickHandlerRegistration;
 
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
@@ -504,8 +528,12 @@ public class TaskDashboard {
 
 							flexTable.setWidget(index, 5, listBox);
 							listBox.setFocus(true);
+							
+							if(clickHandlerRegistration != null){
+								clickHandlerRegistration.removeHandler();
+							}
 
-							RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+							clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 								@Override
 								public void onClick(ClickEvent event) {
@@ -521,6 +549,7 @@ public class TaskDashboard {
 
 					assignedTo.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
+						private HandlerRegistration clickHandlerRegistration;
 
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
@@ -550,8 +579,12 @@ public class TaskDashboard {
 									}
 									flexTable.setWidget(index, 6, listBox);
 									listBox.setFocus(true);
+									
+									if(clickHandlerRegistration != null){
+										clickHandlerRegistration.removeHandler();
+									}
 
-									RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+									clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 										@Override
 										public void onClick(ClickEvent event) {
@@ -570,6 +603,7 @@ public class TaskDashboard {
 
 					product.addDoubleClickHandler(new DoubleClickHandler() {
 						private final int index = rowIndex;
+						private HandlerRegistration clickHandlerRegistration;
 
 						@Override
 						public void onDoubleClick(DoubleClickEvent event) {
@@ -599,8 +633,12 @@ public class TaskDashboard {
 
 									flexTable.setWidget(index, 7, listBox);
 									listBox.setFocus(true);
+									
+									if(clickHandlerRegistration != null){
+										clickHandlerRegistration.removeHandler();
+									}
 
-									RootLayoutPanel.get().addDomHandler(new ClickHandler() {
+									clickHandlerRegistration = RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 										@Override
 										public void onClick(ClickEvent event) {
@@ -627,7 +665,7 @@ public class TaskDashboard {
 		vpanel.add(spanel);
 		return vpanel;
 	}
-
+	
 	private void updateTaskProduct(final long id, final ListBox listBox, final int row, final int col,
 			final FlexTable flexTable, final Label label) {
 
@@ -735,7 +773,10 @@ public class TaskDashboard {
 		hpanel.getElement().getStyle().setPadding(15, Unit.PX);
 		hpanel.add(l1);
 		hpanel.add(icon);
-
+		
+		adminBtn = new Button("Admin Page");
+		adminBtn.setStyleName("customBtn");
+		
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
@@ -743,9 +784,10 @@ public class TaskDashboard {
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
+		
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+		headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 450);
 
 		return headerPanel;
 	}
