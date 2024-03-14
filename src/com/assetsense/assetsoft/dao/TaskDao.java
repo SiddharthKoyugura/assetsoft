@@ -28,13 +28,31 @@ public class TaskDao {
 		this.sessionFactory = sessionFactory;
 	}
 
-	// method to add task
+	// method to add or update task
 	public void saveTask(Task task) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			session.save(task);
+			if (task.getTaskId() != 0L) {
+				// Update the task
+				Task taskInDB = session.get(Task.class, task.getTaskId());
+				taskInDB.setTitle(task.getTitle());
+				taskInDB.setType(task.getType());
+				taskInDB.setDescription(task.getDescription());
+				taskInDB.setInitialEstimate(task.getInitialEstimate());
+				taskInDB.setPercentComplete(task.getPercentComplete());
+				taskInDB.setRemainingEstimate(task.getRemainingEstimate());
+				taskInDB.setDueDate(task.getDueDate());
+				taskInDB.setPriority(task.getPriority());
+				taskInDB.setStatus(task.getStatus());
+				taskInDB.setUser(task.getUser());
+				taskInDB.setProduct(task.getProduct());
+				session.update(taskInDB);
+			} else {
+				// Add the task
+				session.save(task);
+			}
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -66,13 +84,14 @@ public class TaskDao {
 	}
 
 	// method to return one task of given id
-	public Task getTaskById(long id) {
+	public TaskDTO getTaskById(long id) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
-		Task task = null;
+		TaskDTO taskDTO = null;
 		try {
 			tx = session.beginTransaction();
-			task = session.get(Task.class, id);
+			Task task = session.get(Task.class, id);
+			taskDTO = daoToDto.convertToTaskDTO(task);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -82,7 +101,7 @@ public class TaskDao {
 		} finally {
 			session.close();
 		}
-		return task;
+		return taskDTO;
 	}
 
 	// method to return tasks of given user_id
@@ -224,7 +243,7 @@ public class TaskDao {
 			Query<User> userQuery = (Query<User>) session.createQuery("from User where name=:name", User.class);
 			userQuery.setParameter("name", username);
 			User user = (User) userQuery.getResultList().get(0);
-			
+
 			task.setUser(user);
 			session.save(task);
 			tx.commit();
@@ -237,8 +256,8 @@ public class TaskDao {
 			session.close();
 		}
 	}
-	
-	public void editTaskProduct(long id, String productName){
+
+	public void editTaskProduct(long id, String productName) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
@@ -247,10 +266,11 @@ public class TaskDao {
 			query.setParameter("id", id);
 			Task task = (Task) query.uniqueResult();
 
-			Query<Product> productQuery = (Query<Product>) session.createQuery("from Product where name=:name", Product.class);
+			Query<Product> productQuery = (Query<Product>) session.createQuery("from Product where name=:name",
+					Product.class);
 			productQuery.setParameter("name", productName);
 			Product product = (Product) productQuery.getResultList().get(0);
-			
+
 			task.setProduct(product);
 			session.save(task);
 			tx.commit();

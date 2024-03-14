@@ -28,7 +28,7 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 	}
 
 	@Override
-	public Task getTaskById(long id) {
+	public TaskDTO getTaskById(long id) {
 		// TODO Auto-generated method stub
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTaskById(id);

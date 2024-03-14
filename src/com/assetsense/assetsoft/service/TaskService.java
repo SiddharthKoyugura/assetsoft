@@ -11,7 +11,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface TaskService extends RemoteService {
 	void saveTask(Task task);
 	void deleteTask(Task task);
-	Task getTaskById(long id);
+	TaskDTO getTaskById(long id);
 	List<TaskDTO> getTasksByUserId(long userId);
 	List<TaskDTO> getTasksByPriorityId(long priorityId);
 	List<TaskDTO> getTasks();
