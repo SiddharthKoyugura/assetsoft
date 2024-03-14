@@ -25,11 +25,11 @@ public class AuthServiceImpl extends RemoteServiceServlet implements AuthService
 //	}
 
 	@Override
-	public String authenticateUser(String email, String password) {
+	public UserDTO authenticateUser(String email, String password) {
 		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
 		UserDTO user = userDao.getUserByEmail(email);
 		if(user != null && user.getPassword().equals(password)) {
-			return user.getName();
+			return user;
 		}
 		return null;
 	}
