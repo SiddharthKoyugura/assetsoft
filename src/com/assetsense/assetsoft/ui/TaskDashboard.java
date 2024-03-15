@@ -147,9 +147,14 @@ public class TaskDashboard {
 	}
 
 	private Tree buildProductsTree() {
-		final Tree tree = new Tree(customTreeResources);
-
-		tree.setStyleName("parentTree");
+		final Tree treeWidget = new Tree(customTreeResources);
+		
+		treeWidget.setStyleName("parentTree");
+		
+		final TreeItem tree = new TreeItem(new Label("All Products"));
+		tree.setStyleName("treeHeading");
+		treeWidget.addItem(tree);
+		
 
 		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
 
@@ -170,11 +175,12 @@ public class TaskDashboard {
 						tree.addItem(rootItem);
 					}
 				}
+				tree.setState(true);
 			}
 
 		});
 
-		return tree;
+		return treeWidget;
 	}
 
 	private void buildSubProductsTree(final ProductDTO product, final TreeItem parentItem) {
