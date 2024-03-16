@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC  
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.assetsense.assetsoft.domain.Module" table="MODULE">
+		<id name="moduleId" column="module_id">
+			<generator class="native"/>
+		</id>
+
+		<property name="name" column="name" unique="true"></property>
+		
+		<many-to-one name="product" class="com.assetsense.assetsoft.domain.Product" column="product_id" not-null="false"/>
+		<many-to-one name="parentModule" column="parent_module_id" not-null="false" />
+	</class>
+</hibernate-mapping>

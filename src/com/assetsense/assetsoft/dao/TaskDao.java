@@ -48,6 +48,8 @@ public class TaskDao {
 				taskInDB.setStatus(task.getStatus());
 				taskInDB.setUser(task.getUser());
 				taskInDB.setProduct(task.getProduct());
+				taskInDB.setModule(task.getModule());
+				taskInDB.setSubSystem(task.getSubSystem());
 				session.update(taskInDB);
 			} else {
 				// Add the task

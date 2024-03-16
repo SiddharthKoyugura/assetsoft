@@ -16,6 +16,8 @@ public class TaskDTO implements Serializable {
 	private LookupDTO status;
 	private UserDTO user;
 	private ProductDTO product;
+	private ModuleDTO module;
+	private ModuleDTO subSystem;
 
 	public TaskDTO() {
 
@@ -115,6 +117,22 @@ public class TaskDTO implements Serializable {
 
 	public void setProduct(ProductDTO product) {
 		this.product = product;
+	}
+
+	public ModuleDTO getModule() {
+		return module;
+	}
+
+	public void setModule(ModuleDTO module) {
+		this.module = module;
+	}
+
+	public ModuleDTO getSubSystem() {
+		return subSystem;
+	}
+
+	public void setSubSystem(ModuleDTO subSystem) {
+		this.subSystem = subSystem;
 	}
 
 	@Override

@@ -4,12 +4,17 @@ import java.util.List;
 
 import com.assetsense.assetsoft.dto.ProductDTO;
 import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.dto.ModuleDTO;
+import com.assetsense.assetsoft.service.ModuleService;
+import com.assetsense.assetsoft.service.ModuleServiceAsync;
 import com.assetsense.assetsoft.service.ProductService;
 import com.assetsense.assetsoft.service.ProductServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,32 +32,34 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AddEditForm {
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
-	
+	private final ModuleServiceAsync moduleService = GWT.create(ModuleService.class);
+
 	private Button saveBtn;
 	private Button closeBtn;
-	
+
 	private TextArea descriptionField;
 	private ListBox workItemTypeField;
 	private ListBox workFlowStepField;
 	private ListBox assignedToField;
+	private ListBox moduleField;
+	private ListBox subSystemField;
 	private TextBox initialEstField;
-	// Todo: Need to update
 	private TextBox dueDateField;
 	private TextBox titleField;
-	
+
 	private ListBox productField;
 	private ListBox priorityField;
 	private TextBox remainingEstField;
 	private IntegerBox percentField;
 
 	public void setSaveBtnHandler(ClickHandler handler) {
-        saveBtn.addClickHandler(handler);
-    }
-	
+		saveBtn.addClickHandler(handler);
+	}
+
 	public void setCloseBtnHandler(ClickHandler handler) {
 		closeBtn.addClickHandler(handler);
 	}
-	
+
 	public Button getSaveBtn() {
 		return saveBtn;
 	}
@@ -105,6 +112,14 @@ public class AddEditForm {
 		return percentField;
 	}
 
+	public ListBox getModuleField() {
+		return moduleField;
+	}
+
+	public ListBox getSubSystemField() {
+		return subSystemField;
+	}
+
 	public DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		dpanel.getElement().getStyle().setProperty("boxShadow", "0 2px 2px -2px rgba(0,0,0,.4)");
@@ -131,22 +146,22 @@ public class AddEditForm {
 
 		return dpanel;
 	}
-	
+
 	public VerticalPanel buildForm() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
-		
+
 		vpanel.add(buildFieldPanels());
 		vpanel.add(buildDescField());
-		
+
 		return vpanel;
 	}
-	
+
 	private VerticalPanel buildDescField() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
 		vpanel.getElement().getStyle().setProperty("padding", "50px 0 0 50px");
-		
+
 		Label l1 = new Label("Description:");
 		l1.setStyleName("taskLabel");
 		l1.getElement().getStyle().setProperty("marginBottom", "10px");
@@ -154,28 +169,28 @@ public class AddEditForm {
 		descriptionField.setStyleName("listBoxStyle");
 		descriptionField.setHeight("150px");
 		descriptionField.setWidth("90vw");
-		
-        vpanel.add(l1);
-        vpanel.add(descriptionField);
-		
+
+		vpanel.add(l1);
+		vpanel.add(descriptionField);
+
 		return vpanel;
 	}
-	
+
 	private HorizontalPanel buildFieldPanels() {
 		HorizontalPanel hpanel = new HorizontalPanel();
-		hpanel.getElement().getStyle().setProperty("padding", "80px 100px 0 100px");
+		hpanel.getElement().getStyle().setProperty("padding", "60px 100px 0 100px");
 		hpanel.setWidth("100%");
-		
+
 		hpanel.add(buildLeftPanel());
 		hpanel.add(buildRightPanel());
-		
+
 		return hpanel;
 	}
-	
-	private VerticalPanel buildLeftPanel(){
+
+	private VerticalPanel buildLeftPanel() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
-		
+
 		Label l1 = new Label("Work Item Type:");
 		l1.setStyleName("mr-5");
 		workItemTypeField = new ListBox();
@@ -196,51 +211,55 @@ public class AddEditForm {
 
 		Label l3 = new Label("Assigned To:");
 		l3.setStyleName("mr-5");
-		
-
 
 		Label l4 = new Label("Initial Estimate:");
 		l4.setStyleName("mr-5");
 		initialEstField = new TextBox();
 		initialEstField.setStyleName("listBoxStyle");
 
-
 		Label l5 = new Label("Title:");
 		l5.setStyleName("mr-5");
 		titleField = new TextBox();
 		titleField.setStyleName("listBoxStyle");
-		
+
+		Label l6 = new Label("Due Date:");
+		l6.setStyleName("mr-5");
+		dueDateField = new TextBox();
+		dueDateField.setStyleName("listBoxStyle");
+
 		l1.setStyleName("taskLabel");
 		l2.setStyleName("taskLabel");
 		l3.setStyleName("taskLabel");
 		l4.setStyleName("taskLabel");
 		l5.setStyleName("taskLabel");
-		
+		l6.setStyleName("taskLabel");
+
 		l1.addStyleName("imp");
 		l2.addStyleName("imp");
 		l5.addStyleName("imp");
 
-		final Grid grid = new Grid(5, 2);
+		final Grid grid = new Grid(6, 2);
 		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
-		
+
 		grid.setWidget(0, 0, l5);
 		grid.setWidget(1, 0, l1);
 		grid.setWidget(2, 0, l2);
 		grid.setWidget(3, 0, l3);
 		grid.setWidget(4, 0, l4);
-		
+		grid.setWidget(5, 0, l6);
+
 		grid.setWidget(0, 1, titleField);
 		grid.setWidget(1, 1, workItemTypeField);
 		grid.setWidget(2, 1, workFlowStepField);
 		grid.setWidget(4, 1, initialEstField);
-		
-		
+		grid.setWidget(5, 1, dueDateField);
+
 		assignedToField = new ListBox();
 		assignedToField.setStyleName("listBoxStyle");
-		
-		userService.getUsers(new AsyncCallback<List<UserDTO>>(){
+
+		userService.getUsers(new AsyncCallback<List<UserDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -250,36 +269,36 @@ public class AddEditForm {
 
 			@Override
 			public void onSuccess(List<UserDTO> users) {
-				for(UserDTO user: users){
+				for (UserDTO user : users) {
 					assignedToField.addItem(user.getName());
 				}
 				grid.setWidget(3, 1, assignedToField);
 			}
-			
+
 		});
-		
-		
+
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
 		grid.getCellFormatter().setStyleName(1, 0, "text-right");
 		grid.getCellFormatter().setStyleName(2, 0, "text-right");
 		grid.getCellFormatter().setStyleName(3, 0, "text-right");
 		grid.getCellFormatter().setStyleName(4, 0, "text-right");
+		grid.getCellFormatter().setStyleName(5, 0, "text-right");
 
 		vpanel.add(grid);
 
 		return vpanel;
 	}
-	
-	private VerticalPanel buildRightPanel(){
+
+	private VerticalPanel buildRightPanel() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
-		
+
 		productField = new ListBox();
+		productField.addItem("<Select>");
 		productField.setStyleName("listBoxStyle");
-		
+
 		Label l1 = new Label("Product:");
 		l1.setStyleName("mr-5");
-		
 
 		Label l2 = new Label("Priority:");
 		l2.setStyleName("mr-5");
@@ -289,47 +308,54 @@ public class AddEditForm {
 		priorityField.addItem("MEDIUM");
 		priorityField.addItem("LOW");
 
-
 		Label l3 = new Label("Remaining Estimate:");
 		l3.setStyleName("mr-5");
 		remainingEstField = new TextBox();
 		remainingEstField.setStyleName("listBoxStyle");
 
-
 		Label l4 = new Label("Percent Complete:");
 		l4.setStyleName("mr-5");
 		percentField = new IntegerBox();
 		percentField.setStyleName("listBoxStyle");
-		
-		Label l5 = new Label("Due Date:");
+
+		Label l5 = new Label("Module:");
 		l5.setStyleName("mr-5");
-		dueDateField = new TextBox();
-		dueDateField.setStyleName("listBoxStyle");
-		
+		moduleField = new ListBox();
+		moduleField.addItem("<Select>");
+		moduleField.setStyleName("listBoxStyle");
+
+		Label l6 = new Label("Sub-System");
+		l6.setStyleName("mr-5");
+		subSystemField = new ListBox();
+		subSystemField.addItem("<Select>");
+		subSystemField.setStyleName("listBoxStyle");
+
 		l1.setStyleName("taskLabel");
 		l2.setStyleName("taskLabel");
 		l3.setStyleName("taskLabel");
 		l4.setStyleName("taskLabel");
 		l5.setStyleName("taskLabel");
+		l6.setStyleName("taskLabel");
 
-		final Grid grid = new Grid(5, 2);
+		final Grid grid = new Grid(6, 2);
 		grid.setCellPadding(5);
 		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		grid.setWidth("100%");
-		
+
 		grid.setWidget(0, 0, l1);
-		grid.setWidget(1, 0, l2);
-		grid.setWidget(3, 0, l3);
-		grid.setWidget(2, 0, l4);
-		grid.setWidget(4, 0, l5);
-		
-		grid.setWidget(1, 1, priorityField);
-		grid.setWidget(3, 1, remainingEstField);
-		grid.setWidget(2, 1, percentField);
-		grid.setWidget(4, 1, dueDateField);
-		
-		
-		productService.getProducts(new AsyncCallback<List<ProductDTO>>(){
+		grid.setWidget(3, 0, l2);
+		grid.setWidget(4, 0, l3);
+		grid.setWidget(5, 0, l4);
+		grid.setWidget(1, 0, l5);
+		grid.setWidget(2, 0, l6);
+
+		grid.setWidget(3, 1, priorityField);
+		grid.setWidget(4, 1, remainingEstField);
+		grid.setWidget(5, 1, percentField);
+		grid.setWidget(1, 1, moduleField);
+		grid.setWidget(2, 1, subSystemField);
+
+		productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -338,30 +364,89 @@ public class AddEditForm {
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
-				// TODO Auto-generated method stub
-				for(ProductDTO product: products){
-					String topMostParentName = product.findTopMostParent().getName();
-					String childName = product.getName();
-					if(topMostParentName.equals(childName)){
-						productField.addItem(childName);
-					}else{
-						productField.addItem(topMostParentName + " >> " + childName);
-					}
+				for (ProductDTO product : products) {
+					productField.addItem(product.getName());
 				}
 				grid.setWidget(0, 1, productField);
 			}
-			
+
 		});
-		
+
+		productField.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				updateModuleField();
+			}
+		});
+
+		moduleField.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				updateSubSytemField();
+			}
+
+		});
+
 		grid.getCellFormatter().setStyleName(0, 0, "text-right");
 		grid.getCellFormatter().setStyleName(1, 0, "text-right");
 		grid.getCellFormatter().setStyleName(2, 0, "text-right");
 		grid.getCellFormatter().setStyleName(3, 0, "text-right");
 		grid.getCellFormatter().setStyleName(4, 0, "text-right");
-		
+		grid.getCellFormatter().setStyleName(5, 0, "text-right");
 
 		vpanel.add(grid);
 
 		return vpanel;
+	}
+	
+	
+	public void updateModuleField(){
+		String productName = productField.getSelectedValue();
+		subSystemField.clear();
+		subSystemField.addItem("<Select>");
+		moduleField.clear();
+		moduleField.addItem("<Select>");
+		moduleService.getModulesByProductName(productName, new AsyncCallback<List<ModuleDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(List<ModuleDTO> modules) {
+				for (ModuleDTO module : modules) {
+					moduleField.addItem(module.getName());
+				}
+			}
+
+		});
+	}
+	
+	public void updateSubSytemField(){
+		String moduleName = moduleField.getSelectedValue();
+		subSystemField.clear();
+		subSystemField.addItem("<Select>");
+		if (!moduleName.equals("<Select>")) {
+			moduleService.getChildModulesByParentName(moduleName, new AsyncCallback<List<ModuleDTO>>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					// TODO Auto-generated method stub
+
+				}
+
+				@Override
+				public void onSuccess(List<ModuleDTO> modules) {
+					for (ModuleDTO module : modules) {
+						subSystemField.addItem(module.getName());
+					}
+				}
+
+			});
+		}
 	}
 }
