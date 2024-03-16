@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
+import com.assetsense.assetsoft.dto.ModuleDTO;
 import com.assetsense.assetsoft.dto.ProductDTO;
 import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.dto.TeamDTO;
@@ -20,6 +22,8 @@ import com.assetsense.assetsoft.service.AuthService;
 import com.assetsense.assetsoft.service.AuthServiceAsync;
 import com.assetsense.assetsoft.service.LookupService;
 import com.assetsense.assetsoft.service.LookupServiceAsync;
+import com.assetsense.assetsoft.service.ModuleService;
+import com.assetsense.assetsoft.service.ModuleServiceAsync;
 import com.assetsense.assetsoft.service.ProductService;
 import com.assetsense.assetsoft.service.ProductServiceAsync;
 import com.assetsense.assetsoft.service.TaskService;
@@ -53,6 +57,7 @@ public class Assetsoft implements EntryPoint {
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
+	private final ModuleServiceAsync moduleService = GWT.create(ModuleService.class);
 
 	@Override
 	public void onModuleLoad() {
@@ -254,7 +259,7 @@ public class Assetsoft implements EntryPoint {
 			}
 
 			@Override
-			public void onSuccess(TaskDTO task) {
+			public void onSuccess(final TaskDTO task) {
 
 				addEditForm.getDescriptionField().setText(task.getDescription());
 				addEditForm.getInitialEstField().setText(task.getInitialEstimate());
@@ -277,7 +282,53 @@ public class Assetsoft implements EntryPoint {
 
 				String selectedPriority = task.getPriority().getValue();
 				selectListBoxItem(addEditForm.getPriorityField(), selectedPriority);
-				dpanel.add(vpanel);
+				
+				
+				moduleService.getModulesByProductName(selectedProduct, new AsyncCallback<List<ModuleDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<ModuleDTO> modules) {
+						for (ModuleDTO module : modules) {
+							addEditForm.getModuleField().addItem(module.getName());
+						}
+						
+						
+						if (task.getModule() != null) {
+							String selectedModule = task.getModule().getName();
+							selectListBoxItem(addEditForm.getModuleField(), selectedModule);
+							moduleService.getChildModulesByParentName(selectedModule, new AsyncCallback<List<ModuleDTO>>() {
+
+								@Override
+								public void onFailure(Throwable caught) {
+									// TODO Auto-generated method stub
+
+								}
+
+								@Override
+								public void onSuccess(List<ModuleDTO> modules) {
+									for (ModuleDTO module : modules) {
+										addEditForm.getSubSystemField().addItem(module.getName());
+									}
+									if(task.getSubSystem() != null){
+										String selectedSubSystem = task.getSubSystem().getName();
+										selectListBoxItem(addEditForm.getSubSystemField(), selectedSubSystem);
+									}
+									dpanel.add(vpanel);
+								}
+
+							});
+						}
+					}
+
+				});
+				
+				
 			}
 
 		});
@@ -461,23 +512,31 @@ public class Assetsoft implements EntryPoint {
 		return product;
 	}
 
+	private Module convertToModuleDao(ModuleDTO moduleDTO) {
+		Module module = new Module();
+
+		module.setModuleId(moduleDTO.getModuleId());
+		module.setName(moduleDTO.getName());
+		module.setProduct(convertToProductDao(moduleDTO.getProductDTO()));
+
+		if (moduleDTO.getParentModuleDTO() != null) {
+			module.setParentModule(convertToModuleDao(moduleDTO.getParentModuleDTO()));
+		}
+
+		return module;
+	}
+
 	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();
 
-		int typeIndex = addEditForm.getWorkItemTypeField().getSelectedIndex();
-		String type = addEditForm.getWorkItemTypeField().getValue(typeIndex);
+		String type = addEditForm.getWorkItemTypeField().getSelectedValue();
 
-		int stepIndex = addEditForm.getWorkFlowStepField().getSelectedIndex();
-		final String step = addEditForm.getWorkFlowStepField().getValue(stepIndex);
-
-		int assignIndex = addEditForm.getAssignedToField().getSelectedIndex();
-		final String assign = addEditForm.getAssignedToField().getValue(assignIndex);
-
-		int productIndex = addEditForm.getProductField().getSelectedIndex();
-		final String product = addEditForm.getProductField().getValue(productIndex);
-
-		int priorityIndex = addEditForm.getPriorityField().getSelectedIndex();
-		final String priority = addEditForm.getPriorityField().getValue(priorityIndex);
+		final String step = addEditForm.getWorkFlowStepField().getSelectedValue();
+		final String assign = addEditForm.getAssignedToField().getSelectedValue();
+		final String product = addEditForm.getProductField().getSelectedValue();
+		final String priority = addEditForm.getPriorityField().getSelectedValue();
+		final String module = addEditForm.getModuleField().getSelectedValue();
+		final String subSystem = addEditForm.getSubSystemField().getSelectedValue();
 
 		String percent = addEditForm.getPercentField().getText();
 		String initialEst = addEditForm.getInitialEstField().getText();
@@ -501,17 +560,19 @@ public class Assetsoft implements EntryPoint {
 		values.add(step);
 		values.add(priority);
 
+		final List<String> moduleNames = new ArrayList<>();
+		moduleNames.add(module);
+		moduleNames.add(subSystem);
+
 		lookupService.getLookupsByValues(values, new AsyncCallback<List<Lookup>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
 				Window.alert("Error at lookupservice");
 			}
 
 			@Override
 			public void onSuccess(List<Lookup> lookups) {
-				// TODO Auto-generated method stub
 				task.setType(lookups.get(0));
 				task.setStatus(lookups.get(1));
 				task.setPriority(lookups.get(2));
@@ -520,13 +581,11 @@ public class Assetsoft implements EntryPoint {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
 						Window.alert("Error at userService");
 					}
 
 					@Override
 					public void onSuccess(UserDTO userDTO) {
-						// TODO Auto-generated method stub
 						User user = new User();
 						user.setUserId(userDTO.getUserId());
 						user.setName(userDTO.getName());
@@ -548,36 +607,47 @@ public class Assetsoft implements EntryPoint {
 
 						task.setUser(user);
 
-						String[] wordsArray = product.split(" >> ");
-						String productName = wordsArray[wordsArray.length - 1];
-
-						productService.getProductByName(productName, new AsyncCallback<ProductDTO>() {
+						productService.getProductByName(product, new AsyncCallback<ProductDTO>() {
 
 							@Override
 							public void onFailure(Throwable caught) {
-								// TODO Auto-generated method stub
 								Window.alert("Error at product Service");
 							}
 
 							@Override
 							public void onSuccess(ProductDTO productDTO) {
-								Product product = convertToProductDao(productDTO.findTopMostParent());
-								task.setProduct(product.findTopMostParent());
-
-								taskService.saveTask(task, new AsyncCallback<Void>() {
+								Product product = convertToProductDao(productDTO);
+								task.setProduct(product);
+								moduleService.getModulesByNames(moduleNames, new AsyncCallback<List<ModuleDTO>>() {
 
 									@Override
 									public void onFailure(Throwable caught) {
 										// TODO Auto-generated method stub
-										Window.alert("Error at adding task");
+
 									}
 
 									@Override
-									public void onSuccess(Void result) {
-										loadMainPage();
+									public void onSuccess(List<ModuleDTO> moduleDTOs) {
+										task.setModule(convertToModuleDao(moduleDTOs.get(0)));
+										task.setSubSystem(convertToModuleDao(moduleDTOs.get(1)));
+										Window.alert(task.getModule().toString());
+										taskService.saveTask(task, new AsyncCallback<Void>() {
+
+											@Override
+											public void onFailure(Throwable caught) {
+												Window.alert("Error at adding task");
+											}
+
+											@Override
+											public void onSuccess(Void result) {
+												loadMainPage();
+											}
+
+										});
 									}
 
 								});
+
 							}
 						});
 					}

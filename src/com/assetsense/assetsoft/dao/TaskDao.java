@@ -48,6 +48,8 @@ public class TaskDao {
 				taskInDB.setStatus(task.getStatus());
 				taskInDB.setUser(task.getUser());
 				taskInDB.setProduct(task.getProduct());
+				taskInDB.setModule(task.getModule());
+				taskInDB.setSubSystem(task.getSubSystem());
 				session.update(taskInDB);
 			} else {
 				// Add the task
@@ -209,7 +211,7 @@ public class TaskDao {
 			query.setParameter("id", id);
 			Task task = (Task) query.uniqueResult();
 			task.setTitle(title);
-			session.save(task);
+			session.update(task);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -243,7 +245,7 @@ public class TaskDao {
 			} else if ("status".equals(name)) {
 				task.setStatus(lookup);
 			}
-			session.save(task);
+			session.update(task);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -269,7 +271,7 @@ public class TaskDao {
 			User user = (User) userQuery.getResultList().get(0);
 
 			task.setUser(user);
-			session.save(task);
+			session.update(task);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {

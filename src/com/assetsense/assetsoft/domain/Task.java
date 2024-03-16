@@ -16,59 +16,43 @@ public class Task implements Serializable {
 	private Lookup status;
 	private User user;
 	private Product product;
+	private Module module;
+	private Module subSystem;
 
 	public Task() {
 	}
-	
-	
-	
+
 	public String getInitialEstimate() {
 		return initialEstimate;
 	}
-
-
 
 	public void setInitialEstimate(String initialEstimate) {
 		this.initialEstimate = initialEstimate;
 	}
 
-
-
 	public String getPercentComplete() {
 		return percentComplete;
 	}
-
-
 
 	public void setPercentComplete(String percentComplete) {
 		this.percentComplete = percentComplete;
 	}
 
-
-
 	public String getRemainingEstimate() {
 		return remainingEstimate;
 	}
-
-
 
 	public void setRemainingEstimate(String remainingEstimate) {
 		this.remainingEstimate = remainingEstimate;
 	}
 
-
-
 	public String getDueDate() {
 		return dueDate;
 	}
 
-
-
 	public void setDueDate(String dueDate) {
 		this.dueDate = dueDate;
 	}
-
-
 
 	public long getTaskId() {
 		return taskId;
@@ -132,6 +116,22 @@ public class Task implements Serializable {
 
 	public void setProduct(Product product) {
 		this.product = product;
+	}
+
+	public Module getModule() {
+		return module;
+	}
+
+	public void setModule(Module module) {
+		this.module = module;
+	}
+
+	public Module getSubSystem() {
+		return subSystem;
+	}
+
+	public void setSubSystem(Module subSystem) {
+		this.subSystem = subSystem;
 	}
 
 	@Override

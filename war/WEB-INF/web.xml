@@ -71,6 +71,17 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 		<servlet-name>productService</servlet-name>
 		<url-pattern>/assetsoft/product</url-pattern>
 	</servlet-mapping>
+	
+	<!-- Module Service -->
+	<servlet>
+		<servlet-name>moduleService</servlet-name>
+		<servlet-class>com.assetsense.assetsoft.server.ModuleServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>moduleService</servlet-name>
+		<url-pattern>/assetsoft/module</url-pattern>
+	</servlet-mapping>
 
 	<!-- Default page to serve -->
 	<welcome-file-list>

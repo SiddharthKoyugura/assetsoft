@@ -4,11 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.LookupDTO;
+import com.assetsense.assetsoft.dto.ModuleDTO;
 import com.assetsense.assetsoft.dto.ProductDTO;
 import com.assetsense.assetsoft.dto.TaskDTO;
 import com.assetsense.assetsoft.dto.TeamDTO;
@@ -51,6 +53,14 @@ public class DaoToDto {
 			taskDTO.setProduct(convertToProductDTO(task.getProduct()));
 		}
 
+		if (task.getModule() != null) {
+			taskDTO.setModule(convertToModuleDTO(task.getModule()));
+		}
+		
+		if(task.getSubSystem() != null){
+			taskDTO.setSubSystem(convertToModuleDTO(task.getSubSystem()));
+		}
+
 		return taskDTO;
 	}
 
@@ -72,7 +82,7 @@ public class DaoToDto {
 		userDTO.setEmail(user.getEmail());
 		userDTO.setPassword(user.getPassword());
 		// Convert teams to TeamDTOs
-		if(user.getTeams() != null){
+		if (user.getTeams() != null) {
 			userDTO.setTeams(convertTeamsToDTOs(user.getTeams()));
 		}
 
@@ -98,13 +108,27 @@ public class DaoToDto {
 		ProductDTO productDTO = new ProductDTO();
 
 		productDTO.setProductId(product.getProductId());
-		
+
 		productDTO.setName(product.getName());
-		
-		if(product.getParentProduct() != null){
+
+		if (product.getParentProduct() != null) {
 			productDTO.setParentProductDTO(convertToProductDTO(product.getParentProduct()));
 		}
-		
+
 		return productDTO;
+	}
+
+	public ModuleDTO convertToModuleDTO(Module module) {
+		ModuleDTO moduleDTO = new ModuleDTO();
+
+		moduleDTO.setModuleId(module.getModuleId());
+		moduleDTO.setName(module.getName());
+		moduleDTO.setProductDTO(convertToProductDTO(module.getProduct()));
+
+		if (module.getParentModule() != null) {
+			moduleDTO.setParentModuleDTO(convertToModuleDTO(module.getParentModule()));
+		}
+
+		return moduleDTO;
 	}
 }
