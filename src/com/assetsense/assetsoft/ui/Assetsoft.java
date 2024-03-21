@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
-import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.Team;
@@ -51,6 +50,8 @@ public class Assetsoft implements EntryPoint {
 	private final AddEditForm addEditForm = new AddEditForm();
 	private final LoginForm loginForm = new LoginForm();
 	private final AdminPage adminPage = new AdminPage();
+	
+	private final DtoToDao typeConverter = new DtoToDao();
 
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
@@ -146,7 +147,7 @@ public class Assetsoft implements EntryPoint {
 
 							@Override
 							public void onSuccess(ProductDTO productDTO) {
-								Product parentProduct = convertToProductDao(productDTO);
+								Product parentProduct = typeConverter.convertToProductDao(productDTO);
 								Product product = new Product();
 								product.setName(newProduct);
 								product.setParentProduct(parentProduct);
@@ -282,8 +283,7 @@ public class Assetsoft implements EntryPoint {
 
 				String selectedPriority = task.getPriority().getValue();
 				selectListBoxItem(addEditForm.getPriorityField(), selectedPriority);
-				
-				
+
 				moduleService.getModulesByProductName(selectedProduct, new AsyncCallback<List<ModuleDTO>>() {
 
 					@Override
@@ -297,38 +297,38 @@ public class Assetsoft implements EntryPoint {
 						for (ModuleDTO module : modules) {
 							addEditForm.getModuleField().addItem(module.getName());
 						}
-						
-						
 						if (task.getModule() != null) {
 							String selectedModule = task.getModule().getName();
 							selectListBoxItem(addEditForm.getModuleField(), selectedModule);
-							moduleService.getChildModulesByParentName(selectedModule, new AsyncCallback<List<ModuleDTO>>() {
+							moduleService.getChildModulesByParentName(selectedModule,
+									new AsyncCallback<List<ModuleDTO>>() {
 
-								@Override
-								public void onFailure(Throwable caught) {
-									// TODO Auto-generated method stub
+										@Override
+										public void onFailure(Throwable caught) {
+											// TODO Auto-generated method stub
 
-								}
+										}
 
-								@Override
-								public void onSuccess(List<ModuleDTO> modules) {
-									for (ModuleDTO module : modules) {
-										addEditForm.getSubSystemField().addItem(module.getName());
-									}
-									if(task.getSubSystem() != null){
-										String selectedSubSystem = task.getSubSystem().getName();
-										selectListBoxItem(addEditForm.getSubSystemField(), selectedSubSystem);
-									}
-									dpanel.add(vpanel);
-								}
+										@Override
+										public void onSuccess(List<ModuleDTO> modules) {
+											for (ModuleDTO module : modules) {
+												addEditForm.getSubSystemField().addItem(module.getName());
+											}
+											if (task.getSubSystem() != null) {
+												String selectedSubSystem = task.getSubSystem().getName();
+												selectListBoxItem(addEditForm.getSubSystemField(), selectedSubSystem);
+											}
+											dpanel.add(vpanel);
+										}
 
-							});
+									});
+						}else{
+							dpanel.add(vpanel);
 						}
 					}
 
 				});
-				
-				
+
 			}
 
 		});
@@ -499,32 +499,7 @@ public class Assetsoft implements EntryPoint {
 		return dpanel;
 	}
 
-	private Product convertToProductDao(ProductDTO productDTO) {
-		Product product = new Product();
-
-		product.setProductId(productDTO.getProductId());
-		product.setName(productDTO.getName());
-
-		if (product.getParentProduct() != null) {
-			product.setParentProduct(convertToProductDao(productDTO.getParentProductDTO()));
-		}
-
-		return product;
-	}
-
-	private Module convertToModuleDao(ModuleDTO moduleDTO) {
-		Module module = new Module();
-
-		module.setModuleId(moduleDTO.getModuleId());
-		module.setName(moduleDTO.getName());
-		module.setProduct(convertToProductDao(moduleDTO.getProductDTO()));
-
-		if (moduleDTO.getParentModuleDTO() != null) {
-			module.setParentModule(convertToModuleDao(moduleDTO.getParentModuleDTO()));
-		}
-
-		return module;
-	}
+	
 
 	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();
@@ -616,21 +591,30 @@ public class Assetsoft implements EntryPoint {
 
 							@Override
 							public void onSuccess(ProductDTO productDTO) {
-								Product product = convertToProductDao(productDTO);
+								Product product = typeConverter.convertToProductDao(productDTO);
 								task.setProduct(product);
 								moduleService.getModulesByNames(moduleNames, new AsyncCallback<List<ModuleDTO>>() {
 
 									@Override
 									public void onFailure(Throwable caught) {
 										// TODO Auto-generated method stub
-
+										Window.alert("Error at moduleService");
 									}
 
 									@Override
 									public void onSuccess(List<ModuleDTO> moduleDTOs) {
-										task.setModule(convertToModuleDao(moduleDTOs.get(0)));
-										task.setSubSystem(convertToModuleDao(moduleDTOs.get(1)));
-										Window.alert(task.getModule().toString());
+										if (moduleDTOs != null && moduleDTOs.size() > 0) {
+											if(moduleDTOs.size() == 2){
+												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
+												task.setSubSystem(typeConverter.convertToModuleDao(moduleDTOs.get(1)));
+											}else{
+												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
+											}
+										}else{
+											task.setModule(null);
+											task.setSubSystem(null);
+										}
+										
 										taskService.saveTask(task, new AsyncCallback<Void>() {
 
 											@Override

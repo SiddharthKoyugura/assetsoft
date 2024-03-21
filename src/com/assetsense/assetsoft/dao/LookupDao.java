@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.assetsense.assetsoft.domain.Lookup;
 
-@SuppressWarnings("deprecation")
 public class LookupDao {
 	private SessionFactory sessionFactory;
 

@@ -20,4 +20,5 @@ public interface TaskService extends RemoteService {
 	void editTaskLookup(long id, String name, String value);
 	void editTaskUser(long id, String username);
 	void editTaskProduct(long id, String productName);
+	void editTaskModule(long id, String name, String moduleName);
 }

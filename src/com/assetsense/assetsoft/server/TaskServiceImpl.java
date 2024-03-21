@@ -78,4 +78,10 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		taskDao.deleteTasksByIds(taskIds);	
 	}
+
+	@Override
+	public void editTaskModule(long id, String name, String moduleName) {
+		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
+		taskDao.editTaskModule(id, name, moduleName);
+	}
 }
