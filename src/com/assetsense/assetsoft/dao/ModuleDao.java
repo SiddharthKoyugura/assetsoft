@@ -27,6 +27,23 @@ public class ModuleDao {
 		this.sessionFactory = sessionFactory;
 	}
 
+	public void saveModule(Module module) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			session.save(module);
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+	}
+
 	public List<ModuleDTO> getModulesByProductName(String productName) {
 		List<ModuleDTO> moduleDTOs = new ArrayList<>();
 		Session session = sessionFactory.openSession();
@@ -88,7 +105,7 @@ public class ModuleDao {
 			}
 			e.printStackTrace();
 		} catch (NoResultException e) {
-//			e.printStackTrace();
+			// e.printStackTrace();
 		} finally {
 			session.close();
 		}
