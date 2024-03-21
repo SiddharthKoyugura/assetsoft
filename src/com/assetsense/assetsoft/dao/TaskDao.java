@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.TaskDTO;
 
-@SuppressWarnings("deprecation")
 public class TaskDao {
 	private SessionFactory sessionFactory;
 	private DaoToDto daoToDto = new DaoToDto();
@@ -236,7 +236,7 @@ public class TaskDao {
 			Query<Lookup> lookupQuery = (Query<Lookup>) session.createQuery("from Lookup where value=:value",
 					Lookup.class);
 			lookupQuery.setParameter("value", value);
-			Lookup lookup = (Lookup) lookupQuery.getResultList().get(0);
+			Lookup lookup = lookupQuery.getSingleResult();
 
 			if ("type".equals(name)) {
 				task.setType(lookup);
@@ -248,6 +248,38 @@ public class TaskDao {
 			session.update(task);
 			tx.commit();
 		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+	}
+	
+	public void editTaskModule(long id, String name, String moduleName){
+		Transaction tx = null;
+		name = name.toLowerCase();
+		Session session = sessionFactory.openSession();
+		try {
+			tx = session.beginTransaction();
+			
+			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
+			query.setParameter("id", id);
+			Task task = (Task) query.uniqueResult();
+			
+			Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module where name=:name", Module.class);
+			moduleQuery.setParameter("name", moduleName);
+			Module module = moduleQuery.getSingleResult();
+			
+			if("module".equals(name)){
+				task.setModule(module);
+			}else if("subSystem".equals(name)){
+				task.setSubSystem(module);
+			}
+			session.update(task);
+			tx.commit();
+		}catch (HibernateException e) {
 			if (tx != null) {
 				tx.rollback();
 			}

@@ -9,7 +9,7 @@
 			<generator class="native"/>
 		</id>
 
-		<property name="name" column="name" unique="true"></property>
+		<property name="name" column="name"></property>
 		
 		<many-to-one name="product" class="com.assetsense.assetsoft.domain.Product" column="product_id" not-null="false"/>
 		<many-to-one name="parentModule" column="parent_module_id" not-null="false" />

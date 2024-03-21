@@ -18,4 +18,5 @@ public interface TaskServiceAsync {
 	void editTaskLookup(long id, String name, String value, AsyncCallback<Void> callback);
 	void editTaskUser(long id, String username, AsyncCallback<Void> callback);
 	void editTaskProduct(long id, String productName, AsyncCallback<Void> callback);
+	void editTaskModule(long id, String name, String moduleName, AsyncCallback<Void> callback);
 }
