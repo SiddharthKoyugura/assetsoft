@@ -36,6 +36,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -43,8 +45,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -76,6 +80,7 @@ public class TaskDashboard {
 	private Button editBtn;
 	private Button deleteBtn;
 	private Button adminBtn;
+	private Button addProductBtn;
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
@@ -240,8 +245,18 @@ public class TaskDashboard {
 		final Tree treeWidget = new Tree(customTreeResources);
 
 		treeWidget.setStyleName("parentTree");
+		
+		Label label = new Label("All Products");
+		final TreeItem tree = new TreeItem(label);
+		
+		label.addDoubleClickHandler(new DoubleClickHandler(){
 
-		final TreeItem tree = new TreeItem(new Label("All Products"));
+			@Override
+			public void onDoubleClick(DoubleClickEvent event) {
+				addProductHandler(tree, null);
+			}
+			
+		});
 		tree.setStyleName("treeHeading");
 		treeWidget.addItem(tree);
 
@@ -255,7 +270,6 @@ public class TaskDashboard {
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
-				// TODO Auto-generated method stub
 				for (ProductDTO product : products) {
 					if (product.getParentProductDTO() == null) {
 						TreeItem rootItem = new TreeItem(createProductWidget(product));
@@ -278,15 +292,23 @@ public class TaskDashboard {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
 				// TODO Auto-generated method stub
-				for (ProductDTO child : products) {
-					TreeItem childItem = new TreeItem(createProductWidget(child));
+				for (final ProductDTO child : products) {
+					Label label = new Label(child.getName());
+					final TreeItem childItem = new TreeItem(label);
+					label.addDoubleClickHandler(new DoubleClickHandler(){
+
+						@Override
+						public void onDoubleClick(DoubleClickEvent event) {
+							addProductHandler(childItem, child);
+						}
+						
+					});
 					parentItem.addItem(childItem);
 					buildSubProductsTree(child, childItem);
 					childItem.setState(true);
@@ -300,6 +322,82 @@ public class TaskDashboard {
 	private Label createProductWidget(ProductDTO product) {
 		Label label = new Label(product.getName());
 		return label;
+	}
+	
+	private void addProductHandler(final TreeItem treeItem, final ProductDTO productDTO){
+		final DialogBox dialogBox = new DialogBox();
+		dialogBox.setAnimationEnabled(true);
+		
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setStyleName("form-container");
+		vpanel.setWidth("100%");
+
+		Label l1 = new Label("Select Parent:");
+		l1.setStyleName("mr-5");
+		l1.addStyleName("taskLabel");
+
+		Label l2 = new Label("New Product:");
+		l2.setStyleName("mr-5");
+		l2.addStyleName("taskLabel");
+		final TextBox newProductField = new TextBox();
+		newProductField.setStyleName("listBoxStyle");
+
+		addProductBtn = new Button("Submit");
+		addProductBtn.setStyleName("customBtn");
+		
+		addProductBtn.addClickHandler(new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				final String productName = newProductField.getText();
+				if(productName.trim().length() > 0){
+					Product product = new Product();
+					product.setName(productName);
+					if(productDTO != null){
+						product.setParentProduct(typeConverter.convertToProductDao(productDTO));
+					}
+					productService.saveProduct(product, new AsyncCallback<Void>(){
+
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+							
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							TreeItem item = new TreeItem();
+							item.setText(productName);
+							treeItem.addItem(item);
+							dialogBox.hide();
+						}
+						
+					});
+				}
+				dialogBox.hide();
+			}
+		});
+
+		final Grid grid = new Grid(5, 2);
+		grid.setCellPadding(10);
+		grid.getElement().getStyle().setProperty("margin", "100px 0 0 0");
+		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		grid.setWidth("100%");
+
+		grid.setWidget(0, 0, l2);
+
+		grid.setWidget(0, 1, newProductField);
+		grid.setWidget(2, 1, addProductBtn);
+
+		grid.getCellFormatter().setStyleName(0, 0, "text-right");
+		grid.getCellFormatter().setStyleName(1, 0, "text-right");
+		grid.getCellFormatter().setStyleName(2, 0, "text-right");
+
+		grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
+
+		vpanel.add(grid);
+		
+		dialogBox.add(vpanel);
+        dialogBox.center();
 	}
 
 	private Tree buildUsersTree() {
