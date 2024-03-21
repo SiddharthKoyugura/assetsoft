@@ -11,4 +11,5 @@ public interface ModuleService extends RemoteService {
 	List<ModuleDTO> getModulesByProductName(String productName);
 	List<ModuleDTO> getChildModulesByParentName(String parentName);
 	List<ModuleDTO> getModulesByNames(List<String> moduleNames);
+	List<ModuleDTO> getChildModulesByParentId(long id);
 }

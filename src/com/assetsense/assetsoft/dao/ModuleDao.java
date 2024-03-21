@@ -88,6 +88,35 @@ public class ModuleDao {
 			}
 			e.printStackTrace();
 		} catch (NoResultException e) {
+//			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return moduleDTOs;
+	}
+
+	public List<ModuleDTO> getChildModulesByParentId(long id) {
+		List<ModuleDTO> moduleDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module where parent_module_id=:id",
+					Module.class);
+			moduleQuery.setParameter("id", id);
+			List<Module> modules = moduleQuery.getResultList();
+			for (Module moduleDAO : modules) {
+				moduleDTOs.add(daoToDto.convertToModuleDTO(moduleDAO));
+			}
+
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} catch (NoResultException e) {
 			e.printStackTrace();
 		} finally {
 			session.close();

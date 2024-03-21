@@ -29,4 +29,10 @@ public class ModuleServiceImpl extends RemoteServiceServlet implements ModuleSer
 		return moduleDao.getModulesByNames(moduleNames);
 	}
 
+	@Override
+	public List<ModuleDTO> getChildModulesByParentId(long id) {
+		moduleDao = (ModuleDao) ApplicationContextListener.applicationContext.getBean("moduleDao");
+		return moduleDao.getChildModulesByParentId(id);
+	}
+
 }

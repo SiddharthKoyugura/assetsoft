@@ -160,6 +160,82 @@ public class TaskDashboard {
 		return navbar;
 	}
 
+	private Tree buildModulesTree() {
+		final Tree treeWidget = new Tree(customTreeResources);
+
+		treeWidget.setStyleName("parentTree");
+
+		final TreeItem tree = new TreeItem(new Label("All Modules"));
+		tree.setStyleName("treeHeading");
+		treeWidget.addItem(tree);
+
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+
+			}
+
+			@Override
+			public void onSuccess(List<ProductDTO> products) {
+				// TODO Auto-generated method stub
+				for (ProductDTO product : products) {
+					if (product.getParentProductDTO() == null) {
+						final TreeItem rootItem = new TreeItem(createProductWidget(product));
+						rootItem.setStyleName("treeHeading");
+						moduleService.getModulesByProductName(product.getName(), new AsyncCallback<List<ModuleDTO>>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								Window.alert("Hierarchy failed");
+							}
+
+							@Override
+							public void onSuccess(List<ModuleDTO> moduleDTOs) {
+								for (ModuleDTO module : moduleDTOs) {
+									TreeItem moduleItem = new TreeItem(new Label(module.getName()));
+									moduleItem.setStyleName("treeHeading");
+									buildSubModulesTree(module, moduleItem);
+									rootItem.addItem(moduleItem);
+									moduleItem.setState(true);
+								}
+								rootItem.setState(true);
+							}
+
+						});
+
+						tree.addItem(rootItem);
+					}
+				}
+
+				tree.setState(true);
+			}
+
+		});
+		return treeWidget;
+	}
+
+	private void buildSubModulesTree(final ModuleDTO module, final TreeItem parentItem) {
+		moduleService.getChildModulesByParentId(module.getModuleId(), new AsyncCallback<List<ModuleDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(List<ModuleDTO> modules) {
+				for (ModuleDTO child : modules) {
+					TreeItem childItem = new TreeItem(new Label(child.getName()));
+					parentItem.addItem(childItem);
+					buildSubModulesTree(child, childItem);
+				}
+			}
+
+		});
+	}
+
 	private Tree buildProductsTree() {
 		final Tree treeWidget = new Tree(customTreeResources);
 
@@ -294,14 +370,27 @@ public class TaskDashboard {
 
 	public VerticalPanel buildLeftSidebar() {
 		VerticalPanel vpanel = new VerticalPanel();
+		
+		ScrollPanel spanel = new ScrollPanel();
+		spanel.setSize("100%", "100%");
 
 		vpanel.setStyleName("leftSidebar");
 		vpanel.add(buildProductsTree());
-		HTML hrLine = new HTML("<div class='hr' />");
-		vpanel.add(hrLine);
+
+		vpanel.add(new HTML("<div class='hr' />"));
+
+		vpanel.add(buildModulesTree());
+
+		vpanel.add(new HTML("<div class='hr' />"));
+
 		vpanel.add(buildUsersTree());
 
-		return vpanel;
+		spanel.add(vpanel);
+		VerticalPanel mainPanel = new VerticalPanel();
+		mainPanel.setWidth("100%");
+		mainPanel.setHeight("100%");
+		mainPanel.add(spanel);
+		return mainPanel;
 	}
 
 	public VerticalPanel buildTaskDashboard() {
@@ -325,7 +414,7 @@ public class TaskDashboard {
 		ScrollPanel spanel = new ScrollPanel();
 		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
-		// Grid headerGrid = new Grid(17, 7);
+
 		final FlexTable flexTable = new FlexTable();
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
