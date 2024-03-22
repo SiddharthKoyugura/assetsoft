@@ -14,10 +14,10 @@ public class ProductServiceImpl extends RemoteServiceServlet implements ProductS
 	private ProductDao productDao;
 	
 	@Override
-	public void saveProduct(Product product) {
+	public ProductDTO saveProduct(Product product) {
 		// TODO Auto-generated method stub
 		productDao = (ProductDao) ApplicationContextListener.applicationContext.getBean("productDao");
-		productDao.saveProduct(product);
+		return productDao.saveProduct(product);
 	}
 
 	@Override

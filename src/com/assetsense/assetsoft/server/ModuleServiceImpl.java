@@ -13,9 +13,9 @@ public class ModuleServiceImpl extends RemoteServiceServlet implements ModuleSer
 	private ModuleDao moduleDao;
 	
 	@Override
-	public void saveModule(Module module) {
+	public ModuleDTO saveModule(Module module) {
 		moduleDao = (ModuleDao) ApplicationContextListener.applicationContext.getBean("moduleDao");
-		moduleDao.saveModule(module);
+		return moduleDao.saveModule(module);
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import com.assetsense.assetsoft.dto.ProductDTO;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ProductServiceAsync {
-	void saveProduct(Product product, AsyncCallback<Void> callback);
+	void saveProduct(Product product, AsyncCallback<ProductDTO> callback);
 	void deleteProduct(Product product, AsyncCallback<Void> callback);
 	void getProductById(long id, AsyncCallback<Product> callaback);
 	void getProducts(AsyncCallback<List<ProductDTO>> callaback);

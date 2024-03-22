@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("module")
 public interface ModuleService extends RemoteService {
-	void saveModule(Module module);
+	ModuleDTO saveModule(Module module);
 	List<ModuleDTO> getModulesByProductName(String productName);
 	List<ModuleDTO> getChildModulesByParentName(String parentName);
 	List<ModuleDTO> getModulesByNames(List<String> moduleNames);
