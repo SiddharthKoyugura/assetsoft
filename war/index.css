@@ -63,7 +63,7 @@ body {
 	background-color: #A59595;
 	margin: 10px 0 10px 10px;
 	height: 1px;
-	width: 120px;
+	width: 180px;
 }
 
 /*      END: DROPDOWN(TREE) SECTION         */
@@ -188,5 +188,12 @@ body {
 
 /*      END: ADD-EDIT PAGE SECTION         */
 
+.gwt-TreeItem-selected {
+	display: block !important; 
+	background-color: rgba(52, 152, 219, 0.7) !important;
+	padding: 2px 0 2px 3px;
+	border-radius: 5px;
+	width: 150px !important;
+}
 
 

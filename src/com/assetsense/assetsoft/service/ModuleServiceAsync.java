@@ -7,7 +7,7 @@ import com.assetsense.assetsoft.dto.ModuleDTO;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ModuleServiceAsync {
-	void saveModule(Module module, AsyncCallback<Void> callback);
+	void saveModule(Module module, AsyncCallback<ModuleDTO> callback);
 	void getModulesByProductName(String productName, AsyncCallback<List<ModuleDTO>> callback);
 	void getChildModulesByParentName(String parentName, AsyncCallback<List<ModuleDTO>> callback);
 	void getModulesByNames(List<String> moduleNames, AsyncCallback<List<ModuleDTO>> callback);

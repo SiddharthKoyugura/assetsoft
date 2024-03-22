@@ -27,12 +27,20 @@ public class ModuleDao {
 		this.sessionFactory = sessionFactory;
 	}
 
-	public void saveModule(Module module) {
+	public ModuleDTO saveModule(Module module) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
+		ModuleDTO moduleInDB = null;
 		try {
 			tx = session.beginTransaction();
 			session.save(module);
+			Query<Module> query = session.createQuery("from Product where name=:name AND product_id=:productId AND parent_module_id=:pid", Module.class);
+			query.setParameter("name", module.getName());
+			long productId = module.getProduct() != null ? module.getProduct().getProductId() : null;
+			long parentId = module.getParentModule() != null ? module.getParentModule().getModuleId() : null;
+			query.setParameter("productId", productId);
+			query.setParameter("pid", parentId);
+			moduleInDB = daoToDto.convertToModuleDTO(query.getSingleResult());
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -42,6 +50,7 @@ public class ModuleDao {
 		} finally {
 			session.close();
 		}
+		return moduleInDB;
 	}
 
 	public List<ModuleDTO> getModulesByProductName(String productName) {

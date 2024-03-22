@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -12,7 +12,6 @@ import org.hibernate.Transaction;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.dto.ProductDTO;
 
-@SuppressWarnings("deprecation")
 public class ProductDao {
 	private SessionFactory sessionFactory;
 	private DaoToDto daoToDto = new DaoToDto();
@@ -26,12 +25,18 @@ public class ProductDao {
 	}
 
 	// method to add product
-	public void saveProduct(Product product) {
+	public ProductDTO saveProduct(Product product) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
+		ProductDTO productInDB = null;
 		try {
 			tx = session.beginTransaction();
 			session.save(product);
+			Query<Product> query = session.createQuery("from Product where name=:name AND parent_product_id=:pid", Product.class);
+			query.setParameter("name", product.getName());
+			long pid = product.getParentProduct() != null ? product.getParentProduct().getProductId() : null;
+			query.setParameter("pid", pid);
+			productInDB = daoToDto.convertToProductDTO(query.getSingleResult());
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -41,7 +46,7 @@ public class ProductDao {
 		} finally {
 			session.close();
 		}
-
+		return productInDB;
 	}
 
 	// method to delete product

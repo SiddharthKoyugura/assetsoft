@@ -32,4 +32,5 @@ public class DtoToDao {
 
 		return module;
 	}
+
 }
