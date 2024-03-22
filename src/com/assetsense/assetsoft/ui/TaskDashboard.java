@@ -74,13 +74,11 @@ public class TaskDashboard {
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 
 	private int rowIndex = 1;
-	private Boolean isAdmin = false;
 
 	private Button navBtn;
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
-	private Button adminBtn;
 	private Button addProductBtn;
 	private Button addModuleBtn;
 
@@ -100,10 +98,6 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
-	}
-
 	public void setAddBtnHandler(ClickHandler handler) {
 		addBtn.addClickHandler(handler);
 	}
@@ -114,10 +108,6 @@ public class TaskDashboard {
 
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
-	}
-
-	public void setAdminBtnHandler(ClickHandler handler) {
-		adminBtn.addClickHandler(handler);
 	}
 
 	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler) {
@@ -1173,9 +1163,6 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 
-		adminBtn = new Button("Admin Page");
-		adminBtn.setStyleName("customBtn");
-
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
@@ -1185,11 +1172,8 @@ public class TaskDashboard {
 		deleteBtn.setStyleName("customBtn");
 
 		headerPanel.addWest(hpanel, 300);
-		if (isAdmin) {
-			headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 420);
-		} else {
-			headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
-		}
+		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+
 		return headerPanel;
 	}
 
