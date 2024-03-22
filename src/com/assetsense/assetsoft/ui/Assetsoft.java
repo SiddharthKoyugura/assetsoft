@@ -40,7 +40,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -49,7 +48,6 @@ public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
 	private final AddEditForm addEditForm = new AddEditForm();
 	private final LoginForm loginForm = new LoginForm();
-	private final AdminPage adminPage = new AdminPage();
 	
 	private final DtoToDao typeConverter = new DtoToDao();
 
@@ -86,7 +84,6 @@ public class Assetsoft implements EntryPoint {
 			public void onSuccess(UserDTO user) {
 				if (user != null) {
 					taskDashboard.setNavBtnName(user.getName());
-					taskDashboard.setIsAdmin(user.getUserId() == 1);
 					loadMainPage();
 				} else {
 					Window.alert("Invalid Credentials");
@@ -110,119 +107,6 @@ public class Assetsoft implements EntryPoint {
 		RootLayoutPanel.get().add(buildEditForm(id));
 	}
 
-	private void loadAddProductPage() {
-		RootLayoutPanel.get().clear();
-		RootLayoutPanel.get().add(buildAddProductPage());
-	}
-
-	private DockLayoutPanel buildAddProductPage() {
-		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
-		HorizontalPanel vpanel = new HorizontalPanel();
-
-		vpanel.setWidth("100%");
-		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
-
-		vpanel.add(adminPage.buildAddProductForm());
-
-		adminPage.setSubmitBtnHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				String parentProductText = adminPage.getProductField().getSelectedValue();
-				final String newProduct = adminPage.getNewProductField().getText();
-				if (newProduct.trim().length() == 0) {
-					loadMainPage();
-				} else {
-					if (parentProductText != "NULL") {
-						String[] wordsArray = parentProductText.split(" >> ");
-						final String parentProductName = wordsArray[wordsArray.length - 1];
-
-						productService.getProductByName(parentProductName, new AsyncCallback<ProductDTO>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void onSuccess(ProductDTO productDTO) {
-								Product parentProduct = typeConverter.convertToProductDao(productDTO);
-								Product product = new Product();
-								product.setName(newProduct);
-								product.setParentProduct(parentProduct);
-								saveProduct(product);
-							}
-
-						});
-					} else {
-
-						Product product = new Product();
-						product.setName(newProduct);
-						saveProduct(product);
-					}
-				}
-			}
-
-		});
-
-		vpanel.add(adminPage.buildUsersForm());
-
-		adminPage.setAddUserBtnHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
-				String name = adminPage.getNameField().getText();
-				String email = adminPage.getEmailField().getText();
-				String password = adminPage.getPasswordField().getText();
-				if (name.trim().length() == 0 || email.trim().length() == 0 || password.trim().length() == 0) {
-					loadMainPage();
-				} else {
-					User user = new User();
-					user.setName(name);
-					user.setEmail(email);
-					user.setPassword(password);
-					userService.saveUser(user, new AsyncCallback<Void>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-
-						}
-
-						@Override
-						public void onSuccess(Void result) {
-							loadMainPage();
-						}
-
-					});
-				}
-			}
-
-		});
-
-		dpanel.add(vpanel);
-
-		return dpanel;
-	}
-
-	private void saveProduct(Product product) {
-		productService.saveProduct(product, new AsyncCallback<Void>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onSuccess(Void result) {
-				// TODO Auto-generated method stub
-				loadMainPage();
-			}
-
-		});
-	}
 
 	private DockLayoutPanel buildEditForm(final long id) {
 		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
@@ -305,7 +189,6 @@ public class Assetsoft implements EntryPoint {
 
 										@Override
 										public void onFailure(Throwable caught) {
-											// TODO Auto-generated method stub
 
 										}
 
@@ -460,15 +343,6 @@ public class Assetsoft implements EntryPoint {
 						}
 					});
 				}
-			}
-
-		});
-
-		taskDashboard.setAdminBtnHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				loadAddProductPage();
 			}
 
 		});

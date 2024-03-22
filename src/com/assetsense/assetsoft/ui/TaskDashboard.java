@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.Team;
@@ -36,6 +37,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -43,8 +46,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -69,13 +74,14 @@ public class TaskDashboard {
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 
 	private int rowIndex = 1;
-	private Boolean isAdmin = false;
 
 	private Button navBtn;
 	private Button addBtn;
 	private Button editBtn;
 	private Button deleteBtn;
-	private Button adminBtn;
+	private Button addProductBtn;
+	private Button addModuleBtn;
+
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
 
@@ -92,10 +98,6 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
-	}
-
 	public void setAddBtnHandler(ClickHandler handler) {
 		addBtn.addClickHandler(handler);
 	}
@@ -106,10 +108,6 @@ public class TaskDashboard {
 
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
-	}
-
-	public void setAdminBtnHandler(ClickHandler handler) {
-		adminBtn.addClickHandler(handler);
 	}
 
 	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler) {
@@ -160,12 +158,192 @@ public class TaskDashboard {
 		return navbar;
 	}
 
+	private Tree buildModulesTree() {
+		final Tree treeWidget = new Tree(customTreeResources);
+
+		treeWidget.setStyleName("parentTree");
+
+		final TreeItem tree = new TreeItem(new Label("All Modules"));
+		tree.setStyleName("treeHeading");
+		treeWidget.addItem(tree);
+
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+
+			}
+
+			@Override
+			public void onSuccess(List<ProductDTO> products) {
+				// TODO Auto-generated method stub
+				for (final ProductDTO product : products) {
+					if (product.getParentProductDTO() == null) {
+						Label label = new Label(product.getName());
+						final TreeItem rootItem = new TreeItem(label);
+						rootItem.setStyleName("treeHeading");
+						label.addDoubleClickHandler(new DoubleClickHandler() {
+
+							@Override
+							public void onDoubleClick(DoubleClickEvent event) {
+								// TODO Auto-generated method stub
+								addModuleHandler(rootItem, null, product);
+							}
+
+						});
+						moduleService.getModulesByProductName(product.getName(), new AsyncCallback<List<ModuleDTO>>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								Window.alert("Hierarchy failed");
+							}
+
+							@Override
+							public void onSuccess(List<ModuleDTO> moduleDTOs) {
+								for (final ModuleDTO module : moduleDTOs) {
+									Label label = new Label(module.getName());
+									final TreeItem moduleItem = new TreeItem(label);
+									moduleItem.setStyleName("treeHeading");
+									label.addDoubleClickHandler(new DoubleClickHandler() {
+
+										@Override
+										public void onDoubleClick(DoubleClickEvent event) {
+											// TODO Auto-generated method stub
+											addModuleHandler(moduleItem, module, module.getProductDTO());
+										}
+
+									});
+									buildSubModulesTree(module, moduleItem);
+									rootItem.addItem(moduleItem);
+									moduleItem.setState(true);
+								}
+								rootItem.setState(true);
+							}
+
+						});
+
+						tree.addItem(rootItem);
+					}
+				}
+
+				tree.setState(true);
+			}
+
+		});
+		return treeWidget;
+	}
+
+	private void buildSubModulesTree(final ModuleDTO module, final TreeItem parentItem) {
+		moduleService.getChildModulesByParentId(module.getModuleId(), new AsyncCallback<List<ModuleDTO>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onSuccess(List<ModuleDTO> modules) {
+				for (final ModuleDTO child : modules) {
+					Label label = new Label(child.getName());
+					final TreeItem childItem = new TreeItem(label);
+					parentItem.addItem(childItem);
+					buildSubModulesTree(child, childItem);
+				}
+			}
+
+		});
+	}
+
+	private void addModuleHandler(final TreeItem treeItem, final ModuleDTO moduleDTO, final ProductDTO productDTO) {
+		final DialogBox dialogBox = new DialogBox();
+		dialogBox.setAnimationEnabled(true);
+
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setStyleName("form-container");
+		vpanel.setWidth("100%");
+
+		Label l2 = new Label("New Module:");
+		l2.setStyleName("mr-5");
+		l2.addStyleName("taskLabel");
+		final TextBox newModuleField = new TextBox();
+		newModuleField.setStyleName("listBoxStyle");
+
+		addModuleBtn = new Button("Submit");
+		addModuleBtn.setStyleName("customBtn");
+
+		addModuleBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final String moduleName = newModuleField.getText();
+				if (moduleName.trim().length() > 0) {
+					Module module = new Module();
+					module.setName(moduleName);
+					if (moduleDTO != null) {
+						module.setParentModule(typeConverter.convertToModuleDao(moduleDTO));
+					}
+					module.setProduct(typeConverter.convertToProductDao(productDTO));
+					moduleService.saveModule(module, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							TreeItem item = new TreeItem();
+							item.setText(moduleName);
+							treeItem.addItem(item);
+							dialogBox.hide();
+						}
+
+					});
+				}
+				dialogBox.hide();
+			}
+		});
+
+		final Grid grid = new Grid(5, 2);
+		grid.setCellPadding(10);
+		grid.getElement().getStyle().setProperty("margin", "100px 0 0 0");
+		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		grid.setWidth("100%");
+
+		grid.setWidget(0, 0, l2);
+
+		grid.setWidget(0, 1, newModuleField);
+		grid.setWidget(2, 1, addModuleBtn);
+
+		grid.getCellFormatter().setStyleName(0, 0, "text-right");
+		grid.getCellFormatter().setStyleName(1, 0, "text-right");
+		grid.getCellFormatter().setStyleName(2, 0, "text-right");
+
+		grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
+
+		vpanel.add(grid);
+
+		dialogBox.add(vpanel);
+		dialogBox.center();
+	}
+
 	private Tree buildProductsTree() {
 		final Tree treeWidget = new Tree(customTreeResources);
 
 		treeWidget.setStyleName("parentTree");
 
-		final TreeItem tree = new TreeItem(new Label("All Products"));
+		Label label = new Label("All Products");
+		final TreeItem tree = new TreeItem(label);
+
+		label.addDoubleClickHandler(new DoubleClickHandler() {
+
+			@Override
+			public void onDoubleClick(DoubleClickEvent event) {
+				addProductHandler(tree, null);
+			}
+
+		});
 		tree.setStyleName("treeHeading");
 		treeWidget.addItem(tree);
 
@@ -179,11 +357,19 @@ public class TaskDashboard {
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
-				// TODO Auto-generated method stub
-				for (ProductDTO product : products) {
+				for (final ProductDTO product : products) {
 					if (product.getParentProductDTO() == null) {
-						TreeItem rootItem = new TreeItem(createProductWidget(product));
+						Label label = new Label(product.getName());
+						final TreeItem rootItem = new TreeItem(label);
 						rootItem.setStyleName("treeHeading");
+						label.addDoubleClickHandler(new DoubleClickHandler(){
+
+							@Override
+							public void onDoubleClick(DoubleClickEvent event) {
+								addProductHandler(rootItem, product);
+							}
+							
+						});
 						buildSubProductsTree(product, rootItem);
 						tree.addItem(rootItem);
 					}
@@ -202,15 +388,23 @@ public class TaskDashboard {
 
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
 
 			}
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
 				// TODO Auto-generated method stub
-				for (ProductDTO child : products) {
-					TreeItem childItem = new TreeItem(createProductWidget(child));
+				for (final ProductDTO child : products) {
+					Label label = new Label(child.getName());
+					final TreeItem childItem = new TreeItem(label);
+					label.addDoubleClickHandler(new DoubleClickHandler() {
+
+						@Override
+						public void onDoubleClick(DoubleClickEvent event) {
+							addProductHandler(childItem, child);
+						}
+
+					});
 					parentItem.addItem(childItem);
 					buildSubProductsTree(child, childItem);
 					childItem.setState(true);
@@ -221,9 +415,81 @@ public class TaskDashboard {
 		});
 	}
 
-	private Label createProductWidget(ProductDTO product) {
-		Label label = new Label(product.getName());
-		return label;
+
+	private void addProductHandler(final TreeItem treeItem, final ProductDTO productDTO) {
+		final DialogBox dialogBox = new DialogBox();
+		dialogBox.setAnimationEnabled(true);
+
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setStyleName("form-container");
+		vpanel.setWidth("100%");
+
+		Label l1 = new Label("Select Parent:");
+		l1.setStyleName("mr-5");
+		l1.addStyleName("taskLabel");
+
+		Label l2 = new Label("New Product:");
+		l2.setStyleName("mr-5");
+		l2.addStyleName("taskLabel");
+		final TextBox newProductField = new TextBox();
+		newProductField.setStyleName("listBoxStyle");
+
+		addProductBtn = new Button("Submit");
+		addProductBtn.setStyleName("customBtn");
+
+		addProductBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				final String productName = newProductField.getText();
+				if (productName.trim().length() > 0) {
+					Product product = new Product();
+					product.setName(productName);
+					if (productDTO != null) {
+						product.setParentProduct(typeConverter.convertToProductDao(productDTO));
+					}
+					productService.saveProduct(product, new AsyncCallback<Void>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							TreeItem item = new TreeItem();
+							item.setText(productName);
+							treeItem.addItem(item);
+							dialogBox.hide();
+						}
+
+					});
+				}
+				dialogBox.hide();
+			}
+		});
+
+		final Grid grid = new Grid(5, 2);
+		grid.setCellPadding(10);
+		grid.getElement().getStyle().setProperty("margin", "100px 0 0 0");
+		grid.getElement().getStyle().setProperty("borderCollapse", "collapse");
+		grid.setWidth("100%");
+
+		grid.setWidget(0, 0, l2);
+
+		grid.setWidget(0, 1, newProductField);
+		grid.setWidget(2, 1, addProductBtn);
+
+		grid.getCellFormatter().setStyleName(0, 0, "text-right");
+		grid.getCellFormatter().setStyleName(1, 0, "text-right");
+		grid.getCellFormatter().setStyleName(2, 0, "text-right");
+
+		grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
+
+		vpanel.add(grid);
+
+		dialogBox.add(vpanel);
+		dialogBox.center();
 	}
 
 	private Tree buildUsersTree() {
@@ -295,13 +561,26 @@ public class TaskDashboard {
 	public VerticalPanel buildLeftSidebar() {
 		VerticalPanel vpanel = new VerticalPanel();
 
+		ScrollPanel spanel = new ScrollPanel();
+		spanel.setSize("100%", "100%");
+
 		vpanel.setStyleName("leftSidebar");
 		vpanel.add(buildProductsTree());
-		HTML hrLine = new HTML("<div class='hr' />");
-		vpanel.add(hrLine);
+
+		vpanel.add(new HTML("<div class='hr' />"));
+
+		vpanel.add(buildModulesTree());
+
+		vpanel.add(new HTML("<div class='hr' />"));
+
 		vpanel.add(buildUsersTree());
 
-		return vpanel;
+		spanel.add(vpanel);
+		VerticalPanel mainPanel = new VerticalPanel();
+		mainPanel.setWidth("100%");
+		mainPanel.setHeight("100%");
+		mainPanel.add(spanel);
+		return mainPanel;
 	}
 
 	public VerticalPanel buildTaskDashboard() {
@@ -325,7 +604,7 @@ public class TaskDashboard {
 		ScrollPanel spanel = new ScrollPanel();
 		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
-		// Grid headerGrid = new Grid(17, 7);
+
 		final FlexTable flexTable = new FlexTable();
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
@@ -884,9 +1163,6 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 
-		adminBtn = new Button("Admin Page");
-		adminBtn.setStyleName("customBtn");
-
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
@@ -896,11 +1172,8 @@ public class TaskDashboard {
 		deleteBtn.setStyleName("customBtn");
 
 		headerPanel.addWest(hpanel, 300);
-		if (isAdmin) {
-			headerPanel.addEast(createButtonsPanel(adminBtn, addBtn, editBtn, deleteBtn), 420);
-		} else {
-			headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
-		}
+		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+
 		return headerPanel;
 	}
 
