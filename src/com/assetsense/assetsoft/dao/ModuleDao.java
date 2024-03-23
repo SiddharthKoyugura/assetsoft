@@ -34,12 +34,13 @@ public class ModuleDao {
 		try {
 			tx = session.beginTransaction();
 			session.save(module);
-			Query<Module> query = session.createQuery("from Product where name=:name AND product_id=:productId AND parent_module_id=:pid", Module.class);
+			Query<Module> query = session.createQuery(
+					"from Module where name=:name AND product_id=:productId AND parent_module_id=:pid", Module.class);
 			query.setParameter("name", module.getName());
-			long productId = module.getProduct() != null ? module.getProduct().getProductId() : null;
-			long parentId = module.getParentModule() != null ? module.getParentModule().getModuleId() : null;
+			Long productId = module.getProduct().getProductId();
+			Long parentId = module.getParentModule() != null ? module.getParentModule().getModuleId() : null;
 			query.setParameter("productId", productId);
-			query.setParameter("pid", parentId);
+			query.setParameter("pid", parentId != null ? parentId : "NULL");
 			moduleInDB = daoToDto.convertToModuleDTO(query.getSingleResult());
 			tx.commit();
 		} catch (HibernateException e) {
