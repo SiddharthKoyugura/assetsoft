@@ -34,7 +34,7 @@ public class ProductDao {
 			session.save(product);
 			Query<Product> query = session.createQuery("from Product where name=:name AND parent_product_id=:pid", Product.class);
 			query.setParameter("name", product.getName());
-			long pid = product.getParentProduct() != null ? product.getParentProduct().getProductId() : null;
+			Long pid = product.getParentProduct() != null ? product.getParentProduct().getProductId() : null;
 			query.setParameter("pid", pid);
 			productInDB = daoToDto.convertToProductDTO(query.getSingleResult());
 			tx.commit();

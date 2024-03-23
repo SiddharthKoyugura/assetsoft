@@ -37,8 +37,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -90,6 +88,8 @@ public class TaskDashboard {
 	private TreeItem selectedModuleItem;
 	private ModuleDTO selectedModule;
 	private ProductDTO selectedModuleProduct;
+	
+	private TreeItem userRootTree;
 
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
@@ -181,8 +181,7 @@ public class TaskDashboard {
 			@Override
 			public void onClick(ClickEvent event) {
 				clearSelection(productRootTree);
-				selectedModuleItem = moduleRootTree;
-				selectedModule = null;
+				clearSelection(userRootTree);
 			}
 		});
 		
@@ -205,16 +204,7 @@ public class TaskDashboard {
 						final TreeItem rootItem = new TreeItem(label);
 						rootItem.setStyleName("treeHeading");
 						
-						label.addClickHandler(new ClickHandler(){
-							@Override
-							public void onClick(ClickEvent event) {
-								clearSelection(productRootTree);
-								selectedModuleItem = rootItem;
-								selectedModule = null;
-								selectedModuleProduct = product;
-							}
-							
-						});
+						label.addClickHandler(moduleLabelClickHandler(rootItem, null, product));
 						
 						moduleService.getModulesByProductName(product.getName(), new AsyncCallback<List<ModuleDTO>>() {
 
@@ -230,26 +220,8 @@ public class TaskDashboard {
 									label.getElement().getStyle().setProperty("cursor", "pointer");
 									final TreeItem moduleItem = new TreeItem(label);
 									moduleItem.setStyleName("treeHeading");
+									label.addClickHandler(moduleLabelClickHandler(moduleItem, module, module.getProductDTO()));
 									
-									label.addClickHandler(new ClickHandler(){
-										@Override
-										public void onClick(ClickEvent event) {
-											clearSelection(productRootTree);
-											selectedModuleItem = moduleItem;
-											selectedModule = module;
-											selectedModuleProduct = module.getProductDTO();
-										}
-									});
-									
-									label.addDoubleClickHandler(new DoubleClickHandler() {
-
-										@Override
-										public void onDoubleClick(DoubleClickEvent event) {
-											// TODO Auto-generated method stub
-											addModuleHandler(moduleItem, module, module.getProductDTO());
-										}
-
-									});
 									buildSubModulesTree(module, moduleItem);
 									rootItem.addItem(moduleItem);
 									moduleItem.setState(true);
@@ -285,15 +257,7 @@ public class TaskDashboard {
 					Label label = new Label(child.getName());
 					label.getElement().getStyle().setProperty("cursor", "pointer");
 					final TreeItem childItem = new TreeItem(label);
-					label.addClickHandler(new ClickHandler(){
-						@Override
-						public void onClick(ClickEvent event) {
-							clearSelection(productRootTree);
-							selectedModuleItem = childItem;
-							selectedModule = module;
-							selectedModuleProduct =module.getProductDTO();
-						}
-					});
+					label.addClickHandler(moduleLabelClickHandler(childItem, module, module.getProductDTO()));
 					parentItem.addItem(childItem);
 					buildSubModulesTree(child, childItem);
 				}
@@ -327,32 +291,27 @@ public class TaskDashboard {
 					Module module = new Module();
 					module.setName(moduleName);
 					if (moduleDTO != null) {
-						module.setParentModule(typeConverter.convertToModuleDao(moduleDTO));
+						Module parentModule = typeConverter.convertToModuleDao(moduleDTO);
+				        if (parentModule != null) {
+				            module.setParentModule(parentModule);
+				        }
+					}else{
+						module.setParentModule(null);
 					}
 					module.setProduct(typeConverter.convertToProductDao(productDTO));
+					Window.alert(module.toString());
 					moduleService.saveModule(module, new AsyncCallback<ModuleDTO>() {
 
 						@Override
 						public void onFailure(Throwable caught) {
-							// TODO Auto-generated method stub
-
 						}
 
 						@Override
 						public void onSuccess(final ModuleDTO module) {
 							Label label = new Label(moduleName);
 							label.getElement().getStyle().setProperty("cursor", "pointer");
-							final TreeItem item = new TreeItem(label);;
-							label.addClickHandler(new ClickHandler(){
-								@Override
-								public void onClick(ClickEvent event) {
-									clearSelection(productRootTree);
-									selectedModuleItem = item;
-									selectedModule = module;
-									selectedModuleProduct =module.getProductDTO();
-								}
-							});
-							
+							final TreeItem item = new TreeItem(label);
+							label.addClickHandler(moduleLabelClickHandler(item, module, module.getProductDTO()));
 							treeItem.addItem(item);
 							dialogBox.hide();
 						}
@@ -385,6 +344,20 @@ public class TaskDashboard {
 		dialogBox.add(vpanel);
 		dialogBox.center();
 	}
+	
+	private ClickHandler moduleLabelClickHandler(final TreeItem item, final ModuleDTO module,final ProductDTO product){
+		return new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				clearSelection(productRootTree);
+				clearSelection(userRootTree);
+				selectedModuleItem = item;
+				selectedModule = module;
+				selectedModuleProduct =product;
+			}
+		};
+	}
 
 	private Tree buildProductsTree() {
 		final Tree treeWidget = new Tree(customTreeResources);
@@ -395,15 +368,7 @@ public class TaskDashboard {
 		label.getElement().getStyle().setProperty("cursor", "pointer");
 		productRootTree = new TreeItem(label);
 
-		label.addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				clearSelection(moduleRootTree);
-				selectedProductItem = productRootTree;
-				selectedProduct = null;
-			}
-			
-		});
+		label.addClickHandler(productLabelClickHandler(productRootTree, null));
 		
 		productRootTree.setStyleName("treeHeading");
 		treeWidget.addItem(productRootTree);
@@ -426,15 +391,7 @@ public class TaskDashboard {
 						rootItem.getElement().getStyle().setProperty("display", "");
 						rootItem.setStyleName("treeHeading");
 						
-						label.addClickHandler(new ClickHandler(){
-							@Override
-							public void onClick(ClickEvent event) {
-								clearSelection(moduleRootTree);
-								selectedProductItem = rootItem;
-								selectedProduct = product;
-							}
-							
-						});
+						label.addClickHandler(productLabelClickHandler(rootItem, product));
 						
 						buildSubProductsTree(product, rootItem);
 						productRootTree.addItem(rootItem);
@@ -465,15 +422,7 @@ public class TaskDashboard {
 					label.getElement().getStyle().setProperty("cursor", "pointer");
 					final TreeItem childItem = new TreeItem(label);
 					
-					label.addClickHandler(new ClickHandler(){
-						@Override
-						public void onClick(ClickEvent event) {
-							clearSelection(moduleRootTree);
-							selectedProductItem = childItem;
-							selectedProduct = child;
-						}
-						
-					});
+					label.addClickHandler(productLabelClickHandler(childItem, child));
 					
 					parentItem.addItem(childItem);
 					buildSubProductsTree(child, childItem);
@@ -531,14 +480,7 @@ public class TaskDashboard {
 							Label label = new Label(productName);
 							label.getElement().getStyle().setProperty("cursor", "pointer");
 							final TreeItem item = new TreeItem(label);
-							label.addClickHandler(new ClickHandler(){
-								@Override
-								public void onClick(ClickEvent event) {
-									clearSelection(moduleRootTree);
-									selectedProductItem = item;
-									selectedProduct = product;
-								}
-							});
+							label.addClickHandler(productLabelClickHandler(item, product));
 							treeItem.addItem(item);
 							treeItem.setSelected(false);
 							dialogBox.hide();
@@ -573,6 +515,19 @@ public class TaskDashboard {
 		dialogBox.center();
 	}
 	
+	private ClickHandler productLabelClickHandler(final TreeItem item, final ProductDTO product){
+		return new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				clearSelection(moduleRootTree);
+				clearSelection(userRootTree);
+				selectedProductItem = item;
+				selectedProduct = product;
+			}
+		};
+	}
+	
 	private void clearSelection(TreeItem rootItem) {
 	    if (rootItem != null) {
 	        rootItem.setSelected(false);
@@ -592,15 +547,18 @@ public class TaskDashboard {
 
 		tree.setStyleName("parentTree");
 
-		TreeItem mainItem = new TreeItem();
-		mainItem.setText("Users & Teams");
-		mainItem.setStyleName("treeHeading");
+		Label label = new Label("Users & Teams");
+		label.getElement().getStyle().setProperty("cursor", "pointer");
+		userRootTree = new TreeItem(label);
+		userRootTree.setStyleName("treeHeading");
 
-		final TreeItem item1 = new TreeItem();
-		item1.setText("All Users");
+		Label label1 = new Label("All Users");
+		label1.getElement().getStyle().setProperty("cursor", "pointer");
+		final TreeItem item1 = new TreeItem(label1);
 
-		final TreeItem item2 = new TreeItem();
-		item2.setText("All Teams");
+		Label label2 = new Label("All Teams");
+		label2.getElement().getStyle().setProperty("cursor", "pointer");
+		final TreeItem item2 = new TreeItem(label2);
 
 		userService.getUsers(new AsyncCallback<List<UserDTO>>() {
 
@@ -645,11 +603,11 @@ public class TaskDashboard {
 
 		});
 
-		mainItem.addItem(item1);
-		mainItem.addItem(item2);
-		mainItem.setState(true);
+		userRootTree.addItem(item1);
+		userRootTree.addItem(item2);
+		userRootTree.setState(true);
 
-		tree.addItem(mainItem);
+		tree.addItem(userRootTree);
 		return tree;
 	}
 
