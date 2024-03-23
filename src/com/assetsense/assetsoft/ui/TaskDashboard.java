@@ -90,6 +90,8 @@ public class TaskDashboard {
 	private ProductDTO selectedModuleProduct;
 	
 	private TreeItem userRootTree;
+	private Boolean isSelectedUser;
+	private Boolean isSelectedTeam;
 
 	private CheckBox headerCheckBox = new CheckBox();
 	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
@@ -542,6 +544,7 @@ public class TaskDashboard {
 		selectedProductItem = null;
 		selectedProduct = null;
 	}
+	
 	private Tree buildUsersTree() {
 		Tree tree = new Tree(customTreeResources);
 
@@ -549,15 +552,18 @@ public class TaskDashboard {
 
 		Label label = new Label("Users & Teams");
 		label.getElement().getStyle().setProperty("cursor", "pointer");
+		label.addClickHandler(UserLabelClickHandler(false, false));
 		userRootTree = new TreeItem(label);
 		userRootTree.setStyleName("treeHeading");
 
 		Label label1 = new Label("All Users");
 		label1.getElement().getStyle().setProperty("cursor", "pointer");
+		label1.addClickHandler(UserLabelClickHandler(true, false));
 		final TreeItem item1 = new TreeItem(label1);
 
 		Label label2 = new Label("All Teams");
 		label2.getElement().getStyle().setProperty("cursor", "pointer");
+		label2.addClickHandler(UserLabelClickHandler(false, true));
 		final TreeItem item2 = new TreeItem(label2);
 
 		userService.getUsers(new AsyncCallback<List<UserDTO>>() {
@@ -572,8 +578,10 @@ public class TaskDashboard {
 			public void onSuccess(List<UserDTO> users) {
 				// TODO Auto-generated method stub
 				for (UserDTO user : users) {
-					TreeItem sub = new TreeItem();
-					sub.setText(user.getName());
+					Label label = new Label(user.getName());
+					label.getElement().getStyle().setProperty("cursor", "pointer");
+					label.addClickHandler(UserLabelClickHandler(false, false));
+					TreeItem sub = new TreeItem(label);
 					item1.addItem(sub);
 				}
 				item1.setState(true);
@@ -593,9 +601,10 @@ public class TaskDashboard {
 			public void onSuccess(List<TeamDTO> teams) {
 				// TODO Auto-generated method stub
 				for (TeamDTO team : teams) {
-					GWT.log("IM here");
-					TreeItem sub = new TreeItem();
-					sub.setText(team.getName());
+					Label label = new Label(team.getName());
+					label.getElement().getStyle().setProperty("cursor", "pointer");
+					label.addClickHandler(UserLabelClickHandler(false, false));
+					TreeItem sub = new TreeItem(label);
 					item2.addItem(sub);
 				}
 				item2.setState(true);
@@ -609,6 +618,18 @@ public class TaskDashboard {
 
 		tree.addItem(userRootTree);
 		return tree;
+	}
+	
+	private ClickHandler UserLabelClickHandler(final Boolean isUser, final Boolean isTeam){
+		return new ClickHandler(){
+			@Override
+			public void onClick(ClickEvent event) {
+				clearSelection(moduleRootTree);
+				clearSelection(productRootTree);
+				isSelectedUser = isUser;
+				isSelectedTeam = isTeam;
+			}
+		};
 	}
 
 	public VerticalPanel buildLeftSidebar() {
