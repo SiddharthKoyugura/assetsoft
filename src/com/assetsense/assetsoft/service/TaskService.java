@@ -15,6 +15,7 @@ public interface TaskService extends RemoteService {
 	TaskDTO getTaskById(long id);
 	List<TaskDTO> getTasksByUserId(long userId);
 	List<TaskDTO> getTasksByPriorityId(long priorityId);
+	List<TaskDTO> getTasksByUsername(String username);
 	List<TaskDTO> getTasks();
 	void editTaskTitle(long id, String title);
 	void editTaskLookup(long id, String name, String value);

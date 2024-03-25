@@ -288,6 +288,7 @@ public class Assetsoft implements EntryPoint {
 
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
+		taskDashboard.resetFilters();
 		dpanel.add(taskDashboard.buildTaskDashboard());
 
 		taskDashboard.getCheckedBoxes().clear();
@@ -372,8 +373,6 @@ public class Assetsoft implements EntryPoint {
 
 		return dpanel;
 	}
-
-	
 
 	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();

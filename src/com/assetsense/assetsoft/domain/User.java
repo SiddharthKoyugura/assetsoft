@@ -1,6 +1,7 @@
 package com.assetsense.assetsoft.domain;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 public class User implements Serializable {
@@ -9,7 +10,7 @@ public class User implements Serializable {
 	private String name;
 	private String email;
 	private String password;
-	private Set<Team> teams;
+	private Set<Team> teams = new HashSet<>();
 
 	public User() {
 	}
