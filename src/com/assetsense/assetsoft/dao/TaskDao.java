@@ -49,7 +49,6 @@ public class TaskDao {
 				taskInDB.setUser(task.getUser());
 				taskInDB.setProduct(task.getProduct());
 				taskInDB.setModule(task.getModule());
-				taskInDB.setSubSystem(task.getSubSystem());
 				session.update(taskInDB);
 			} else {
 				// Add the task
@@ -308,7 +307,6 @@ public class TaskDao {
 			if ("module".equals(name)) {
 				task.setModule(module);
 			} else if ("subSystem".equals(name)) {
-				task.setSubSystem(module);
 			}
 			session.update(task);
 			tx.commit();

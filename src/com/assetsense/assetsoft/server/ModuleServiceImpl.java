@@ -31,9 +31,9 @@ public class ModuleServiceImpl extends RemoteServiceServlet implements ModuleSer
 	}
 
 	@Override
-	public List<ModuleDTO> getModulesByNames(List<String> moduleNames) {
+	public ModuleDTO getModuleByName(String module) {
 		moduleDao = (ModuleDao) ApplicationContextListener.applicationContext.getBean("moduleDao");
-		return moduleDao.getModulesByNames(moduleNames);
+		return moduleDao.getModuleByName(module);
 	}
 
 	@Override

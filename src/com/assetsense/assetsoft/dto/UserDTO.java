@@ -1,6 +1,7 @@
 package com.assetsense.assetsoft.dto;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 public class UserDTO implements Serializable {
@@ -10,7 +11,7 @@ public class UserDTO implements Serializable {
 	private String name;
 	private String email;
 	private String password;
-	private Set<TeamDTO> teams;
+	private Set<TeamDTO> teams = new HashSet<>();
 
 	public UserDTO() {
 	}

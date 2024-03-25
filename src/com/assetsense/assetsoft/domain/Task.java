@@ -17,7 +17,6 @@ public class Task implements Serializable {
 	private User user;
 	private Product product;
 	private Module module;
-	private Module subSystem;
 
 	public Task() {
 	}
@@ -124,14 +123,6 @@ public class Task implements Serializable {
 
 	public void setModule(Module module) {
 		this.module = module;
-	}
-
-	public Module getSubSystem() {
-		return subSystem;
-	}
-
-	public void setSubSystem(Module subSystem) {
-		this.subSystem = subSystem;
 	}
 
 	@Override

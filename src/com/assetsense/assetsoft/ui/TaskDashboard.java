@@ -315,7 +315,6 @@ public class TaskDashboard {
 						module.setParentModule(null);
 					}
 					module.setProduct(typeConverter.convertToProductDao(productDTO));
-					Window.alert(module.toString());
 					moduleService.saveModule(module, new AsyncCallback<ModuleDTO>() {
 
 						@Override
@@ -1146,7 +1145,6 @@ public class TaskDashboard {
 		flexTable.setText(0, 6, "Assigned to");
 		flexTable.setText(0, 7, "Project");
 		flexTable.setText(0, 8, "Module");
-		flexTable.setText(0, 9, "Sub-System");
 
 		headerCheckBox.setValue(false);
 
@@ -1170,7 +1168,6 @@ public class TaskDashboard {
 			final Label assignedTo = new Label(task.getUser() != null ? task.getUser().getName() : "NULL");
 			final Label product = new Label(task.getProduct() != null ? task.getProduct().getName() : "NULL");
 			final Label module = new Label(task.getModule() != null ? task.getModule().getName() : "NULL");
-			final Label subSystem = new Label(task.getSubSystem() != null ? task.getSubSystem().getName() : "NULL");
 
 			flexTable.setWidget(rowIndex, col++, cb);
 			flexTable.setText(rowIndex, col++, String.valueOf(task.getTaskId()));
@@ -1181,7 +1178,6 @@ public class TaskDashboard {
 			flexTable.setWidget(rowIndex, col++, assignedTo);
 			flexTable.setWidget(rowIndex, col++, product);
 			flexTable.setWidget(rowIndex, col++, module);
-			flexTable.setWidget(rowIndex, col++, subSystem);
 
 			taskCheckBoxes.put(task.getTaskId(), cb);
 
@@ -1229,9 +1225,6 @@ public class TaskDashboard {
 
 										@Override
 										public void onSuccess(List<ProductDTO> products) {
-											// TODO
-											// Auto-generated
-											// method stub
 											convertRowToEditable(row, flexTable, users, products);
 										}
 
@@ -1456,14 +1449,6 @@ public class TaskDashboard {
 		final Label module = (Label) flexTable.getWidget(row, 8);
 		moduleListBox.addItem(module.getText());
 
-		final ListBox subSystemListBox = new ListBox();
-		subSystemListBox.setStyleName("listBoxStyle");
-		subSystemListBox.getElement().getStyle().setProperty("padding", "2px");
-		subSystemListBox.getElement().getStyle().setProperty("width", "100px");
-
-		final Label subSystem = (Label) flexTable.getWidget(row, 9);
-		subSystemListBox.addItem(subSystem.getText());
-
 		moduleService.getModulesByProductName(product.getText(), new AsyncCallback<List<ModuleDTO>>() {
 
 			@Override
@@ -1476,15 +1461,11 @@ public class TaskDashboard {
 			public void onSuccess(List<ModuleDTO> modules) {
 				// TODO Auto-generated method stub
 				for (ModuleDTO moduleDTO : modules) {
-					if (moduleDTO.getParentModuleDTO() == null && !moduleDTO.getName().equals(module.getText())) {
+					if (!moduleDTO.getName().equals(module.getText())) {
 						moduleListBox.addItem(moduleDTO.getName());
-					} else if (moduleDTO.getParentModuleDTO() != null
-							&& !moduleDTO.getName().equals(subSystem.getText())) {
-						subSystemListBox.addItem(moduleDTO.getName());
 					}
 				}
 				flexTable.setWidget(row, 8, moduleListBox);
-				flexTable.setWidget(row, 9, subSystemListBox);
 			}
 
 		});
@@ -1511,45 +1492,14 @@ public class TaskDashboard {
 								// TODO Auto-generated method stub
 								moduleListBox.clear();
 								moduleListBox.addItem("NULL");
-								subSystemListBox.clear();
-								subSystemListBox.addItem("NULL");
 								for (ModuleDTO moduleDTO : modules) {
-									if (moduleDTO.getParentModuleDTO() == null
-											&& !moduleDTO.getName().equals(module.getText())) {
+									if (!moduleDTO.getName().equals(module.getText())) {
 										moduleListBox.addItem(moduleDTO.getName());
 									}
 								}
 							}
 
 						});
-			}
-
-		});
-
-		moduleListBox.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-				moduleService.getChildModulesByParentName(moduleListBox.getSelectedValue(),
-						new AsyncCallback<List<ModuleDTO>>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void onSuccess(List<ModuleDTO> modules) {
-								subSystemListBox.clear();
-								subSystemListBox.addItem("NULL");
-								for (ModuleDTO moduleDTO : modules) {
-									subSystemListBox.addItem(moduleDTO.getName());
-								}
-							}
-
-						});
-
 			}
 
 		});
@@ -1580,9 +1530,6 @@ public class TaskDashboard {
 				ListBox moduleListBox = (ListBox) flexTable.getWidget(row, 8);
 				final String module = moduleListBox.getSelectedValue();
 
-				ListBox subSystemListBox = (ListBox) flexTable.getWidget(row, 9);
-				final String subSystem = subSystemListBox.getSelectedValue();
-
 				final long id = Long.parseLong(flexTable.getText(row, 1));
 				final int index = row;
 
@@ -1590,7 +1537,7 @@ public class TaskDashboard {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						// Window.alert("Got error at id: " + id);
+						 Window.alert("Got error at id: " + id);
 					}
 
 					@Override
@@ -1600,10 +1547,6 @@ public class TaskDashboard {
 						values.add(step);
 						values.add(priority);
 
-						List<String> moduleNames = new ArrayList<>();
-						moduleNames.add(module);
-						moduleNames.add(subSystem);
-
 						final Task task = new Task();
 						task.setTaskId(taskDTO.getTaskId());
 						task.setDescription(taskDTO.getDescription());
@@ -1612,8 +1555,8 @@ public class TaskDashboard {
 						task.setInitialEstimate(taskDTO.getInitialEstimate());
 						task.setRemainingEstimate(taskDTO.getRemainingEstimate());
 						task.setDueDate(taskDTO.getDueDate());
-
-						updateTask(task, values, assign, product, moduleNames, index);
+						
+						updateTask(task, values, assign, product, module, index);
 					}
 
 				});
@@ -1625,7 +1568,7 @@ public class TaskDashboard {
 	}
 
 	private void updateTask(final Task task, final List<String> values, final String assign, final String product,
-			final List<String> moduleNames, final int row) {
+			final String module, final int row) {
 
 		lookupService.getLookupsByValues(values, new AsyncCallback<List<Lookup>>() {
 
@@ -1639,7 +1582,7 @@ public class TaskDashboard {
 				task.setType(lookups.get(0));
 				task.setStatus(lookups.get(1));
 				task.setPriority(lookups.get(2));
-
+				
 				userService.getUserByName(assign, new AsyncCallback<UserDTO>() {
 
 					@Override
@@ -1654,8 +1597,7 @@ public class TaskDashboard {
 						user.setName(userDTO.getName());
 						user.setEmail(userDTO.getEmail());
 						user.setPassword(userDTO.getPassword());
-
-						if (user.getTeams() != null) {
+						if (userDTO.getTeams() != null && userDTO.getTeams().size() > 0) {
 							Set<Team> teams = new HashSet<>();
 
 							for (TeamDTO team : userDTO.getTeams()) {
@@ -1664,10 +1606,8 @@ public class TaskDashboard {
 								teamDao.setName(team.getName());
 								teams.add(teamDao);
 							}
-
 							user.setTeams(teams);
 						}
-
 						task.setUser(user);
 
 						productService.getProductByName(product, new AsyncCallback<ProductDTO>() {
@@ -1681,7 +1621,7 @@ public class TaskDashboard {
 							public void onSuccess(ProductDTO productDTO) {
 								Product product = typeConverter.convertToProductDao(productDTO);
 								task.setProduct(product);
-								moduleService.getModulesByNames(moduleNames, new AsyncCallback<List<ModuleDTO>>() {
+								moduleService.getModuleByName(module, new AsyncCallback<ModuleDTO>() {
 
 									@Override
 									public void onFailure(Throwable caught) {
@@ -1692,25 +1632,18 @@ public class TaskDashboard {
 									}
 
 									@Override
-									public void onSuccess(List<ModuleDTO> moduleDTOs) {
-										if (moduleDTOs != null && moduleDTOs.size() > 0) {
-											if (moduleDTOs.size() == 2) {
-												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
-												task.setSubSystem(typeConverter.convertToModuleDao(moduleDTOs.get(1)));
-											} else {
-												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
-											}
+									public void onSuccess(ModuleDTO moduleDTO) {
+										if (moduleDTO != null) {
+												task.setModule(typeConverter.convertToModuleDao(moduleDTO));
 										} else {
 											task.setModule(null);
-											task.setSubSystem(null);
 										}
 
 										taskService.saveTask(task, new AsyncCallback<Void>() {
 
 											@Override
 											public void onFailure(Throwable caught) {
-												// Window.alert("Error at adding
-												// task");
+												 Window.alert("Error at adding task");
 											}
 
 											@Override
@@ -1721,8 +1654,7 @@ public class TaskDashboard {
 												flexTable.setWidget(row, 5, new Label(task.getPriority().getValue()));
 												flexTable.setWidget(row, 6, new Label(task.getUser().getName()));
 												flexTable.setWidget(row, 7, new Label(task.getProduct().getName()));
-												flexTable.setWidget(row, 8, new Label(moduleNames.get(0)));
-												flexTable.setWidget(row, 9, new Label(moduleNames.get(1)));
+												flexTable.setWidget(row, 8, new Label(module));
 											}
 
 										});
