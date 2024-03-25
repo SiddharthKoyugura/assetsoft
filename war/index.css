@@ -81,7 +81,18 @@ body {
 	cursor: pointer;
 }
 
-.customBtn:hover {
+.smallBtn {
+	padding: 0.5px 5px;
+	margin: 0 10px;
+	border: 2px solid black;
+	border-radius: 5px;
+	font-weight: 600;
+	color: black;
+	background-color: white;
+	cursor: pointer;
+}
+
+.customBtn:hover, .smallBtn:hover {
 	color: white;
 	background-color: black;
 }

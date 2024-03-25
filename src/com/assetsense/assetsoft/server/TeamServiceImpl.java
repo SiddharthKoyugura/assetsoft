@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.assetsense.assetsoft.dao.TeamDao;
 import com.assetsense.assetsoft.domain.Team;
-import com.assetsense.assetsoft.dto.TeamDTO;
 import com.assetsense.assetsoft.service.TeamService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -14,10 +13,10 @@ public class TeamServiceImpl extends RemoteServiceServlet implements TeamService
 	private TeamDao teamDao;
 
 	@Override
-	public void saveTeam(Team team) {
+	public Team saveTeam(Team team) {
 		// TODO Auto-generated method stub
 		teamDao = (TeamDao) ApplicationContextListener.applicationContext.getBean("teamDao");
-		teamDao.saveTeam(team);
+		return teamDao.saveTeam(team);
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class TeamServiceImpl extends RemoteServiceServlet implements TeamService
 	}
 
 	@Override
-	public List<TeamDTO> getTeams() {
+	public List<Team> getTeams() {
 		// TODO Auto-generated method stub
 		teamDao = (TeamDao) ApplicationContextListener.applicationContext.getBean("teamDao");
 		return teamDao.getTeams();

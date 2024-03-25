@@ -3,6 +3,7 @@ package com.assetsense.assetsoft.server;
 import java.util.List;
 
 import com.assetsense.assetsoft.dao.UserDao;
+import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.UserDTO;
 import com.assetsense.assetsoft.service.UserService;
@@ -47,6 +48,18 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
 	public UserDTO getUserByName(String name) {
 		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
 		return userDao.getUserByName(name);
+	}
+
+	@Override
+	public void addUserToTeam(User user, Team team) {
+		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
+		userDao.addUserToTeam(user, team);
+	}
+
+	@Override
+	public List<UserDTO> getUsersFromTeam(Team team) {
+		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
+		return userDao.getUsersFromTeam(team);
 	}
 
 }

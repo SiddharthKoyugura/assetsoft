@@ -48,7 +48,7 @@ public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
 	private final AddEditForm addEditForm = new AddEditForm();
 	private final LoginForm loginForm = new LoginForm();
-	
+
 	private final DtoToDao typeConverter = new DtoToDao();
 
 	private final AuthServiceAsync authService = GWT.create(AuthService.class);
@@ -106,7 +106,6 @@ public class Assetsoft implements EntryPoint {
 		RootLayoutPanel.get().clear();
 		RootLayoutPanel.get().add(buildEditForm(id));
 	}
-
 
 	private DockLayoutPanel buildEditForm(final long id) {
 		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
@@ -184,30 +183,8 @@ public class Assetsoft implements EntryPoint {
 						if (task.getModule() != null) {
 							String selectedModule = task.getModule().getName();
 							selectListBoxItem(addEditForm.getModuleField(), selectedModule);
-							moduleService.getChildModulesByParentName(selectedModule,
-									new AsyncCallback<List<ModuleDTO>>() {
-
-										@Override
-										public void onFailure(Throwable caught) {
-
-										}
-
-										@Override
-										public void onSuccess(List<ModuleDTO> modules) {
-											for (ModuleDTO module : modules) {
-												addEditForm.getSubSystemField().addItem(module.getName());
-											}
-											if (task.getSubSystem() != null) {
-												String selectedSubSystem = task.getSubSystem().getName();
-												selectListBoxItem(addEditForm.getSubSystemField(), selectedSubSystem);
-											}
-											dpanel.add(vpanel);
-										}
-
-									});
-						}else{
-							dpanel.add(vpanel);
 						}
+						dpanel.add(vpanel);
 					}
 
 				});
@@ -288,6 +265,7 @@ public class Assetsoft implements EntryPoint {
 
 		dpanel.addNorth(taskDashboard.buildNavBar(), 48);
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
+		taskDashboard.resetFilters();
 		dpanel.add(taskDashboard.buildTaskDashboard());
 
 		taskDashboard.getCheckedBoxes().clear();
@@ -373,8 +351,6 @@ public class Assetsoft implements EntryPoint {
 		return dpanel;
 	}
 
-	
-
 	private void saveTask(long... id) {
 		String title = addEditForm.getTitleField().getText();
 
@@ -385,7 +361,6 @@ public class Assetsoft implements EntryPoint {
 		final String product = addEditForm.getProductField().getSelectedValue();
 		final String priority = addEditForm.getPriorityField().getSelectedValue();
 		final String module = addEditForm.getModuleField().getSelectedValue();
-		final String subSystem = addEditForm.getSubSystemField().getSelectedValue();
 
 		String percent = addEditForm.getPercentField().getText();
 		String initialEst = addEditForm.getInitialEstField().getText();
@@ -408,10 +383,6 @@ public class Assetsoft implements EntryPoint {
 		values.add(type);
 		values.add(step);
 		values.add(priority);
-
-		final List<String> moduleNames = new ArrayList<>();
-		moduleNames.add(module);
-		moduleNames.add(subSystem);
 
 		lookupService.getLookupsByValues(values, new AsyncCallback<List<Lookup>>() {
 
@@ -441,7 +412,7 @@ public class Assetsoft implements EntryPoint {
 						user.setEmail(userDTO.getEmail());
 						user.setPassword(userDTO.getPassword());
 
-						if (user.getTeams() != null) {
+						if (user.getTeams() != null && user.getTeams().size() > 0) {
 							Set<Team> teams = new HashSet<>();
 
 							for (TeamDTO team : userDTO.getTeams()) {
@@ -467,7 +438,7 @@ public class Assetsoft implements EntryPoint {
 							public void onSuccess(ProductDTO productDTO) {
 								Product product = typeConverter.convertToProductDao(productDTO);
 								task.setProduct(product);
-								moduleService.getModulesByNames(moduleNames, new AsyncCallback<List<ModuleDTO>>() {
+								moduleService.getModuleByName(module, new AsyncCallback<ModuleDTO>() {
 
 									@Override
 									public void onFailure(Throwable caught) {
@@ -476,19 +447,14 @@ public class Assetsoft implements EntryPoint {
 									}
 
 									@Override
-									public void onSuccess(List<ModuleDTO> moduleDTOs) {
-										if (moduleDTOs != null && moduleDTOs.size() > 0) {
-											if(moduleDTOs.size() == 2){
-												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
-												task.setSubSystem(typeConverter.convertToModuleDao(moduleDTOs.get(1)));
-											}else{
-												task.setModule(typeConverter.convertToModuleDao(moduleDTOs.get(0)));
-											}
-										}else{
+									public void onSuccess(ModuleDTO moduleDTO) {
+										if (moduleDTO != null) {
+											task.setModule(typeConverter.convertToModuleDao(moduleDTO));
+
+										} else {
 											task.setModule(null);
-											task.setSubSystem(null);
 										}
-										
+
 										taskService.saveTask(task, new AsyncCallback<Void>() {
 
 											@Override

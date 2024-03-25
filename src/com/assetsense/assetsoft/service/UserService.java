@@ -2,6 +2,7 @@ package com.assetsense.assetsoft.service;
 
 import java.util.List;
 
+import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.UserDTO;
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -16,4 +17,6 @@ public interface UserService extends RemoteService {
 	User getUserById(long id);
 	List<UserDTO> getUsers();
 	UserDTO getUserByName(String name);
+	void addUserToTeam(User user, Team team);
+	List<UserDTO> getUsersFromTeam(Team team);
 }

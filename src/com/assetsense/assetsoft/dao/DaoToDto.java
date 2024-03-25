@@ -56,10 +56,6 @@ public class DaoToDto {
 		if (task.getModule() != null) {
 			taskDTO.setModule(convertToModuleDTO(task.getModule()));
 		}
-		
-		if(task.getSubSystem() != null){
-			taskDTO.setSubSystem(convertToModuleDTO(task.getSubSystem()));
-		}
 
 		return taskDTO;
 	}

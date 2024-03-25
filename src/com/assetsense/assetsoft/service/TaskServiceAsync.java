@@ -13,6 +13,7 @@ public interface TaskServiceAsync {
 	void getTaskById(long taskIds, AsyncCallback<TaskDTO> callback);
 	void getTasksByUserId(long userId, AsyncCallback<List<TaskDTO>> callback);
 	void getTasksByPriorityId(long priorityId, AsyncCallback<List<TaskDTO>> callback);
+	void getTasksByUsername(String username, AsyncCallback<List<TaskDTO>> callback);
 	void getTasks(AsyncCallback<List<TaskDTO>> callback);
 	void editTaskTitle(long id, String title, AsyncCallback<Void> callback);
 	void editTaskLookup(long id, String name, String value, AsyncCallback<Void> callback);

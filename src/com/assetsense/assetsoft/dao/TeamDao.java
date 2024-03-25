@@ -1,18 +1,15 @@
 package com.assetsense.assetsoft.dao;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.assetsense.assetsoft.domain.Team;
-import com.assetsense.assetsoft.dto.TeamDTO;
 
-@SuppressWarnings("deprecation")
 public class TeamDao {
 	private SessionFactory sessionFactory;
 
@@ -25,12 +22,16 @@ public class TeamDao {
 	}
 
 	// method to add team
-	public void saveTeam(Team team) {
+	public Team saveTeam(Team team) {
+		Team teamInDb = null;
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
 			session.save(team);
+			Query<Team> query = session.createQuery("from Team Where name=:name", Team.class);
+			query.setParameter("name", team.getName());
+			teamInDb = query.getSingleResult();
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -40,7 +41,7 @@ public class TeamDao {
 		} finally {
 			session.close();
 		}
-
+		return teamInDb;
 	}
 
 	// method to delete team
@@ -82,20 +83,14 @@ public class TeamDao {
 	}
 
 	// method to return all teams
-	public List<TeamDTO> getTeams() {
-		List<TeamDTO> teamDTOs = new ArrayList<>();
+	public List<Team> getTeams() {
+		List<Team> teams = null;
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			Query<Team> query = (Query<Team>) session.createQuery("from Team", Team.class);
-			List<Team> teams = query.getResultList();
-			for(Team team: teams){
-				TeamDTO teamDTO = new TeamDTO();
-				teamDTO.setName(team.getName());
-				teamDTO.setTeamId(team.getTeamId());
-				teamDTOs.add(teamDTO);
-			}
+			Query<Team> query = (Query<Team>) session.createQuery("from Team ORDER BY id ASC", Team.class);
+			teams = query.getResultList();
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -105,7 +100,7 @@ public class TeamDao {
 		} finally {
 			session.close();
 		}
-		return teamDTOs;
+		return teams;
 	}
 
 }

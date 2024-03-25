@@ -49,7 +49,6 @@ public class TaskDao {
 				taskInDB.setUser(task.getUser());
 				taskInDB.setProduct(task.getProduct());
 				taskInDB.setModule(task.getModule());
-				taskInDB.setSubSystem(task.getSubSystem());
 				session.update(taskInDB);
 			} else {
 				// Add the task
@@ -93,7 +92,7 @@ public class TaskDao {
 
 			for (long taskId : taskIds) {
 				Task task = session.get(Task.class, taskId);
-				if(task != null){
+				if (task != null) {
 					session.delete(task);
 				}
 			}
@@ -124,6 +123,8 @@ public class TaskDao {
 				tx.rollback();
 			}
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+
 		} finally {
 			session.close();
 		}
@@ -165,6 +166,36 @@ public class TaskDao {
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
 				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+			}
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return taskDTOs;
+	}
+
+	// Method to return tasks of given username
+	public List<TaskDTO> getTasksByUsername(String username) {
+		Transaction tx = null;
+		Session session = sessionFactory.openSession();
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		try {
+			tx = session.beginTransaction();
+			Query<User> userQuery = session.createQuery("from User where name=:name", User.class);
+			userQuery.setParameter("name", username);
+			User user = userQuery.getSingleResult();
+			if (user != null) {
+				Query<Task> query = session.createQuery("from Task where user_id=:userId", Task.class);
+				query.setParameter("userId", user.getUserId());
+				List<Task> tasks = query.getResultList();
+				for (Task task : tasks) {
+					taskDTOs.add(daoToDto.convertToTaskDTO(task));
+				}
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -256,30 +287,30 @@ public class TaskDao {
 			session.close();
 		}
 	}
-	
-	public void editTaskModule(long id, String name, String moduleName){
+
+	public void editTaskModule(long id, String name, String moduleName) {
 		Transaction tx = null;
 		name = name.toLowerCase();
 		Session session = sessionFactory.openSession();
 		try {
 			tx = session.beginTransaction();
-			
+
 			Query<Task> query = (Query<Task>) session.createQuery("from Task where task_id=:id", Task.class);
 			query.setParameter("id", id);
 			Task task = (Task) query.uniqueResult();
-			
-			Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module where name=:name", Module.class);
+
+			Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module where name=:name",
+					Module.class);
 			moduleQuery.setParameter("name", moduleName);
 			Module module = moduleQuery.getSingleResult();
-			
-			if("module".equals(name)){
+
+			if ("module".equals(name)) {
 				task.setModule(module);
-			}else if("subSystem".equals(name)){
-				task.setSubSystem(module);
+			} else if ("subSystem".equals(name)) {
 			}
 			session.update(task);
 			tx.commit();
-		}catch (HibernateException e) {
+		} catch (HibernateException e) {
 			if (tx != null) {
 				tx.rollback();
 			}
