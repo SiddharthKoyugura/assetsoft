@@ -65,7 +65,7 @@ public class ModuleDao {
 
 			if (product != null) {
 				Query<Module> moduleQuery = (Query<Module>) session
-						.createQuery("from Module where product_id=:id AND parent_module_id=NULL", Module.class);
+						.createQuery("from Module where product_id=:id", Module.class);
 				moduleQuery.setParameter("id", product.getProductId());
 				List<Module> modules = moduleQuery.getResultList();
 				for (Module module : modules) {
