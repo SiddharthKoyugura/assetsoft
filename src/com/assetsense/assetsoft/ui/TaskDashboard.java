@@ -94,9 +94,10 @@ public class TaskDashboard {
 	private Team selectedTeam;
 
 	// Task Table section
-	private FlexTable flexTable;
+	private DoubleClickTable flexTable;
 	private int rowIndex = 1;
-	Set<Integer> selectedRows = new HashSet<>();
+	private Set<Integer> selectedRows = new HashSet<>();
+	private int editableRow = -1;
 
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
@@ -108,17 +109,25 @@ public class TaskDashboard {
 		}
 		return navBtn;
 	}
-	
-	public FlexTable getFlexTable(){
+
+	public DoubleClickTable getFlexTable() {
 		return flexTable;
+	}
+
+	public Set<Integer> getSelectedRows() {
+		return selectedRows;
+	}
+
+	public int getEditableRow() {
+		return editableRow;
+	}
+
+	public void resetEditableRow() {
+		editableRow = -1;
 	}
 
 	public void setAddBtnHandler(ClickHandler handler) {
 		addBtn.addClickHandler(handler);
-	}
-
-	public void setEditBtnHandler(ClickHandler handler) {
-		editBtn.addClickHandler(handler);
 	}
 
 	public void setDeleteBtnHandler(ClickHandler handler) {
@@ -1118,7 +1127,7 @@ public class TaskDashboard {
 		spanel.setSize("100vw-800px", "100vh");
 		spanel.getElement().getStyle().setProperty("overflow", "scroll");
 
-		flexTable = new FlexTable();
+		flexTable = new DoubleClickTable();
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
@@ -1223,12 +1232,15 @@ public class TaskDashboard {
 				if (cell != null) {
 					final int row = cell.getRowIndex();
 					if (row != 0) {
-						if(selectedRows.contains(row)){
+						if (selectedRows.contains(row)) {
 							flexTable.getRowFormatter().removeStyleName(row, "selected-row");
-		                    selectedRows.remove(row);
-						}else{
+							selectedRows.remove(row);
+						} else if (editableRow != row) {
+							if (editableRow != -1) {
+								revertFieldsToNormalState(flexTable);
+							}
 							flexTable.getRowFormatter().addStyleName(row, "selected-row");
-		                    selectedRows.add(row);
+							selectedRows.add(row);
 						}
 					}
 				}
@@ -1237,7 +1249,6 @@ public class TaskDashboard {
 		});
 
 		RootLayoutPanel.get().addDomHandler(new ClickHandler() {
-
 			@Override
 			public void onClick(ClickEvent event) {
 				Element eventTarget = Element.as(event.getNativeEvent().getEventTarget());
@@ -1248,15 +1259,15 @@ public class TaskDashboard {
 
 		}, ClickEvent.getType());
 	}
-	
-	public void handleFlexTableClickEvent(int row){
+
+	public void handleFlexTableClickEvent(int row) {
 		if (row != 0) {
-			if(selectedRows.contains(row)){
+			if (selectedRows.contains(row)) {
 				flexTable.getRowFormatter().removeStyleName(row, "selected-row");
-                selectedRows.remove(row);
-			}else{
+				selectedRows.remove(row);
+			} else {
 				flexTable.getRowFormatter().addStyleName(row, "selected-row");
-                selectedRows.add(row);
+				selectedRows.add(row);
 			}
 		}
 	}
@@ -1513,9 +1524,9 @@ public class TaskDashboard {
 
 	// Method to revert fields to normal state with updated text
 	private void revertFieldsToNormalState(final FlexTable flexTable) {
-		for (int row = 1; row < flexTable.getRowCount(); row++) {
+		int row = editableRow;
+		if (row != 1) {
 			try {
-
 				final String title = ((TextBox) flexTable.getWidget(row, 2)).getText();
 
 				ListBox typeListBox = (ListBox) flexTable.getWidget(row, 1);
@@ -1561,6 +1572,8 @@ public class TaskDashboard {
 						task.setInitialEstimate(taskDTO.getInitialEstimate());
 						task.setRemainingEstimate(taskDTO.getRemainingEstimate());
 						task.setDueDate(taskDTO.getDueDate());
+
+						editableRow = -1;
 
 						updateTask(task, values, assign, product, module, index);
 					}
@@ -1706,6 +1719,48 @@ public class TaskDashboard {
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
 
+		editBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if (selectedRows.size() == 1) {
+					userService.getUsers(new AsyncCallback<List<UserDTO>>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							// TODO Auto-generated method stub
+
+						}
+
+						@Override
+						public void onSuccess(final List<UserDTO> users) {
+							// TODO Auto-generated method stub
+							productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
+
+								@Override
+								public void onFailure(Throwable caught) {
+
+								}
+
+								@Override
+								public void onSuccess(List<ProductDTO> products) {
+									int row = (int) selectedRows.toArray()[0];
+									flexTable.getRowFormatter().removeStyleName(row, "selected-row");
+									editableRow = row;
+									convertRowToEditable(row, flexTable, users, products);
+									selectedRows.clear();
+								}
+							});
+						}
+
+					});
+				} else {
+					Window.alert("Please select exactly one task");
+				}
+
+			}
+
+		});
+
 		headerPanel.addWest(hpanel, 300);
 		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
 
@@ -1739,20 +1794,20 @@ public class TaskDashboard {
 }
 
 class DoubleClickTable extends FlexTable {
-    class MyCell extends Cell {
-        protected MyCell(int rowIndex, int cellIndex) {
-            super(rowIndex, cellIndex);
-        }
-    }
+	class MyCell extends Cell {
+		protected MyCell(int rowIndex, int cellIndex) {
+			super(rowIndex, cellIndex);
+		}
+	}
 
-    public Cell getCellForEvent(MouseEvent<? extends EventHandler> event) {
-        Element td = getEventTargetCell(Event.as(event.getNativeEvent()));
-        if (td == null) {
-          return null;
-        }
+	public Cell getCellForEvent(MouseEvent<? extends EventHandler> event) {
+		Element td = getEventTargetCell(Event.as(event.getNativeEvent()));
+		if (td == null) {
+			return null;
+		}
 
-        int row = TableRowElement.as(td.getParentElement()).getSectionRowIndex();
-        int column = TableCellElement.as(td).getCellIndex();
-        return new MyCell(row, column);
-    }
+		int row = TableRowElement.as(td.getParentElement()).getSectionRowIndex();
+		int column = TableCellElement.as(td).getCellIndex();
+		return new MyCell(row, column);
+	}
 }
