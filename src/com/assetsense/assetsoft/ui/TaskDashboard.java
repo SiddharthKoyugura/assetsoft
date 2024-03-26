@@ -1,10 +1,8 @@
 package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
@@ -33,17 +31,19 @@ import com.assetsense.assetsoft.service.UserServiceAsync;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.dom.client.TableCellElement;
+import com.google.gwt.dom.client.TableRowElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -71,8 +71,6 @@ public class TaskDashboard {
 	private final ModuleServiceAsync moduleService = GWT.create(ModuleService.class);
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 
-	private int rowIndex = 1;
-
 	private Button navBtn;
 	private Button addBtn;
 	private Button editBtn;
@@ -97,11 +95,8 @@ public class TaskDashboard {
 
 	// Task Table section
 	private FlexTable flexTable;
-
-	private CheckBox headerCheckBox = new CheckBox();
-	private final Map<Long, CheckBox> taskCheckBoxes = new HashMap<>();
-
-	private Map<Long, Boolean> checkedBoxes = new HashMap<>();
+	private int rowIndex = 1;
+	Set<Integer> selectedRows = new HashSet<>();
 
 	public void setNavBtnName(String name) {
 		getNavBtn().setText(name);
@@ -112,6 +107,10 @@ public class TaskDashboard {
 			navBtn = new Button();
 		}
 		return navBtn;
+	}
+	
+	public FlexTable getFlexTable(){
+		return flexTable;
 	}
 
 	public void setAddBtnHandler(ClickHandler handler) {
@@ -124,18 +123,6 @@ public class TaskDashboard {
 
 	public void setDeleteBtnHandler(ClickHandler handler) {
 		deleteBtn.addClickHandler(handler);
-	}
-
-	public void setHeaderCheckBoxHandler(ValueChangeHandler<Boolean> handler) {
-		headerCheckBox.addValueChangeHandler(handler);
-	}
-
-	public Map<Long, CheckBox> getCheckBoxes() {
-		return taskCheckBoxes;
-	}
-
-	public Map<Long, Boolean> getCheckedBoxes() {
-		return checkedBoxes;
 	}
 
 	public void resetFilters() {
@@ -231,16 +218,17 @@ public class TaskDashboard {
 							@Override
 							public void onSuccess(List<ModuleDTO> moduleDTOs) {
 								for (final ModuleDTO module : moduleDTOs) {
-									Label label = new Label(module.getName());
-									label.getElement().getStyle().setProperty("cursor", "pointer");
-									final TreeItem moduleItem = new TreeItem(label);
-									moduleItem.setStyleName("treeHeading");
-									label.addClickHandler(
-											moduleLabelClickHandler(moduleItem, module, module.getProductDTO()));
-
-									buildSubModulesTree(module, moduleItem);
-									rootItem.addItem(moduleItem);
-									moduleItem.setState(true);
+									if (module.getParentModuleDTO() == null) {
+										Label label = new Label(module.getName());
+										label.getElement().getStyle().setProperty("cursor", "pointer");
+										final TreeItem moduleItem = new TreeItem(label);
+										moduleItem.setStyleName("treeHeading");
+										label.addClickHandler(
+												moduleLabelClickHandler(moduleItem, module, module.getProductDTO()));
+										buildSubModulesTree(module, moduleItem);
+										rootItem.addItem(moduleItem);
+										moduleItem.setState(true);
+									}
 								}
 								rootItem.setState(true);
 							}
@@ -890,7 +878,7 @@ public class TaskDashboard {
 							});
 							Button btn = new Button("+");
 							btn.setStyleName("smallBtn");
-							
+
 							final TreeItem item = new TreeItem(createToolbarPanel(label, btn));
 							btn.addClickHandler(new ClickHandler() {
 								@Override
@@ -898,7 +886,7 @@ public class TaskDashboard {
 									addUserToTeamHandler(item, team);
 								}
 							});
-							
+
 							treeItem.addItem(item);
 							treeItem.setSelected(false);
 							dialogBox.hide();
@@ -1135,18 +1123,16 @@ public class TaskDashboard {
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
 		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
+		flexTable.getRowFormatter().getElement(0).getStyle().setProperty("cursor", "pointer");
 
-		flexTable.setWidget(0, 0, headerCheckBox);
-		flexTable.setText(0, 1, "ID");
-		flexTable.setText(0, 2, "Type");
-		flexTable.setText(0, 3, "Title");
-		flexTable.setText(0, 4, "Work flow step");
-		flexTable.setText(0, 5, "Priority");
-		flexTable.setText(0, 6, "Assigned to");
-		flexTable.setText(0, 7, "Project");
-		flexTable.setText(0, 8, "Module");
-
-		headerCheckBox.setValue(false);
+		flexTable.setText(0, 0, "ID");
+		flexTable.setText(0, 1, "Type");
+		flexTable.setText(0, 2, "Title");
+		flexTable.setText(0, 3, "Work flow step");
+		flexTable.setText(0, 4, "Priority");
+		flexTable.setText(0, 5, "Assigned to");
+		flexTable.setText(0, 6, "Project");
+		flexTable.setText(0, 7, "Module");
 
 		filterTasks();
 
@@ -1159,7 +1145,6 @@ public class TaskDashboard {
 		for (final TaskDTO task : tasks) {
 			flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 			int col = 0;
-			CheckBox cb = new CheckBox();
 
 			final Label type = new Label(task.getType() != null ? task.getType().getValue() : "NULL");
 			final Label title = new Label(task.getTitle() != null ? task.getTitle() : "NULL");
@@ -1169,7 +1154,6 @@ public class TaskDashboard {
 			final Label product = new Label(task.getProduct() != null ? task.getProduct().getName() : "NULL");
 			final Label module = new Label(task.getModule() != null ? task.getModule().getName() : "NULL");
 
-			flexTable.setWidget(rowIndex, col++, cb);
 			flexTable.setText(rowIndex, col++, String.valueOf(task.getTaskId()));
 			flexTable.setWidget(rowIndex, col++, type);
 			flexTable.setWidget(rowIndex, col++, title);
@@ -1179,69 +1163,79 @@ public class TaskDashboard {
 			flexTable.setWidget(rowIndex, col++, product);
 			flexTable.setWidget(rowIndex, col++, module);
 
-			taskCheckBoxes.put(task.getTaskId(), cb);
+			flexTable.getRowFormatter().getElement(rowIndex).getStyle().setProperty("cursor", "pointer");
+			flexTable.getRowFormatter().addStyleName(rowIndex, "row-border-top");
 
-			cb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-				private final long id = task.getTaskId();
-
-				@Override
-				public void onValueChange(ValueChangeEvent<Boolean> event) {
-					// TODO Auto-generated method stub
-					if (event.getValue()) {
-						checkedBoxes.put(id, true);
-					} else {
-						checkedBoxes.remove(id);
-					}
-				}
-			});
-
-			flexTable.addClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					Cell cell = flexTable.getCellForEvent(event);
-					if (cell != null) {
-						final int row = cell.getRowIndex();
-						if (row > 0) {
-							userService.getUsers(new AsyncCallback<List<UserDTO>>() {
-
-								@Override
-								public void onFailure(Throwable caught) {
-									// TODO Auto-generated method stub
-
-								}
-
-								@Override
-								public void onSuccess(final List<UserDTO> users) {
-									// TODO Auto-generated method stub
-									productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
-
-										@Override
-										public void onFailure(Throwable caught) {
-											// TODO
-											// Auto-generated
-											// method stub
-
-										}
-
-										@Override
-										public void onSuccess(List<ProductDTO> products) {
-											convertRowToEditable(row, flexTable, users, products);
-										}
-
-									});
-								}
-
-							});
-
-						}
-					} else {
-						revertFieldsToNormalState(flexTable);
-					}
-				}
-			});
+			// flexTable.addClickHandler(new ClickHandler() {
+			// @Override
+			// public void onClick(ClickEvent event) {
+			// Cell cell = flexTable.getCellForEvent(event);
+			// if (cell != null) {
+			// final int row = cell.getRowIndex();
+			// if (row > 0) {
+			// userService.getUsers(new AsyncCallback<List<UserDTO>>() {
+			//
+			// @Override
+			// public void onFailure(Throwable caught) {
+			// // TODO Auto-generated method stub
+			//
+			// }
+			//
+			// @Override
+			// public void onSuccess(final List<UserDTO> users) {
+			// // TODO Auto-generated method stub
+			// productService.getTopMostParentProducts(new
+			// AsyncCallback<List<ProductDTO>>() {
+			//
+			// @Override
+			// public void onFailure(Throwable caught) {
+			// // TODO
+			// // Auto-generated
+			// // method stub
+			//
+			// }
+			//
+			// @Override
+			// public void onSuccess(List<ProductDTO> products) {
+			// convertRowToEditable(row, flexTable, users, products);
+			// }
+			//
+			// });
+			// }
+			//
+			// });
+			//
+			// }
+			// } else {
+			// revertFieldsToNormalState(flexTable);
+			// }
+			// }
+			// });
 
 			rowIndex++;
 		}
+		flexTable.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				event.preventDefault();
+				Cell cell = flexTable.getCellForEvent(event);
+				if (cell != null) {
+					final int row = cell.getRowIndex();
+					if (row != 0) {
+						if(selectedRows.contains(row)){
+							flexTable.getRowFormatter().removeStyleName(row, "selected-row");
+		                    selectedRows.remove(row);
+						}else{
+							flexTable.getRowFormatter().addStyleName(row, "selected-row");
+		                    selectedRows.add(row);
+						}
+					}
+				}
+			}
+
+		});
+
 		RootLayoutPanel.get().addDomHandler(new ClickHandler() {
 
 			@Override
@@ -1253,6 +1247,18 @@ public class TaskDashboard {
 			}
 
 		}, ClickEvent.getType());
+	}
+	
+	public void handleFlexTableClickEvent(int row){
+		if (row != 0) {
+			if(selectedRows.contains(row)){
+				flexTable.getRowFormatter().removeStyleName(row, "selected-row");
+                selectedRows.remove(row);
+			}else{
+				flexTable.getRowFormatter().addStyleName(row, "selected-row");
+                selectedRows.add(row);
+			}
+		}
 	}
 
 	public void filterTasks() {
@@ -1297,27 +1303,27 @@ public class TaskDashboard {
 					});
 				}
 			}
-		}else{
+		} else {
 			// Clear all tasks
 			while (flexTable.getRowCount() != 1) {
 				flexTable.removeRow(1);
 			}
-			userService.getUsersFromTeam(selectedTeam, new AsyncCallback<List<UserDTO>>(){
+			userService.getUsersFromTeam(selectedTeam, new AsyncCallback<List<UserDTO>>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
-					
+
 				}
 
 				@Override
 				public void onSuccess(List<UserDTO> users) {
-					for(UserDTO user: users){
-						taskService.getTasksByUsername(user.getName(), new AsyncCallback<List<TaskDTO>>(){
+					for (UserDTO user : users) {
+						taskService.getTasksByUsername(user.getName(), new AsyncCallback<List<TaskDTO>>() {
 
 							@Override
 							public void onFailure(Throwable caught) {
 								// TODO Auto-generated method stub
-								
+
 							}
 
 							@Override
@@ -1326,11 +1332,11 @@ public class TaskDashboard {
 								allTasksRendered = false;
 								isTeamSelected = false;
 							}
-							
+
 						});
 					}
 				}
-				
+
 			});
 		}
 	}
@@ -1345,8 +1351,8 @@ public class TaskDashboard {
 		titleTextBox.getElement().getStyle().setProperty("padding", "2px");
 		titleTextBox.getElement().getStyle().setProperty("width", "100%");
 
-		titleTextBox.setText(((Label) flexTable.getWidget(row, 3)).getText());
-		flexTable.setWidget(row, 3, titleTextBox);
+		titleTextBox.setText(((Label) flexTable.getWidget(row, 2)).getText());
+		flexTable.setWidget(row, 2, titleTextBox);
 
 		ListBox typeListBox = new ListBox();
 
@@ -1354,7 +1360,7 @@ public class TaskDashboard {
 		typeListBox.getElement().getStyle().setProperty("padding", "2px");
 		typeListBox.getElement().getStyle().setProperty("width", "100px");
 
-		Label type = (Label) flexTable.getWidget(row, 2);
+		Label type = (Label) flexTable.getWidget(row, 1);
 		typeListBox.addItem(type.getText());
 		List<String> typeList = new ArrayList<>();
 		typeList.add("TASK");
@@ -1366,7 +1372,7 @@ public class TaskDashboard {
 				typeListBox.addItem(typeItem);
 			}
 		}
-		flexTable.setWidget(row, 2, typeListBox);
+		flexTable.setWidget(row, 1, typeListBox);
 
 		ListBox stepListBox = new ListBox();
 
@@ -1374,7 +1380,7 @@ public class TaskDashboard {
 		stepListBox.getElement().getStyle().setProperty("padding", "2px");
 		stepListBox.getElement().getStyle().setProperty("width", "100px");
 
-		Label step = (Label) flexTable.getWidget(row, 4);
+		Label step = (Label) flexTable.getWidget(row, 3);
 		stepListBox.addItem(step.getText());
 
 		List<String> stepList = new ArrayList<>();
@@ -1389,14 +1395,14 @@ public class TaskDashboard {
 				stepListBox.addItem(stepItem);
 			}
 		}
-		flexTable.setWidget(row, 4, stepListBox);
+		flexTable.setWidget(row, 3, stepListBox);
 
 		ListBox priorityListBox = new ListBox();
 		priorityListBox.setStyleName("listBoxStyle");
 		priorityListBox.getElement().getStyle().setProperty("padding", "2px");
 		priorityListBox.getElement().getStyle().setProperty("width", "70px");
 
-		Label priority = (Label) flexTable.getWidget(row, 5);
+		Label priority = (Label) flexTable.getWidget(row, 4);
 		priorityListBox.addItem(priority.getText());
 
 		List<String> priorityList = new ArrayList<>();
@@ -1409,28 +1415,28 @@ public class TaskDashboard {
 				priorityListBox.addItem(priorItem);
 			}
 		}
-		flexTable.setWidget(row, 5, priorityListBox);
+		flexTable.setWidget(row, 4, priorityListBox);
 
 		ListBox assignedToListBox = new ListBox();
 		assignedToListBox.setStyleName("listBoxStyle");
 		assignedToListBox.getElement().getStyle().setProperty("padding", "2px");
 		assignedToListBox.getElement().getStyle().setProperty("width", "90px");
 
-		Label assignedTo = (Label) flexTable.getWidget(row, 6);
+		Label assignedTo = (Label) flexTable.getWidget(row, 5);
 		assignedToListBox.addItem(assignedTo.getText());
 		for (UserDTO user : users) {
 			if (!user.getName().equals(assignedTo.getText())) {
 				assignedToListBox.addItem(user.getName());
 			}
 		}
-		flexTable.setWidget(row, 6, assignedToListBox);
+		flexTable.setWidget(row, 5, assignedToListBox);
 
 		final ListBox productListBox = new ListBox();
 		productListBox.setStyleName("listBoxStyle");
 		productListBox.getElement().getStyle().setProperty("padding", "2px");
 		productListBox.getElement().getStyle().setProperty("width", "50px");
 
-		Label product = (Label) flexTable.getWidget(row, 7);
+		Label product = (Label) flexTable.getWidget(row, 6);
 		productListBox.addItem(product.getText());
 
 		for (ProductDTO productDTO : products) {
@@ -1438,7 +1444,7 @@ public class TaskDashboard {
 				productListBox.addItem(productDTO.getName());
 			}
 		}
-		flexTable.setWidget(row, 7, productListBox);
+		flexTable.setWidget(row, 6, productListBox);
 
 		// Module section
 		final ListBox moduleListBox = new ListBox();
@@ -1446,7 +1452,7 @@ public class TaskDashboard {
 		moduleListBox.getElement().getStyle().setProperty("padding", "2px");
 		moduleListBox.getElement().getStyle().setProperty("width", "100px");
 
-		final Label module = (Label) flexTable.getWidget(row, 8);
+		final Label module = (Label) flexTable.getWidget(row, 7);
 		moduleListBox.addItem(module.getText());
 
 		moduleService.getModulesByProductName(product.getText(), new AsyncCallback<List<ModuleDTO>>() {
@@ -1465,7 +1471,7 @@ public class TaskDashboard {
 						moduleListBox.addItem(moduleDTO.getName());
 					}
 				}
-				flexTable.setWidget(row, 8, moduleListBox);
+				flexTable.setWidget(row, 7, moduleListBox);
 			}
 
 		});
@@ -1510,34 +1516,34 @@ public class TaskDashboard {
 		for (int row = 1; row < flexTable.getRowCount(); row++) {
 			try {
 
-				final String title = ((TextBox) flexTable.getWidget(row, 3)).getText();
+				final String title = ((TextBox) flexTable.getWidget(row, 2)).getText();
 
-				ListBox typeListBox = (ListBox) flexTable.getWidget(row, 2);
+				ListBox typeListBox = (ListBox) flexTable.getWidget(row, 1);
 				final String type = typeListBox.getSelectedValue();
 
-				ListBox stepListBox = (ListBox) flexTable.getWidget(row, 4);
+				ListBox stepListBox = (ListBox) flexTable.getWidget(row, 3);
 				final String step = stepListBox.getSelectedValue();
 
-				ListBox priorityListBox = (ListBox) flexTable.getWidget(row, 5);
+				ListBox priorityListBox = (ListBox) flexTable.getWidget(row, 4);
 				final String priority = priorityListBox.getSelectedValue();
 
-				ListBox assignedToListBox = (ListBox) flexTable.getWidget(row, 6);
+				ListBox assignedToListBox = (ListBox) flexTable.getWidget(row, 5);
 				final String assign = assignedToListBox.getSelectedValue();
 
-				ListBox productListBox = (ListBox) flexTable.getWidget(row, 7);
+				ListBox productListBox = (ListBox) flexTable.getWidget(row, 6);
 				final String product = productListBox.getSelectedValue();
 
-				ListBox moduleListBox = (ListBox) flexTable.getWidget(row, 8);
+				ListBox moduleListBox = (ListBox) flexTable.getWidget(row, 7);
 				final String module = moduleListBox.getSelectedValue();
 
-				final long id = Long.parseLong(flexTable.getText(row, 1));
+				final long id = Long.parseLong(flexTable.getText(row, 0));
 				final int index = row;
 
 				taskService.getTaskById(id, new AsyncCallback<TaskDTO>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
-						 Window.alert("Got error at id: " + id);
+						Window.alert("Got error at id: " + id);
 					}
 
 					@Override
@@ -1555,7 +1561,7 @@ public class TaskDashboard {
 						task.setInitialEstimate(taskDTO.getInitialEstimate());
 						task.setRemainingEstimate(taskDTO.getRemainingEstimate());
 						task.setDueDate(taskDTO.getDueDate());
-						
+
 						updateTask(task, values, assign, product, module, index);
 					}
 
@@ -1582,7 +1588,7 @@ public class TaskDashboard {
 				task.setType(lookups.get(0));
 				task.setStatus(lookups.get(1));
 				task.setPriority(lookups.get(2));
-				
+
 				userService.getUserByName(assign, new AsyncCallback<UserDTO>() {
 
 					@Override
@@ -1634,7 +1640,7 @@ public class TaskDashboard {
 									@Override
 									public void onSuccess(ModuleDTO moduleDTO) {
 										if (moduleDTO != null) {
-												task.setModule(typeConverter.convertToModuleDao(moduleDTO));
+											task.setModule(typeConverter.convertToModuleDao(moduleDTO));
 										} else {
 											task.setModule(null);
 										}
@@ -1643,18 +1649,18 @@ public class TaskDashboard {
 
 											@Override
 											public void onFailure(Throwable caught) {
-												 Window.alert("Error at adding task");
+												Window.alert("Error at adding task");
 											}
 
 											@Override
 											public void onSuccess(Void result) {
-												flexTable.setWidget(row, 2, new Label(task.getType().getValue()));
-												flexTable.setWidget(row, 3, new Label(task.getTitle()));
-												flexTable.setWidget(row, 4, new Label(task.getStatus().getValue()));
-												flexTable.setWidget(row, 5, new Label(task.getPriority().getValue()));
-												flexTable.setWidget(row, 6, new Label(task.getUser().getName()));
-												flexTable.setWidget(row, 7, new Label(task.getProduct().getName()));
-												flexTable.setWidget(row, 8, new Label(module));
+												flexTable.setWidget(row, 1, new Label(task.getType().getValue()));
+												flexTable.setWidget(row, 2, new Label(task.getTitle()));
+												flexTable.setWidget(row, 3, new Label(task.getStatus().getValue()));
+												flexTable.setWidget(row, 4, new Label(task.getPriority().getValue()));
+												flexTable.setWidget(row, 5, new Label(task.getUser().getName()));
+												flexTable.setWidget(row, 6, new Label(task.getProduct().getName()));
+												flexTable.setWidget(row, 7, new Label(module));
 											}
 
 										});
@@ -1721,11 +1727,8 @@ public class TaskDashboard {
 
 	private HorizontalPanel createToolbarPanel(Label label, Button button) {
 		HorizontalPanel hpanel = new HorizontalPanel();
-		// hpanel.setWidth("100%");
 
-		HTML spacer = new HTML("&nbsp;"); // Use HTML widget for a non-breaking
-											// space
-		// spacer.setWidth("100%");
+		HTML spacer = new HTML("&nbsp;");
 
 		hpanel.add(label);
 		hpanel.add(spacer);
@@ -1733,4 +1736,23 @@ public class TaskDashboard {
 
 		return hpanel;
 	}
+}
+
+class DoubleClickTable extends FlexTable {
+    class MyCell extends Cell {
+        protected MyCell(int rowIndex, int cellIndex) {
+            super(rowIndex, cellIndex);
+        }
+    }
+
+    public Cell getCellForEvent(MouseEvent<? extends EventHandler> event) {
+        Element td = getEventTargetCell(Event.as(event.getNativeEvent()));
+        if (td == null) {
+          return null;
+        }
+
+        int row = TableRowElement.as(td.getParentElement()).getSectionRowIndex();
+        int column = TableCellElement.as(td).getCellIndex();
+        return new MyCell(row, column);
+    }
 }

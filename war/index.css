@@ -207,4 +207,12 @@ body {
 	width: 150px !important;
 }
 
+.selected-row{
+	background-color: rgba(52, 152, 219, 0.7) !important;
+}
+
+.row-border-top {
+    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Adjust border properties as needed */
+}
+
 

@@ -34,11 +34,8 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -124,14 +121,12 @@ public class Assetsoft implements EntryPoint {
 				saveTask(id);
 			}
 		});
-
 		addEditForm.setCloseBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				loadMainPage();
 			}
-
 		});
 
 		taskService.getTaskById(id, new AsyncCallback<TaskDTO>() {
@@ -268,7 +263,6 @@ public class Assetsoft implements EntryPoint {
 		taskDashboard.resetFilters();
 		dpanel.add(taskDashboard.buildTaskDashboard());
 
-		taskDashboard.getCheckedBoxes().clear();
 
 		taskDashboard.setAddBtnHandler(new ClickHandler() {
 
@@ -279,74 +273,57 @@ public class Assetsoft implements EntryPoint {
 
 		});
 
-		taskDashboard.setEditBtnHandler(new ClickHandler() {
+//		taskDashboard.setEditBtnHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+//				if (checkedBoxes.size() == 1) {
+//					Iterator<Long> iterator = checkedBoxes.keySet().iterator();
+//					loadEditPage(iterator.next());
+//
+//				} else {
+//					Window.alert("Please select exactly one checkbox");
+//				}
+//			}
+//
+//		});
+		
+		taskDashboard.setEditBtnHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (checkedBoxes.size() == 1) {
-					Iterator<Long> iterator = checkedBoxes.keySet().iterator();
-					loadEditPage(iterator.next());
-
-				} else {
-					Window.alert("Please select exactly one checkbox");
-				}
+				
 			}
-
 		});
 
-		taskDashboard.setDeleteBtnHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
-				final Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (checkedBoxes.size() == 0) {
-					Window.alert("Please select atleast one checkbox");
-				} else {
-					Set<Long> keys = checkedBoxes.keySet();
-					List<Long> taskIds = new ArrayList<>();
-					for (long key : keys) {
-						taskIds.add(key);
-					}
-					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>() {
-						@Override
-						public void onFailure(Throwable caught) {
-
-						}
-
-						@Override
-						public void onSuccess(Void result) {
-							Window.alert("Task[s] deleted");
-							loadMainPage();
-						}
-					});
-				}
-			}
-
-		});
-
-		taskDashboard.setHeaderCheckBoxHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				// TODO Auto-generated method stub
-				Map<Long, CheckBox> checkBoxes = taskDashboard.getCheckBoxes();
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (event.getValue()) {
-					for (long id : checkBoxes.keySet()) {
-						CheckBox cb = checkBoxes.get(id);
-						cb.setValue(true);
-						checkedBoxes.put(id, true);
-					}
-				} else {
-					for (long id : checkBoxes.keySet()) {
-						CheckBox cb = checkBoxes.get(id);
-						cb.setValue(false);
-						checkedBoxes.remove(id);
-					}
-				}
-			}
-
-		});
+//		taskDashboard.setDeleteBtnHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				// TODO Auto-generated method stub
+//				final Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
+//				if (checkedBoxes.size() == 0) {
+//					Window.alert("Please select atleast one checkbox");
+//				} else {
+//					Set<Long> keys = checkedBoxes.keySet();
+//					List<Long> taskIds = new ArrayList<>();
+//					for (long key : keys) {
+//						taskIds.add(key);
+//					}
+//					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>() {
+//						@Override
+//						public void onFailure(Throwable caught) {
+//
+//						}
+//
+//						@Override
+//						public void onSuccess(Void result) {
+//							Window.alert("Task[s] deleted");
+//							loadMainPage();
+//						}
+//					});
+//				}
+//			}
+//
+//		});
 
 		return dpanel;
 	}
