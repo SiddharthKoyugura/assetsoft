@@ -114,14 +114,6 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
-	public DoubleClickTable getFlexTable() {
-		return flexTable;
-	}
-
-	public int getEditableRow() {
-		return editableRow;
-	}
-
 	public void resetEditableRow() {
 		editableRow = -1;
 	}
