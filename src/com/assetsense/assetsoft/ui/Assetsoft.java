@@ -2,9 +2,7 @@ package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.assetsense.assetsoft.domain.Lookup;
@@ -34,15 +32,15 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.HTMLTable.Cell;
 
 public class Assetsoft implements EntryPoint {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
@@ -124,14 +122,12 @@ public class Assetsoft implements EntryPoint {
 				saveTask(id);
 			}
 		});
-
 		addEditForm.setCloseBtnHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				loadMainPage();
 			}
-
 		});
 
 		taskService.getTaskById(id, new AsyncCallback<TaskDTO>() {
@@ -267,8 +263,8 @@ public class Assetsoft implements EntryPoint {
 		dpanel.addWest(taskDashboard.buildLeftSidebar(), 240);
 		taskDashboard.resetFilters();
 		dpanel.add(taskDashboard.buildTaskDashboard());
-
-		taskDashboard.getCheckedBoxes().clear();
+		taskDashboard.getSelectedRows().clear();
+		taskDashboard.resetEditableRow();
 
 		taskDashboard.setAddBtnHandler(new ClickHandler() {
 
@@ -279,34 +275,33 @@ public class Assetsoft implements EntryPoint {
 
 		});
 
-		taskDashboard.setEditBtnHandler(new ClickHandler() {
+		taskDashboard.getFlexTable().addDoubleClickHandler(new DoubleClickHandler() {
 			@Override
-			public void onClick(ClickEvent event) {
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (checkedBoxes.size() == 1) {
-					Iterator<Long> iterator = checkedBoxes.keySet().iterator();
-					loadEditPage(iterator.next());
-
-				} else {
-					Window.alert("Please select exactly one checkbox");
+			public void onDoubleClick(DoubleClickEvent event) {
+				event.preventDefault();
+				if (taskDashboard.getEditableRow() == -1) {
+					Cell cell = taskDashboard.getFlexTable().getCellForEvent(event);
+					if (cell != null) {
+						int row = cell.getRowIndex();
+						if (row != 0) {
+							long id = Long.parseLong(taskDashboard.getFlexTable().getText(row, 0));
+							loadEditPage(id);
+						}
+					}
 				}
 			}
-
 		});
 
 		taskDashboard.setDeleteBtnHandler(new ClickHandler() {
-
 			@Override
 			public void onClick(ClickEvent event) {
-				// TODO Auto-generated method stub
-				final Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (checkedBoxes.size() == 0) {
-					Window.alert("Please select atleast one checkbox");
+				final Set<Integer> selectedRows = taskDashboard.getSelectedRows();
+				if (selectedRows.size() == 0) {
+					Window.alert("Please select atleast one task");
 				} else {
-					Set<Long> keys = checkedBoxes.keySet();
 					List<Long> taskIds = new ArrayList<>();
-					for (long key : keys) {
-						taskIds.add(key);
+					for (int row : selectedRows) {
+						taskIds.add(Long.parseLong(taskDashboard.getFlexTable().getText(row, 0)));
 					}
 					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>() {
 						@Override
@@ -320,29 +315,6 @@ public class Assetsoft implements EntryPoint {
 							loadMainPage();
 						}
 					});
-				}
-			}
-
-		});
-
-		taskDashboard.setHeaderCheckBoxHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				// TODO Auto-generated method stub
-				Map<Long, CheckBox> checkBoxes = taskDashboard.getCheckBoxes();
-				Map<Long, Boolean> checkedBoxes = taskDashboard.getCheckedBoxes();
-				if (event.getValue()) {
-					for (long id : checkBoxes.keySet()) {
-						CheckBox cb = checkBoxes.get(id);
-						cb.setValue(true);
-						checkedBoxes.put(id, true);
-					}
-				} else {
-					for (long id : checkBoxes.keySet()) {
-						CheckBox cb = checkBoxes.get(id);
-						cb.setValue(false);
-						checkedBoxes.remove(id);
-					}
 				}
 			}
 
@@ -477,7 +449,6 @@ public class Assetsoft implements EntryPoint {
 					}
 
 				});
-
 			}
 		});
 	}
