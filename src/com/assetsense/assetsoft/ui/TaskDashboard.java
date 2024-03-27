@@ -37,6 +37,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -70,6 +72,8 @@ public class TaskDashboard {
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 	private final ModuleServiceAsync moduleService = GWT.create(ModuleService.class);
 	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
+
+	private AddEditForm addEditForm;
 
 	private Button navBtn;
 	private Button addBtn;
@@ -114,24 +118,12 @@ public class TaskDashboard {
 		return flexTable;
 	}
 
-	public Set<Integer> getSelectedRows() {
-		return selectedRows;
-	}
-
 	public int getEditableRow() {
 		return editableRow;
 	}
 
 	public void resetEditableRow() {
 		editableRow = -1;
-	}
-
-	public void setAddBtnHandler(ClickHandler handler) {
-		addBtn.addClickHandler(handler);
-	}
-
-	public void setDeleteBtnHandler(ClickHandler handler) {
-		deleteBtn.addClickHandler(handler);
 	}
 
 	public void resetFilters() {
@@ -155,6 +147,80 @@ public class TaskDashboard {
 			return MyTreeResources.INSTANCE.treeOpen();
 		}
 	};
+
+	public void loadTaskPage() {
+		RootLayoutPanel.get().clear();
+		RootLayoutPanel.get().add(buildTaskPage());
+	}
+
+	private DockLayoutPanel buildTaskPage() {
+		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		addEditForm = new AddEditForm();
+
+		dpanel.setSize("100%", "100%");
+
+		dpanel.addNorth(buildNavBar(), 48);
+		dpanel.addWest(buildLeftSidebar(), 240);
+		resetFilters();
+		dpanel.add(buildTaskDashboard());
+		selectedRows.clear();
+		resetEditableRow();
+
+		addBtn.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				addEditForm.loadAddPage();
+			}
+
+		});
+
+		flexTable.addDoubleClickHandler(new DoubleClickHandler() {
+			@Override
+			public void onDoubleClick(DoubleClickEvent event) {
+				event.preventDefault();
+				if (editableRow == -1) {
+					Cell cell = flexTable.getCellForEvent(event);
+					if (cell != null) {
+						int row = cell.getRowIndex();
+						if (row != 0) {
+							long id = Long.parseLong(flexTable.getText(row, 0));
+							addEditForm.loadEditPage(id);
+						}
+					}
+				}
+			}
+		});
+
+		deleteBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if (selectedRows.size() == 0) {
+					Window.alert("Please select atleast one task");
+				} else {
+					List<Long> taskIds = new ArrayList<>();
+					for (int row : selectedRows) {
+						taskIds.add(Long.parseLong(flexTable.getText(row, 0)));
+					}
+					taskService.deleteTasksByIds(taskIds, new AsyncCallback<Void>() {
+						@Override
+						public void onFailure(Throwable caught) {
+
+						}
+
+						@Override
+						public void onSuccess(Void result) {
+							Window.alert("Task[s] deleted");
+							loadTaskPage();
+						}
+					});
+				}
+			}
+
+		});
+
+		return dpanel;
+	}
 
 	public HorizontalPanel buildNavBar() {
 		HorizontalPanel navbar = new HorizontalPanel();
@@ -1020,22 +1086,22 @@ public class TaskDashboard {
 
 			@Override
 			public void onSuccess(final List<UserDTO> users) {
-				userService.getUsersFromTeam(team, new AsyncCallback<List<UserDTO>>(){
+				userService.getUsersFromTeam(team, new AsyncCallback<List<UserDTO>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
-						
+
 					}
 
 					@Override
 					public void onSuccess(List<UserDTO> usersInTeam) {
 						List<String> names = new ArrayList<>();
-						for(UserDTO userDTO: usersInTeam){
+						for (UserDTO userDTO : usersInTeam) {
 							names.add(userDTO.getName());
 						}
-						for(UserDTO user: users){
-							if(!names.contains(user.getName())){
+						for (UserDTO user : users) {
+							if (!names.contains(user.getName())) {
 								userField.addItem(user.getName());
 							}
 						}
@@ -1056,7 +1122,7 @@ public class TaskDashboard {
 						dialogBox.add(vpanel);
 						dialogBox.center();
 					}
-					
+
 				});
 			}
 		});
@@ -1067,7 +1133,7 @@ public class TaskDashboard {
 		clearSelection(productRootTree);
 	}
 
-	public VerticalPanel buildLeftSidebar() {
+	private VerticalPanel buildLeftSidebar() {
 		VerticalPanel vpanel = new VerticalPanel();
 
 		ScrollPanel spanel = new ScrollPanel();
@@ -1126,7 +1192,7 @@ public class TaskDashboard {
 	}
 
 	// ################ Task table section #####################
-	public VerticalPanel buildTaskDashboard() {
+	private VerticalPanel buildTaskDashboard() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
 
@@ -1235,19 +1301,7 @@ public class TaskDashboard {
 		}, ClickEvent.getType());
 	}
 
-	public void handleFlexTableClickEvent(int row) {
-		if (row != 0) {
-			if (selectedRows.contains(row)) {
-				flexTable.getRowFormatter().removeStyleName(row, "selected-row");
-				selectedRows.remove(row);
-			} else {
-				flexTable.getRowFormatter().addStyleName(row, "selected-row");
-				selectedRows.add(row);
-			}
-		}
-	}
-
-	public void filterTasks() {
+	private void filterTasks() {
 		rowIndex = 1;
 		if (!isTeamSelected) {
 			// Clear all tasks
