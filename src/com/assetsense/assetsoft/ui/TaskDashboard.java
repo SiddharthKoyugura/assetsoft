@@ -946,6 +946,7 @@ public class TaskDashboard {
 		label1.addStyleName("taskLabel");
 		final ListBox userField = new ListBox();
 		userField.setStyleName("listBoxStyle");
+		userField.addItem("<Select>");
 
 		final Button updateTeam = new Button("Submit");
 		updateTeam.setStyleName("customBtn");
@@ -965,34 +966,36 @@ public class TaskDashboard {
 					@Override
 					public void onSuccess(UserDTO userDTO) {
 						final User user = typeConverter.convertToUserDao(userDTO);
-						userService.addUserToTeam(user, team, new AsyncCallback<Void>() {
+						if (!username.equals("<Select>")) {
+							userService.addUserToTeam(user, team, new AsyncCallback<Void>() {
 
-							@Override
-							public void onFailure(Throwable caught) {
+								@Override
+								public void onFailure(Throwable caught) {
 
-							}
+								}
 
-							@Override
-							public void onSuccess(Void result) {
-								Label label = new Label(user.getName());
-								label.getElement().getStyle().setProperty("cursor", "pointer");
-								TreeItem item = new TreeItem(label);
-								label.addClickHandler(new ClickHandler() {
+								@Override
+								public void onSuccess(Void result) {
+									Label label = new Label(user.getName());
+									label.getElement().getStyle().setProperty("cursor", "pointer");
+									TreeItem item = new TreeItem(label);
+									label.addClickHandler(new ClickHandler() {
 
-									@Override
-									public void onClick(ClickEvent event) {
-										userLabelClickHandler();
-										selectedUserName = user.getName();
-										filterTasks();
-									}
-								});
-								treeItem.addItem(item);
-								treeItem.setSelected(false);
-								item.setState(true);
-								dialogBox.hide();
-							}
+										@Override
+										public void onClick(ClickEvent event) {
+											userLabelClickHandler();
+											selectedUserName = user.getName();
+											filterTasks();
+										}
+									});
+									treeItem.addItem(item);
+									treeItem.setSelected(false);
+									item.setState(true);
+									dialogBox.hide();
+								}
 
-						});
+							});
+						}
 					}
 
 				});
@@ -1016,27 +1019,45 @@ public class TaskDashboard {
 			}
 
 			@Override
-			public void onSuccess(List<UserDTO> users) {
-				for (UserDTO user : users) {
-					userField.addItem(user.getName());
-				}
+			public void onSuccess(final List<UserDTO> users) {
+				userService.getUsersFromTeam(team, new AsyncCallback<List<UserDTO>>(){
 
-				grid.setWidget(0, 1, userField);
-				grid.setWidget(1, 1, updateTeam);
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						
+					}
 
-				grid.getCellFormatter().setStyleName(0, 0, "text-right");
-				grid.getCellFormatter().setStyleName(1, 0, "text-right");
-				grid.getCellFormatter().setStyleName(2, 0, "text-right");
+					@Override
+					public void onSuccess(List<UserDTO> usersInTeam) {
+						List<String> names = new ArrayList<>();
+						for(UserDTO userDTO: usersInTeam){
+							names.add(userDTO.getName());
+						}
+						for(UserDTO user: users){
+							if(!names.contains(user.getName())){
+								userField.addItem(user.getName());
+							}
+						}
+						grid.setWidget(0, 1, userField);
+						grid.setWidget(1, 1, updateTeam);
 
-				grid.getCellFormatter().getElement(0, 1).getStyle().setProperty("textAlign", "left");
-				grid.getCellFormatter().getElement(1, 1).getStyle().setProperty("textAlign", "left");
-				grid.getCellFormatter().getElement(2, 1).getStyle().setProperty("textAlign", "left");
-				grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
+						grid.getCellFormatter().setStyleName(0, 0, "text-right");
+						grid.getCellFormatter().setStyleName(1, 0, "text-right");
+						grid.getCellFormatter().setStyleName(2, 0, "text-right");
 
-				vpanel.add(grid);
+						grid.getCellFormatter().getElement(0, 1).getStyle().setProperty("textAlign", "left");
+						grid.getCellFormatter().getElement(1, 1).getStyle().setProperty("textAlign", "left");
+						grid.getCellFormatter().getElement(2, 1).getStyle().setProperty("textAlign", "left");
+						grid.getCellFormatter().getElement(3, 1).getStyle().setProperty("textAlign", "left");
 
-				dialogBox.add(vpanel);
-				dialogBox.center();
+						vpanel.add(grid);
+
+						dialogBox.add(vpanel);
+						dialogBox.center();
+					}
+					
+				});
 			}
 		});
 	}
@@ -1174,52 +1195,6 @@ public class TaskDashboard {
 
 			flexTable.getRowFormatter().getElement(rowIndex).getStyle().setProperty("cursor", "pointer");
 			flexTable.getRowFormatter().addStyleName(rowIndex, "row-border-top");
-
-			// flexTable.addClickHandler(new ClickHandler() {
-			// @Override
-			// public void onClick(ClickEvent event) {
-			// Cell cell = flexTable.getCellForEvent(event);
-			// if (cell != null) {
-			// final int row = cell.getRowIndex();
-			// if (row > 0) {
-			// userService.getUsers(new AsyncCallback<List<UserDTO>>() {
-			//
-			// @Override
-			// public void onFailure(Throwable caught) {
-			// // TODO Auto-generated method stub
-			//
-			// }
-			//
-			// @Override
-			// public void onSuccess(final List<UserDTO> users) {
-			// // TODO Auto-generated method stub
-			// productService.getTopMostParentProducts(new
-			// AsyncCallback<List<ProductDTO>>() {
-			//
-			// @Override
-			// public void onFailure(Throwable caught) {
-			// // TODO
-			// // Auto-generated
-			// // method stub
-			//
-			// }
-			//
-			// @Override
-			// public void onSuccess(List<ProductDTO> products) {
-			// convertRowToEditable(row, flexTable, users, products);
-			// }
-			//
-			// });
-			// }
-			//
-			// });
-			//
-			// }
-			// } else {
-			// revertFieldsToNormalState(flexTable);
-			// }
-			// }
-			// });
 
 			rowIndex++;
 		}
