@@ -14,6 +14,7 @@ public interface TaskServiceAsync {
 	void getTasksByUserId(long userId, AsyncCallback<List<TaskDTO>> callback);
 	void getTasksByPriorityId(long priorityId, AsyncCallback<List<TaskDTO>> callback);
 	void getTasksByUsername(String username, AsyncCallback<List<TaskDTO>> callback);
+	void getTasksByLookupValue(String name, String value, AsyncCallback<List<TaskDTO>> callback);
 	void getTasks(AsyncCallback<List<TaskDTO>> callback);
 	void editTaskTitle(long id, String title, AsyncCallback<Void> callback);
 	void editTaskLookup(long id, String name, String value, AsyncCallback<Void> callback);

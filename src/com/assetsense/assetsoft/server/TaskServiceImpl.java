@@ -10,9 +10,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
 public class TaskServiceImpl extends RemoteServiceServlet implements TaskService {
-	
+
 	private TaskDao taskDao;
-	
+
 	@Override
 	public void saveTask(Task task) {
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
@@ -42,11 +42,17 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasksByPriroityId(priorityId);
 	}
-	
+
 	@Override
 	public List<TaskDTO> getTasksByUsername(String username) {
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasksByUsername(username);
+	}
+
+	@Override
+	public List<TaskDTO> getTasksByLookupValue(String name, String value) {
+		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
+		return taskDao.getTasksByLookupValue(name, value);
 	}
 
 	@Override
@@ -82,7 +88,7 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 	@Override
 	public void deleteTasksByIds(List<Long> taskIds) {
 		taskDao = (TaskDao) ApplicationContextListener.applicationContext.getBean("taskDao");
-		taskDao.deleteTasksByIds(taskIds);	
+		taskDao.deleteTasksByIds(taskIds);
 	}
 
 	@Override

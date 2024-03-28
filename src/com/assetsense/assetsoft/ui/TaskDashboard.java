@@ -101,6 +101,8 @@ public class TaskDashboard {
 
 	// Task Table section
 	private DoubleClickTable flexTable;
+	private PopupPanel popupPanel;
+	
 	private int rowIndex = 1;
 	private Set<Integer> selectedRows = new HashSet<>();
 	private int editableRow = -1;
@@ -1300,13 +1302,10 @@ public class TaskDashboard {
 	}
 
 	private void filterTasks() {
-		rowIndex = 1;
 		if (!isTeamSelected) {
 			// Clear all tasks
 			if (selectedUserName != null || !allTasksRendered) {
-				while (flexTable.getRowCount() != 1) {
-					flexTable.removeRow(1);
-				}
+				clearFlexTableRows();
 			}
 			if (selectedUserName != null) {
 				taskService.getTasksByUsername(selectedUserName, new AsyncCallback<List<TaskDTO>>() {
@@ -1343,9 +1342,7 @@ public class TaskDashboard {
 			}
 		} else {
 			// Clear all tasks
-			while (flexTable.getRowCount() != 1) {
-				flexTable.removeRow(1);
-			}
+			clearFlexTableRows();
 			userService.getUsersFromTeam(selectedTeam, new AsyncCallback<List<UserDTO>>() {
 
 				@Override
@@ -1379,6 +1376,13 @@ public class TaskDashboard {
 		}
 	}
 
+	private void clearFlexTableRows(){
+		rowIndex = 1;
+		while (flexTable.getRowCount() != 1) {
+			flexTable.removeRow(1);
+		}
+	}
+	
 	// Method to convert cells in a row to editable fields
 	private void convertRowToEditable(final int row, final FlexTable flexTable, List<UserDTO> users,
 			List<ProductDTO> products) {
@@ -1841,8 +1845,8 @@ public class TaskDashboard {
 	}
 	
 	private void showPopup(String name, HTML filterIcon){
-		final PopupPanel popup = new PopupPanel(true);
-		popup.setStyleName("popupPanelStyle");
+		popupPanel = new PopupPanel(true);
+		popupPanel.setStyleName("popupPanelStyle");
 		
         final VerticalPanel menuPanel = new VerticalPanel();
         name = name.toLowerCase();
@@ -1854,6 +1858,10 @@ public class TaskDashboard {
         	l1.addStyleName("subMenuItem");
         	l2.addStyleName("subMenuItem");
         	l3.addStyleName("subMenuItem");
+        	
+        	lookupFilterClickHandler(name, l1);
+        	lookupFilterClickHandler(name, l2);
+        	lookupFilterClickHandler(name, l3);
         	
         	menuPanel.add(l1);
         	menuPanel.add(l2);
@@ -1871,6 +1879,12 @@ public class TaskDashboard {
         	l4.addStyleName("subMenuItem");
         	l5.addStyleName("subMenuItem");
         	
+        	lookupFilterClickHandler("status", l1);
+        	lookupFilterClickHandler("status", l2);
+        	lookupFilterClickHandler("status", l3);
+        	lookupFilterClickHandler("status", l4);
+        	lookupFilterClickHandler("status", l5);
+        	
         	menuPanel.add(l1);
         	menuPanel.add(l2);
         	menuPanel.add(l3);
@@ -1884,6 +1898,10 @@ public class TaskDashboard {
         	l1.addStyleName("subMenuItem");
         	l2.addStyleName("subMenuItem");
         	l3.addStyleName("subMenuItem");
+        	
+        	lookupFilterClickHandler(name, l1);
+        	lookupFilterClickHandler(name, l2);
+        	lookupFilterClickHandler(name, l3);
         	
         	menuPanel.add(l1);
         	menuPanel.add(l2);
@@ -1949,9 +1967,35 @@ public class TaskDashboard {
         
         int left = filterIcon.getAbsoluteLeft();
         int top = filterIcon.getAbsoluteTop() + filterIcon.getOffsetHeight();
-        popup.setPopupPosition(left, top);
-        popup.add(menuPanel);
-        popup.show();
+        popupPanel.setPopupPosition(left, top);
+        popupPanel.add(menuPanel);
+        popupPanel.show();
+	}
+	
+	private void lookupFilterClickHandler(final String name, final Label label){
+		label.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				String value = label.getText();
+				taskService.getTasksByLookupValue(name, value, new AsyncCallback<List<TaskDTO>>(){
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Got error in lookup filter");
+					}
+
+					@Override
+					public void onSuccess(List<TaskDTO> tasks) {
+						popupPanel.hide();
+						clearFlexTableRows();
+						loadTableRows(tasks);
+					}
+					
+				});
+			}
+			
+		});
 	}
 }
 

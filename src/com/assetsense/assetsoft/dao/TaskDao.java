@@ -209,6 +209,39 @@ public class TaskDao {
 		return taskDTOs;
 	}
 
+	// Method to return tasks by lookup value
+	public List<TaskDTO> getTasksByLookupValue(String name, String value) {
+		name = name.toLowerCase();
+		value = value.toUpperCase();
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+			Query<Lookup> lookupQuery = session.createQuery("from Lookup Where value=:value", Lookup.class);
+			lookupQuery.setParameter("value", value);
+			Lookup lookup = lookupQuery.getSingleResult();
+			
+			Query<Task> query = session.createQuery("from Task Where " + name + "id = :id ORDER BY id ASC", Task.class);
+			query.setParameter("id", lookup.getLookupId());
+			
+			List<Task> tasks = query.getResultList();
+			for (Task task : tasks) {
+				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+			}
+			
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+
+		return taskDTOs;
+	}
+
 	// method to return all tasks
 	public List<TaskDTO> getTasks() {
 		List<TaskDTO> taskDTOs = new ArrayList<>();
