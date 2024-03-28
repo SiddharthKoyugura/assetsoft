@@ -23,6 +23,10 @@ public interface TaskServiceAsync {
 
 	void getTasksByLookupValue(String name, String value, AsyncCallback<List<TaskDTO>> callback);
 
+	void getTasksByProductName(String name, AsyncCallback<List<TaskDTO>> callback);
+
+	void getTasksByModuleName(String name, AsyncCallback<List<TaskDTO>> callback);
+
 	void getTasks(AsyncCallback<List<TaskDTO>> callback);
 
 	void editTaskTitle(long id, String title, AsyncCallback<Void> callback);

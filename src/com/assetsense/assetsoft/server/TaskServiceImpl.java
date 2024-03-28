@@ -56,6 +56,18 @@ public class TaskServiceImpl extends RemoteServiceServlet implements TaskService
 	}
 
 	@Override
+	public List<TaskDTO> getTasksByProductName(String name) {
+		taskDao = (TaskDaoImpl) ApplicationContextListener.applicationContext.getBean("taskDao");
+		return taskDao.getTasksByProductName(name);
+	}
+
+	@Override
+	public List<TaskDTO> getTasksByModuleName(String name) {
+		taskDao = (TaskDaoImpl) ApplicationContextListener.applicationContext.getBean("taskDao");
+		return taskDao.getTasksByModuleName(name);
+	}
+
+	@Override
 	public List<TaskDTO> getTasks() {
 		taskDao = (TaskDaoImpl) ApplicationContextListener.applicationContext.getBean("taskDao");
 		return taskDao.getTasks();

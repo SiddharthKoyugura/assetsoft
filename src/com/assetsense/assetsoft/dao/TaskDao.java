@@ -21,6 +21,10 @@ public interface TaskDao {
 	List<TaskDTO> getTasksByUsername(String username);
 
 	List<TaskDTO> getTasksByLookupValue(String name, String value);
+	
+	List<TaskDTO> getTasksByProductName(String name);
+	
+	List<TaskDTO> getTasksByModuleName(String name);
 
 	List<TaskDTO> getTasks();
 

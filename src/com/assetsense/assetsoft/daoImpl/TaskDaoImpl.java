@@ -3,10 +3,13 @@ package com.assetsense.assetsoft.daoImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import com.assetsense.assetsoft.dao.TaskDao;
@@ -231,15 +234,89 @@ public class TaskDaoImpl implements TaskDao {
 			Query<Lookup> lookupQuery = session.createQuery("from Lookup Where value=:value", Lookup.class);
 			lookupQuery.setParameter("value", value);
 			Lookup lookup = lookupQuery.getSingleResult();
-			
+
 			Query<Task> query = session.createQuery("from Task Where " + name + "id = :id ORDER BY id ASC", Task.class);
 			query.setParameter("id", lookup.getLookupId());
-			
+
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
 				taskDTOs.add(typeConverter.convertToTaskDTO(task));
 			}
-			
+			tx.commit();
+
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+
+		return taskDTOs;
+	}
+
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	public List<TaskDTO> getTasksByProductName(String name) {
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			Criteria criteria = session.createCriteria(Product.class);
+			criteria.add(Restrictions.eq("name", name));
+
+			Product product = (Product) criteria.list().get(0);
+
+			if (product != null) {
+				Criteria taskCriteria = session.createCriteria(Task.class);
+				taskCriteria.add(Restrictions.eq("product", product));
+				taskCriteria.addOrder(Order.asc("taskId"));
+
+				List<Task> tasks = taskCriteria.list();
+				for (Task task : tasks) {
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+			}
+
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+
+		return taskDTOs;
+	}
+	
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	@Override
+	public List<TaskDTO> getTasksByModuleName(String name){
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			Criteria criteria = session.createCriteria(Module.class);
+			criteria.add(Restrictions.eq("name", name));
+
+			Module Module = (Module) criteria.list().get(0);
+
+			if (Module != null) {
+				Criteria taskCriteria = session.createCriteria(Task.class);
+				taskCriteria.add(Restrictions.eq("module", Module));
+				taskCriteria.addOrder(Order.asc("taskId"));
+
+				List<Task> tasks = taskCriteria.list();
+				for (Task task : tasks) {
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+			}
+
 		} catch (HibernateException e) {
 			if (tx != null) {
 				tx.rollback();

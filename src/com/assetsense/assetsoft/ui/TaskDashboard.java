@@ -1940,6 +1940,7 @@ public class TaskDashboard {
 					for (ProductDTO product : products) {
 						Label label = new Label(product.getName());
 						label.addStyleName("subMenuItem");
+						productFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
@@ -1959,6 +1960,7 @@ public class TaskDashboard {
 					for (ModuleDTO module : modules) {
 						Label label = new Label(module.getName());
 						label.addStyleName("subMenuItem");
+						moduleFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
@@ -2008,6 +2010,57 @@ public class TaskDashboard {
 				selectedUserName = label.getText();
 				filterTasks();
 			}
+		});
+	}
+
+	private void productFilterClickHandler(final Label label) {
+		label.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskService.getTasksByProductName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+
+					}
+
+					@Override
+					public void onSuccess(List<TaskDTO> tasks) {
+						popupPanel.hide();
+						clearFlexTableRows();
+						loadTableRows(tasks);
+					}
+
+				});
+			}
+
+		});
+	}
+
+	private void moduleFilterClickHandler(final Label label) {
+		label.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskService.getTasksByModuleName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<TaskDTO> tasks) {
+						popupPanel.hide();
+						clearFlexTableRows();
+						loadTableRows(tasks);
+					}
+
+				});
+			}
+
 		});
 	}
 

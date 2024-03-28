@@ -9,7 +9,7 @@
 			<generator class="native"/>
 		</id>
 
-		<property name="name" column="name"></property>
+		<property name="name" column="name" unique="true"></property>
 		
 		<many-to-one name="parentProduct" column="parent_product_id" not-null="false" />
 	</class>
