@@ -67,8 +67,6 @@ body {
 }
 
 /*      END: DROPDOWN(TREE) SECTION         */
-
-
 /*      START: TASKDASHBOARD SECTION         */
 .customBtn {
 	padding: 5px 15px;
@@ -130,23 +128,15 @@ body {
 
 .taskCell {
 	padding: 10px;
-	text-align: center;
+	text-align: left;
 }
 
 .taskCell td {
 	padding: 10px;
 }
 
-
-
 /*      END: TASKDASHBOARD SECTION         */
-
-
-
-
 /*      START: ADD-EDIT PAGE SECTION         */
-
-
 .listBoxStyle {
 	width: 200px;
 	padding: 8px;
@@ -180,39 +170,55 @@ body {
 	margin-right: 50px;
 }
 
-
 /*      END: ADD-EDIT PAGE SECTION          */
-
-
 /*      START: ADD-EDIT PAGE SECTION         */
-
 .form-container {
 	width: 40vw !important;
 	margin: 100px auto 0;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	background-color: #f4f4f4;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-
 /*      END: ADD-EDIT PAGE SECTION         */
-
 .gwt-TreeItem-selected {
-	display: block !important; 
+	display: block !important;
 	background-color: rgba(52, 152, 219, 0.7) !important;
 	padding: 2px 0 2px 3px;
 	border-radius: 5px;
 	width: 150px !important;
 }
 
-.selected-row{
+.selected-row {
 	background-color: rgba(52, 152, 219, 0.7) !important;
 }
 
 .row-border-top {
-    border-top: 1px solid rgba(0, 0, 0, 0.1); /* Adjust border properties as needed */
+	border-top: 1px solid rgba(0, 0, 0, 0.1);
+	/* Adjust border properties as needed */
 }
 
+.set-pad-zero td {
+	padding: 10px 0;
+}
 
+.popupPanelStyle {
+	background-color: #ffffff;
+	border: 1px solid #cccccc;
+	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+	border-radius: 5px;
+}
+
+.subMenuItem {
+	padding: 5px 7px;
+	cursor: pointer;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	font-size: 15px;
+	min-width: 50px;
+}
+
+.subMenuItem:hover {
+	background-color: #f0f0f0;
+}

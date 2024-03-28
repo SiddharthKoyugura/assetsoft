@@ -1,20 +1,35 @@
 package com.assetsense.assetsoft.ui;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.assetsense.assetsoft.dto.ProductDTO;
+import com.assetsense.assetsoft.dto.TaskDTO;
+import com.assetsense.assetsoft.dto.TeamDTO;
 import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.domain.Lookup;
+import com.assetsense.assetsoft.domain.Product;
+import com.assetsense.assetsoft.domain.Task;
+import com.assetsense.assetsoft.domain.Team;
+import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.ModuleDTO;
+import com.assetsense.assetsoft.service.LookupService;
+import com.assetsense.assetsoft.service.LookupServiceAsync;
 import com.assetsense.assetsoft.service.ModuleService;
 import com.assetsense.assetsoft.service.ModuleServiceAsync;
 import com.assetsense.assetsoft.service.ProductService;
 import com.assetsense.assetsoft.service.ProductServiceAsync;
+import com.assetsense.assetsoft.service.TaskService;
+import com.assetsense.assetsoft.service.TaskServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -25,14 +40,21 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AddEditForm {
+	private final TaskDashboard taskDashboard = new TaskDashboard();
+
+	private final DtoToDao typeConverter = new DtoToDao();
+
+	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final ProductServiceAsync productService = GWT.create(ProductService.class);
 	private final ModuleServiceAsync moduleService = GWT.create(ModuleService.class);
+	private final LookupServiceAsync lookupService = GWT.create(LookupService.class);
 
 	private Button saveBtn;
 	private Button closeBtn;
@@ -51,71 +73,273 @@ public class AddEditForm {
 	private TextBox remainingEstField;
 	private IntegerBox percentField;
 
-	public void setSaveBtnHandler(ClickHandler handler) {
-		saveBtn.addClickHandler(handler);
+	public void loadAddPage() {
+		RootLayoutPanel.get().clear();
+		RootLayoutPanel.get().add(buildAddForm());
 	}
 
-	public void setCloseBtnHandler(ClickHandler handler) {
-		closeBtn.addClickHandler(handler);
+	public void loadEditPage(long id) {
+		RootLayoutPanel.get().clear();
+		RootLayoutPanel.get().add(buildEditForm(id));
 	}
 
-	public Button getSaveBtn() {
-		return saveBtn;
+	private DockLayoutPanel buildAddForm() {
+		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		VerticalPanel vpanel = new VerticalPanel();
+		vpanel.setWidth("100%");
+
+		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
+
+		vpanel.add(buildFormHeader());
+		vpanel.add(buildForm());
+
+		saveBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				saveTask();
+			}
+		});
+
+		closeBtn.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskDashboard.loadTaskPage();
+			}
+
+		});
+
+		dpanel.add(vpanel);
+
+		return dpanel;
 	}
 
-	public Button getCloseBtn() {
-		return closeBtn;
+	private DockLayoutPanel buildEditForm(final long id) {
+		final DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
+		final VerticalPanel vpanel = new VerticalPanel();
+
+		vpanel.setWidth("100%");
+
+		dpanel.addNorth(taskDashboard.buildNavBar(), 50);
+
+		vpanel.add(buildFormHeader());
+		vpanel.add(buildForm());
+
+		saveBtn.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				saveTask(id);
+			}
+		});
+		closeBtn.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskDashboard.loadTaskPage();
+			}
+		});
+
+		taskService.getTaskById(id, new AsyncCallback<TaskDTO>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+
+			}
+
+			@Override
+			public void onSuccess(final TaskDTO task) {
+
+				descriptionField.setText(task.getDescription());
+				initialEstField.setText(task.getInitialEstimate());
+				dueDateField.setText(task.getDueDate());
+				titleField.setText(task.getTitle());
+				remainingEstField.setText(task.getRemainingEstimate());
+				percentField.setText(task.getPercentComplete());
+
+				String selectedWorkType = task.getType().getValue();
+				selectListBoxItem(workItemTypeField, selectedWorkType);
+
+				String selectedStatus = task.getStatus().getValue();
+				selectListBoxItem(workFlowStepField, selectedStatus);
+
+				String selectedUser = task.getUser().getName();
+				selectListBoxItem(assignedToField, selectedUser);
+
+				String selectedProduct = task.getProduct().getName();
+				selectListBoxItem(productField, selectedProduct);
+
+				String selectedPriority = task.getPriority().getValue();
+				selectListBoxItem(priorityField, selectedPriority);
+
+				moduleService.getModulesByProductName(selectedProduct, new AsyncCallback<List<ModuleDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<ModuleDTO> modules) {
+						for (ModuleDTO module : modules) {
+							moduleField.addItem(module.getName());
+						}
+						if (task.getModule() != null) {
+							String selectedModule = task.getModule().getName();
+							selectListBoxItem(moduleField, selectedModule);
+						}
+						dpanel.add(vpanel);
+					}
+
+				});
+
+			}
+
+		});
+
+		return dpanel;
 	}
 
-	public TextArea getDescriptionField() {
-		return descriptionField;
+	private void selectListBoxItem(ListBox listBox, String value) {
+		for (int i = 0; i < listBox.getItemCount(); i++) {
+			if (listBox.getValue(i).equals(value)) {
+				listBox.setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 
-	public ListBox getWorkItemTypeField() {
-		return workItemTypeField;
+	private void saveTask(long... id) {
+		String title = titleField.getText();
+
+		String type = workItemTypeField.getSelectedValue();
+
+		final String step = workFlowStepField.getSelectedValue();
+		final String assign = assignedToField.getSelectedValue();
+		final String product = productField.getSelectedValue();
+		final String priority = priorityField.getSelectedValue();
+		final String module = moduleField.getSelectedValue();
+
+		String percent = percentField.getText();
+		String initialEst = initialEstField.getText();
+		String remainEst = remainingEstField.getText();
+		String dueDate = dueDateField.getText();
+		String description = descriptionField.getText();
+
+		final Task task = new Task();
+		if (id.length == 1) {
+			task.setTaskId(id[0]);
+		}
+		task.setDescription(description);
+		task.setTitle(title);
+		task.setPercentComplete(percent);
+		task.setInitialEstimate(initialEst);
+		task.setRemainingEstimate(remainEst);
+		task.setDueDate(dueDate);
+
+		List<String> values = new ArrayList<>();
+		values.add(type);
+		values.add(step);
+		values.add(priority);
+
+		lookupService.getLookupsByValues(values, new AsyncCallback<List<Lookup>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert("Error at lookupservice");
+			}
+
+			@Override
+			public void onSuccess(List<Lookup> lookups) {
+				task.setType(lookups.get(0));
+				task.setStatus(lookups.get(1));
+				task.setPriority(lookups.get(2));
+
+				userService.getUserByName(assign, new AsyncCallback<UserDTO>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						Window.alert("Error at userService");
+					}
+
+					@Override
+					public void onSuccess(UserDTO userDTO) {
+						User user = new User();
+						user.setUserId(userDTO.getUserId());
+						user.setName(userDTO.getName());
+						user.setEmail(userDTO.getEmail());
+						user.setPassword(userDTO.getPassword());
+
+						if (user.getTeams() != null && user.getTeams().size() > 0) {
+							Set<Team> teams = new HashSet<>();
+
+							for (TeamDTO team : userDTO.getTeams()) {
+								Team teamDao = new Team();
+								teamDao.setTeamId(team.getTeamId());
+								teamDao.setName(team.getName());
+								teams.add(teamDao);
+							}
+
+							user.setTeams(teams);
+						}
+
+						task.setUser(user);
+
+						productService.getProductByName(product, new AsyncCallback<ProductDTO>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								Window.alert("Error at product Service");
+							}
+
+							@Override
+							public void onSuccess(ProductDTO productDTO) {
+								Product product = typeConverter.convertToProductDao(productDTO);
+								task.setProduct(product);
+								moduleService.getModuleByName(module, new AsyncCallback<ModuleDTO>() {
+
+									@Override
+									public void onFailure(Throwable caught) {
+										// TODO Auto-generated method stub
+										Window.alert("Error at moduleService");
+									}
+
+									@Override
+									public void onSuccess(ModuleDTO moduleDTO) {
+										if (moduleDTO != null) {
+											task.setModule(typeConverter.convertToModuleDao(moduleDTO));
+
+										} else {
+											task.setModule(null);
+										}
+
+										taskService.saveTask(task, new AsyncCallback<Void>() {
+
+											@Override
+											public void onFailure(Throwable caught) {
+												Window.alert("Error at adding task");
+											}
+
+											@Override
+											public void onSuccess(Void result) {
+												taskDashboard.loadTaskPage();
+											}
+
+										});
+									}
+
+								});
+
+							}
+						});
+					}
+
+				});
+			}
+		});
 	}
 
-	public ListBox getWorkFlowStepField() {
-		return workFlowStepField;
-	}
-
-	public ListBox getAssignedToField() {
-		return assignedToField;
-	}
-
-	public TextBox getInitialEstField() {
-		return initialEstField;
-	}
-
-	public TextBox getDueDateField() {
-		return dueDateField;
-	}
-
-	public TextBox getTitleField() {
-		return titleField;
-	}
-
-	public ListBox getProductField() {
-		return productField;
-	}
-
-	public ListBox getPriorityField() {
-		return priorityField;
-	}
-
-	public TextBox getRemainingEstField() {
-		return remainingEstField;
-	}
-
-	public IntegerBox getPercentField() {
-		return percentField;
-	}
-
-	public ListBox getModuleField() {
-		return moduleField;
-	}
-
-	public DockLayoutPanel buildFormHeader() {
+	private DockLayoutPanel buildFormHeader() {
 		DockLayoutPanel dpanel = new DockLayoutPanel(Unit.PX);
 		dpanel.getElement().getStyle().setProperty("boxShadow", "0 2px 2px -2px rgba(0,0,0,.4)");
 		dpanel.setHeight("50px");
@@ -142,7 +366,7 @@ public class AddEditForm {
 		return dpanel;
 	}
 
-	public VerticalPanel buildForm() {
+	private VerticalPanel buildForm() {
 		VerticalPanel vpanel = new VerticalPanel();
 		vpanel.setWidth("100%");
 
@@ -340,7 +564,6 @@ public class AddEditForm {
 		grid.setWidget(2, 1, priorityField);
 		grid.setWidget(3, 1, remainingEstField);
 		grid.setWidget(4, 1, percentField);
-		
 
 		productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
 
@@ -378,9 +601,8 @@ public class AddEditForm {
 
 		return vpanel;
 	}
-	
-	
-	public void updateModuleField(){
+
+	private void updateModuleField() {
 		String productName = productField.getSelectedValue();
 		moduleField.clear();
 		moduleField.addItem("<Select>");
@@ -401,4 +623,5 @@ public class AddEditForm {
 
 		});
 	}
+
 }

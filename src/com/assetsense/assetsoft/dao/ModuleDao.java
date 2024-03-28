@@ -52,6 +52,32 @@ public class ModuleDao {
 		return moduleInDB;
 	}
 
+	public List<ModuleDTO> getModules() {
+		List<ModuleDTO> moduleDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module", Module.class);
+			List<Module> modules = moduleQuery.getResultList();
+			
+			for(Module module: modules){
+				moduleDTOs.add(daoToDto.convertToModuleDTO(module));
+			}
+
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return moduleDTOs;
+	}
+
 	public List<ModuleDTO> getModulesByProductName(String productName) {
 		List<ModuleDTO> moduleDTOs = new ArrayList<>();
 		Session session = sessionFactory.openSession();
@@ -64,8 +90,8 @@ public class ModuleDao {
 			Product product = query.getSingleResult();
 
 			if (product != null) {
-				Query<Module> moduleQuery = (Query<Module>) session
-						.createQuery("from Module where product_id=:id", Module.class);
+				Query<Module> moduleQuery = (Query<Module>) session.createQuery("from Module where product_id=:id",
+						Module.class);
 				moduleQuery.setParameter("id", product.getProductId());
 				List<Module> modules = moduleQuery.getResultList();
 				for (Module module : modules) {
@@ -160,7 +186,7 @@ public class ModuleDao {
 			query.setParameter("name", moduleName);
 			Module module = query.getSingleResult();
 			if (module != null) {
-				moduleDTO= daoToDto.convertToModuleDTO(module);
+				moduleDTO = daoToDto.convertToModuleDTO(module);
 			}
 
 			tx.commit();
