@@ -25,6 +25,7 @@ import com.assetsense.assetsoft.service.TaskService;
 import com.assetsense.assetsoft.service.TaskServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
+import com.assetsense.assetsoft.util.TypeConverter;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -48,7 +49,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class AddEditForm {
 	private final TaskDashboard taskDashboard = new TaskDashboard();
 
-	private final DtoToDao typeConverter = new DtoToDao();
+	private final TypeConverter typeConverter = new TypeConverter();
 
 	private final TaskServiceAsync taskService = GWT.create(TaskService.class);
 	private final UserServiceAsync userService = GWT.create(UserService.class);

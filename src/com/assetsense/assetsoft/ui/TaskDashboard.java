@@ -1,6 +1,7 @@
 package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ import com.assetsense.assetsoft.service.TeamService;
 import com.assetsense.assetsoft.service.TeamServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
+import com.assetsense.assetsoft.util.TypeConverter;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
@@ -39,6 +41,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -66,7 +70,7 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class TaskDashboard {
-	private final DtoToDao typeConverter = new DtoToDao();
+	private final TypeConverter typeConverter = new TypeConverter();
 
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final TeamServiceAsync teamService = GWT.create(TeamService.class);
@@ -99,9 +103,15 @@ public class TaskDashboard {
 	private Boolean isTeamSelected = false;
 	private Team selectedTeam;
 
+	private TextBox searchField;
+	private ListBox itemSearch;
+	private String attrName;
+
 	// Task Table section
 	private DoubleClickTable flexTable;
 	private PopupPanel popupPanel;
+	private Boolean isIdASCOrder = true;
+	private Boolean isLookupASCOrder = true;
 
 	private int rowIndex = 1;
 	private Set<Integer> selectedRows = new HashSet<>();
@@ -1220,7 +1230,17 @@ public class TaskDashboard {
 		flexTableRow.getElement(0).getStyle().setProperty("textAlign", "left");
 		flexTableRow.getElement(0).getStyle().setProperty("padding", "10px");
 
-		flexTable.setText(0, 0, "ID");
+		Label label = new Label("ID");
+		label.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				isIdASCOrder = !isIdASCOrder;
+				allTasksRendered = false;
+				filterTasks();
+			}
+		});
+
+		flexTable.setWidget(0, 0, label);
 		flexTable.setWidget(0, 1, createLabelFilterPanel("Type"));
 		flexTable.setText(0, 2, "Title");
 		flexTable.setWidget(0, 3, createLabelFilterPanel("Work flow step"));
@@ -1237,6 +1257,11 @@ public class TaskDashboard {
 	}
 
 	private void loadTableRows(List<TaskDTO> tasks) {
+		if (!isIdASCOrder) {
+			Collections.reverse(tasks);
+		}
+		editableRow = -1;
+		selectedRows.clear();
 		for (final TaskDTO task : tasks) {
 			flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 			int col = 0;
@@ -1319,6 +1344,7 @@ public class TaskDashboard {
 					public void onSuccess(List<TaskDTO> tasks) {
 						loadTableRows(tasks);
 						allTasksRendered = false;
+						selectedUserName = null;
 					}
 
 				});
@@ -1741,13 +1767,26 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 
+		Button resetBtn = new Button("Reset");
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
 
+		resetBtn.setStyleName("customBtn");
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
+
+		resetBtn.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				isIdASCOrder = true;
+				allTasksRendered = false;
+				filterTasks();
+			}
+
+		});
 
 		editBtn.addClickHandler(new ClickHandler() {
 			@Override
@@ -1792,12 +1831,90 @@ public class TaskDashboard {
 		});
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+		headerPanel.addEast(createButtonsPanel(resetBtn, addBtn, editBtn, deleteBtn), 400);
+		headerPanel.add(createSearchPanel());
 
 		return headerPanel;
 	}
 
 	// Custom hpanels
+	private HorizontalPanel createSearchPanel() {
+		HorizontalPanel hpanel = new HorizontalPanel();
+		hpanel.getElement().getStyle().setPadding(10, Unit.PX);
+
+		searchField = new TextBox();
+		searchField.getElement().setAttribute("placeHolder", "Search");
+		searchField.addStyleName("listBoxStyle");
+
+		itemSearch = new ListBox();
+		itemSearch.addStyleName("listBoxStyle");
+
+		itemSearch.addItem("ID");
+		itemSearch.addItem("Type");
+		itemSearch.addItem("Title");
+		itemSearch.addItem("Work flow step");
+		itemSearch.addItem("Priority");
+		itemSearch.addItem("Assigned to");
+		itemSearch.addItem("Project");
+		itemSearch.addItem("Module");
+
+		attrName = itemSearch.getSelectedValue();
+
+		itemSearch.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				attrName = itemSearch.getSelectedValue();
+				if (attrName != null) {
+					if (attrName.contains("step")) {
+						attrName = "status";
+					} else if (attrName.contains("Assigned")) {
+						attrName = "user";
+					} else if (attrName.equals("Project")) {
+						attrName = "product";
+					}
+				}
+			}
+		});
+
+		searchField.addKeyUpHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				final String searchValue = searchField.getText();
+				if (searchValue.length() > 0) {
+					taskService.getTasksBySearchString(attrName, searchValue, new AsyncCallback<List<TaskDTO>>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+						}
+
+						@Override
+						public void onSuccess(List<TaskDTO> tasks) {
+							clearFlexTableRows();
+							if (tasks != null) {
+								loadTableRows(tasks);
+							}
+						}
+
+					});
+				} else {
+					isIdASCOrder = true;
+					allTasksRendered = false;
+					filterTasks();
+				}
+			}
+
+		});
+
+		itemSearch.getElement().getStyle().setMarginLeft(5, Unit.PX);
+		itemSearch.getElement().getStyle().setProperty("cursor", "pointer");
+
+		hpanel.add(searchField);
+		hpanel.add(itemSearch);
+
+		return hpanel;
+	}
+
 	private HorizontalPanel createButtonsPanel(Button... buttons) {
 		HorizontalPanel buttonsPanel = new HorizontalPanel();
 		buttonsPanel.getElement().getStyle().setProperty("padding", "10px");
@@ -1837,7 +1954,11 @@ public class TaskDashboard {
 			}
 
 		});
-		hpanel.add(new Label(text));
+
+		Label label = new Label(text);
+		lookupSortClickHandler(label);
+
+		hpanel.add(label);
 		hpanel.add(filterIcon);
 
 		return hpanel;
@@ -1939,6 +2060,7 @@ public class TaskDashboard {
 					for (ProductDTO product : products) {
 						Label label = new Label(product.getName());
 						label.addStyleName("subMenuItem");
+						productFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
@@ -1958,6 +2080,7 @@ public class TaskDashboard {
 					for (ModuleDTO module : modules) {
 						Label label = new Label(module.getName());
 						label.addStyleName("subMenuItem");
+						moduleFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
@@ -1972,6 +2095,7 @@ public class TaskDashboard {
 		popupPanel.show();
 	}
 
+	// Filter section
 	private void lookupFilterClickHandler(final String name, final Label label) {
 		label.addClickHandler(new ClickHandler() {
 
@@ -2010,6 +2134,87 @@ public class TaskDashboard {
 		});
 	}
 
+	private void productFilterClickHandler(final Label label) {
+		label.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskService.getTasksByProductName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+
+					}
+
+					@Override
+					public void onSuccess(List<TaskDTO> tasks) {
+						popupPanel.hide();
+						clearFlexTableRows();
+						loadTableRows(tasks);
+					}
+
+				});
+			}
+
+		});
+	}
+
+	private void moduleFilterClickHandler(final Label label) {
+		label.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				taskService.getTasksByModuleName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onSuccess(List<TaskDTO> tasks) {
+						popupPanel.hide();
+						clearFlexTableRows();
+						loadTableRows(tasks);
+					}
+
+				});
+			}
+
+		});
+	}
+
+	// Sort section
+	private void lookupSortClickHandler(final Label label) {
+		final String lookupName = label.getText().toLowerCase().contains("step") ? "status"
+				: label.getText().toLowerCase();
+
+		if (lookupName.equals("type") || lookupName.equals("status") || lookupName.equals("priority")) {
+			label.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					taskService.getTasksByLookupOrder(lookupName, isLookupASCOrder, new AsyncCallback<List<TaskDTO>>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+
+						}
+
+						@Override
+						public void onSuccess(List<TaskDTO> tasks) {
+							clearFlexTableRows();
+							loadTableRows(tasks);
+							isLookupASCOrder = !isLookupASCOrder;
+						}
+
+					});
+				}
+
+			});
+		}
+	}
 }
 
 class DoubleClickTable extends FlexTable {
