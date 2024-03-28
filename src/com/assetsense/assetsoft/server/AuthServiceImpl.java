@@ -1,6 +1,6 @@
 package com.assetsense.assetsoft.server;
 
-import com.assetsense.assetsoft.dao.UserDao;
+import com.assetsense.assetsoft.daoImpl.UserDaoImpl;
 import com.assetsense.assetsoft.dto.UserDTO;
 import com.assetsense.assetsoft.service.AuthService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -8,7 +8,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class AuthServiceImpl extends RemoteServiceServlet implements AuthService {
 	
-	private UserDao userDao;
+	private UserDaoImpl userDao;
 
 //	@Override
 //	public boolean checkAuthentication() {
@@ -26,7 +26,7 @@ public class AuthServiceImpl extends RemoteServiceServlet implements AuthService
 
 	@Override
 	public UserDTO authenticateUser(String email, String password) {
-		userDao = (UserDao) ApplicationContextListener.applicationContext.getBean("userDao");
+		userDao = (UserDaoImpl) ApplicationContextListener.applicationContext.getBean("userDao");
 		UserDTO user = userDao.getUserByEmail(email);
 		if(user != null && user.getPassword().equals(password)) {
 			return user;
