@@ -33,7 +33,6 @@ public class TaskDaoImpl implements TaskDao {
 		this.sessionFactory = sessionFactory;
 	}
 
-	// method to add or update task
 	/**
 	 * 
 	 * @param task
@@ -60,7 +59,6 @@ public class TaskDaoImpl implements TaskDao {
 				taskInDB.setModule(task.getModule());
 				session.update(taskInDB);
 			} else {
-				// Add the task
 				session.save(task);
 			}
 			tx.commit();
@@ -75,7 +73,6 @@ public class TaskDaoImpl implements TaskDao {
 
 	}
 
-	// method to delete task
 	/**
 	 * 
 	 * @param task
@@ -121,7 +118,6 @@ public class TaskDaoImpl implements TaskDao {
 		}
 	}
 
-	// method to return one task of given id
 	public TaskDTO getTaskById(long id) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
@@ -144,7 +140,6 @@ public class TaskDaoImpl implements TaskDao {
 		return taskDTO;
 	}
 
-	// method to return tasks of given user_id
 	public List<TaskDTO> getTasksByUserId(long userId) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
@@ -168,7 +163,6 @@ public class TaskDaoImpl implements TaskDao {
 		return taskDTOs;
 	}
 
-	// method to return tasks of given priority_id
 	public List<TaskDTO> getTasksByPriorityId(long priorityId) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
@@ -192,7 +186,6 @@ public class TaskDaoImpl implements TaskDao {
 		return taskDTOs;
 	}
 
-	// Method to return tasks of given username
 	public List<TaskDTO> getTasksByUsername(String username) {
 		Transaction tx = null;
 		Session session = sessionFactory.openSession();
@@ -222,7 +215,6 @@ public class TaskDaoImpl implements TaskDao {
 		return taskDTOs;
 	}
 
-	// Method to return tasks by lookup value
 	public List<TaskDTO> getTasksByLookupValue(String name, String value) {
 		name = name.toLowerCase();
 		value = value.toUpperCase();
@@ -365,6 +357,127 @@ public class TaskDaoImpl implements TaskDao {
 				List<Task> tasks = criteria.list();
 				for (Task task : tasks) {
 					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+			}
+
+			tx.commit();
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+
+		return taskDTOs;
+	}
+
+	@SuppressWarnings({ "unchecked", "deprecation" })
+	@Override
+	public List<TaskDTO> getTasksBySearchString(String attrName, String searchValue) {
+		attrName = attrName.toLowerCase();
+		searchValue = searchValue.toLowerCase();
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			Query<Task> taskQuery = null;
+
+			if (attrName.equals("id")) {
+				taskQuery = session.createQuery("From Task WHERE CAST(task_id AS string) LIKE :searchValue",
+						Task.class);
+				taskQuery.setParameter("searchValue", "%" + searchValue + "%");
+
+				List<Task> tasks = taskQuery.getResultList();
+
+				for (Task task : tasks) {
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+
+			} else if (attrName.equals("title")) {
+				taskQuery = session.createQuery("From Task WHERE LOWER(title) LIKE :searchValue", Task.class);
+				taskQuery.setParameter("searchValue", "%" + searchValue + "%");
+
+				List<Task> tasks = taskQuery.getResultList();
+
+				for (Task task : tasks) {
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+
+			} else if (attrName.equals("user")) {
+				Query<User> userQuery = session.createQuery("FROM User WHERE LOWER(name) LIKE :searchValue", User.class);
+				userQuery.setParameter("searchValue", "%" + searchValue + "%");
+
+				List<User> users = userQuery.getResultList();
+
+				for (User user : users) {
+					taskQuery = session.createQuery("FROM Task WHERE user_id = :userId", Task.class);
+					taskQuery.setParameter("userId", user.getUserId());
+
+					List<Task> tasks = taskQuery.getResultList();
+
+					for (Task task : tasks) {
+						taskDTOs.add(typeConverter.convertToTaskDTO(task));
+					}
+				}
+			} else if (attrName.equals("product")) {
+				Query<Product> productQuery = session.createQuery("FROM Product WHERE LOWER(name) LIKE :searchValue",
+						Product.class);
+				productQuery.setParameter("searchValue", "%" + searchValue + "%");
+
+				List<Product> products = productQuery.getResultList();
+
+				for (Product product : products) {
+					taskQuery = session.createQuery("FROM Task WHERE product_id = :productId", Task.class);
+					taskQuery.setParameter("productId", product.getProductId());
+
+					List<Task> tasks = taskQuery.getResultList();
+
+					for (Task task : tasks) {
+						taskDTOs.add(typeConverter.convertToTaskDTO(task));
+					}
+				}
+			} else if (attrName.equals("module")) {
+				Query<Module> moduleQuery = session.createQuery("FROM Module WHERE LOWER(name) LIKE :searchValue",
+						Module.class);
+				moduleQuery.setParameter("searchValue", "%" + searchValue + "%");
+				List<Module> modules = moduleQuery.getResultList();
+				for (Module module : modules) {
+					taskQuery = session.createQuery("FROM Task WHERE moduleid = :moduleId", Task.class);
+					taskQuery.setParameter("moduleId", module.getModuleId());
+
+					List<Task> tasks = taskQuery.getResultList();
+
+					for (Task task : tasks) {
+						taskDTOs.add(typeConverter.convertToTaskDTO(task));
+					}
+				}
+			} else {
+				// TODO: COMplete this lookup filtering part
+				List<Lookup> lookups = null;
+				Criteria criteria = session.createCriteria(Lookup.class);
+				if (attrName.equals("type")) {
+					criteria.add(Restrictions.eq("catId", 1000L));
+				} else if (attrName.equals("priority")) {
+					criteria.add(Restrictions.eq("catId", 2000L));
+				} else if (attrName.equals("status")) {
+					criteria.add(Restrictions.eq("catId", 3000L));
+				}
+
+				lookups = criteria.list();
+				searchValue = searchValue.toUpperCase();
+				for (Lookup lookup : lookups) {
+					if (lookup.getValue().contains(searchValue)) {
+						criteria = session.createCriteria(Task.class);
+						criteria.add(Restrictions.eq(attrName, lookup));
+						List<Task> tasks = criteria.list();
+						for (Task task : tasks) {
+							taskDTOs.add(typeConverter.convertToTaskDTO(task));
+						}
+					}
 				}
 			}
 

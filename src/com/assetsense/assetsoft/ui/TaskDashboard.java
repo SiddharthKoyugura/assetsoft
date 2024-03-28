@@ -41,6 +41,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.resources.client.ImageResource;
@@ -100,6 +102,10 @@ public class TaskDashboard {
 	private String selectedUserName;
 	private Boolean isTeamSelected = false;
 	private Team selectedTeam;
+
+	private TextBox searchField;
+	private ListBox itemSearch;
+	private String attrName;
 
 	// Task Table section
 	private DoubleClickTable flexTable;
@@ -1254,6 +1260,8 @@ public class TaskDashboard {
 		if (!isIdASCOrder) {
 			Collections.reverse(tasks);
 		}
+		editableRow = -1;
+		selectedRows.clear();
 		for (final TaskDTO task : tasks) {
 			flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 			int col = 0;
@@ -1768,8 +1776,8 @@ public class TaskDashboard {
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
-		
-		resetBtn.addClickHandler(new ClickHandler(){
+
+		resetBtn.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
@@ -1777,7 +1785,7 @@ public class TaskDashboard {
 				allTasksRendered = false;
 				filterTasks();
 			}
-			
+
 		});
 
 		editBtn.addClickHandler(new ClickHandler() {
@@ -1824,11 +1832,89 @@ public class TaskDashboard {
 
 		headerPanel.addWest(hpanel, 300);
 		headerPanel.addEast(createButtonsPanel(resetBtn, addBtn, editBtn, deleteBtn), 400);
+		headerPanel.add(createSearchPanel());
 
 		return headerPanel;
 	}
 
 	// Custom hpanels
+	private HorizontalPanel createSearchPanel() {
+		HorizontalPanel hpanel = new HorizontalPanel();
+		hpanel.getElement().getStyle().setPadding(10, Unit.PX);
+
+		searchField = new TextBox();
+		searchField.getElement().setAttribute("placeHolder", "Search");
+		searchField.addStyleName("listBoxStyle");
+
+		itemSearch = new ListBox();
+		itemSearch.addStyleName("listBoxStyle");
+
+		itemSearch.addItem("ID");
+		itemSearch.addItem("Type");
+		itemSearch.addItem("Title");
+		itemSearch.addItem("Work flow step");
+		itemSearch.addItem("Priority");
+		itemSearch.addItem("Assigned to");
+		itemSearch.addItem("Project");
+		itemSearch.addItem("Module");
+
+		attrName = itemSearch.getSelectedValue();
+
+		itemSearch.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				attrName = itemSearch.getSelectedValue();
+				if (attrName != null) {
+					if (attrName.contains("step")) {
+						attrName = "status";
+					} else if (attrName.contains("Assigned")) {
+						attrName = "user";
+					} else if (attrName.equals("Project")) {
+						attrName = "product";
+					}
+				}
+			}
+		});
+
+		searchField.addKeyUpHandler(new KeyUpHandler() {
+
+			@Override
+			public void onKeyUp(KeyUpEvent event) {
+				final String searchValue = searchField.getText();
+				if (searchValue.length() > 0) {
+					taskService.getTasksBySearchString(attrName, searchValue, new AsyncCallback<List<TaskDTO>>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+						}
+
+						@Override
+						public void onSuccess(List<TaskDTO> tasks) {
+							clearFlexTableRows();
+							if (tasks != null) {
+								loadTableRows(tasks);
+							}
+						}
+
+					});
+				} else {
+					isIdASCOrder = true;
+					allTasksRendered = false;
+					filterTasks();
+				}
+			}
+
+		});
+
+		itemSearch.getElement().getStyle().setMarginLeft(5, Unit.PX);
+		itemSearch.getElement().getStyle().setProperty("cursor", "pointer");
+
+		hpanel.add(searchField);
+		hpanel.add(itemSearch);
+
+		return hpanel;
+	}
+
 	private HorizontalPanel createButtonsPanel(Button... buttons) {
 		HorizontalPanel buttonsPanel = new HorizontalPanel();
 		buttonsPanel.getElement().getStyle().setProperty("padding", "10px");

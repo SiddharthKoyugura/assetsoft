@@ -26,8 +26,10 @@ public interface TaskServiceAsync {
 	void getTasksByProductName(String name, AsyncCallback<List<TaskDTO>> callback);
 
 	void getTasksByModuleName(String name, AsyncCallback<List<TaskDTO>> callback);
-	
+
 	void getTasksByLookupOrder(String LookupName, Boolean asc, AsyncCallback<List<TaskDTO>> callback);
+
+	void getTasksBySearchString(String attrName, String searchValue, AsyncCallback<List<TaskDTO>> callback);
 
 	void getTasks(AsyncCallback<List<TaskDTO>> callback);
 
