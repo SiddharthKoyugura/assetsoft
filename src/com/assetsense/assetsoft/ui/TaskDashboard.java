@@ -52,10 +52,12 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
+import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -114,11 +116,11 @@ public class TaskDashboard {
 		return navBtn;
 	}
 
-	public void resetEditableRow() {
+	private void resetEditableRow() {
 		editableRow = -1;
 	}
 
-	public void resetFilters() {
+	private void resetFilters() {
 		selectedUserName = null;
 		allTasksRendered = false;
 	}
@@ -1210,17 +1212,21 @@ public class TaskDashboard {
 		flexTable.getElement().getStyle().setProperty("borderLeft", "1px solid black");
 		flexTable.getElement().getStyle().setProperty("borderCollapse", "collapse");
 		flexTable.setWidth("100%");
-		flexTable.getRowFormatter().setStyleName(0, "taskHeading");
-		flexTable.getRowFormatter().getElement(0).getStyle().setProperty("cursor", "pointer");
-
+		RowFormatter flexTableRow = flexTable.getRowFormatter();
+		flexTableRow.setStyleName(0, "taskHeading");
+		flexTableRow.getElement(0).getStyle().setProperty("cursor", "pointer");
+		flexTableRow.getElement(0).getStyle().setProperty("textAlign", "left");
+		flexTableRow.getElement(0).getStyle().setProperty("padding", "10px");
+		
+		
 		flexTable.setText(0, 0, "ID");
-		flexTable.setText(0, 1, "Type");
+		flexTable.setWidget(0, 1, createLabelFilterPanel("Type"));
 		flexTable.setText(0, 2, "Title");
-		flexTable.setText(0, 3, "Work flow step");
-		flexTable.setText(0, 4, "Priority");
-		flexTable.setText(0, 5, "Assigned to");
-		flexTable.setText(0, 6, "Project");
-		flexTable.setText(0, 7, "Module");
+		flexTable.setWidget(0, 3, createLabelFilterPanel("Work flow step"));
+		flexTable.setWidget(0, 4, createLabelFilterPanel("Priority"));
+		flexTable.setWidget(0, 5, createLabelFilterPanel("Assigned to"));
+		flexTable.setWidget(0, 6, createLabelFilterPanel("Project"));
+		flexTable.setWidget(0, 7, createLabelFilterPanel("Module"));
 
 		filterTasks();
 
@@ -1811,6 +1817,141 @@ public class TaskDashboard {
 		hpanel.add(button);
 
 		return hpanel;
+	}
+	
+	private HorizontalPanel createLabelFilterPanel(final String text){
+		HorizontalPanel hpanel = new HorizontalPanel();
+		hpanel.addStyleName("set-pad-zero");
+		
+		final HTML filterIcon = new HTML("<i class='bi bi-funnel-fill'></i>");
+		filterIcon.getElement().getStyle().setProperty("marginLeft", "10px");
+		
+		filterIcon.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				showPopup(text, filterIcon);
+			}
+			
+		});
+		hpanel.add(new Label(text));
+		hpanel.add(filterIcon);
+		
+		return hpanel;
+	}
+	
+	private void showPopup(String name, HTML filterIcon){
+		final PopupPanel popup = new PopupPanel(true);
+		popup.setStyleName("popupPanelStyle");
+		
+        final VerticalPanel menuPanel = new VerticalPanel();
+        name = name.toLowerCase();
+        if(name.equals("type")){
+        	Label l1 = new Label("TASK");
+        	Label l2 = new Label("BUG");
+        	Label l3 = new Label("FEATURE");
+        	
+        	l1.addStyleName("subMenuItem");
+        	l2.addStyleName("subMenuItem");
+        	l3.addStyleName("subMenuItem");
+        	
+        	menuPanel.add(l1);
+        	menuPanel.add(l2);
+        	menuPanel.add(l3);
+        }else if(name.equals("work flow step")){
+        	Label l1 = new Label("NEW");
+        	Label l2 = new Label("APPROVED");
+        	Label l3 = new Label("IN_PROGRESS");
+        	Label l4 = new Label("DEV_COMPLETE");
+        	Label l5 = new Label("READY_FOR_TESTING");
+        	
+        	l1.addStyleName("subMenuItem");
+        	l2.addStyleName("subMenuItem");
+        	l3.addStyleName("subMenuItem");
+        	l4.addStyleName("subMenuItem");
+        	l5.addStyleName("subMenuItem");
+        	
+        	menuPanel.add(l1);
+        	menuPanel.add(l2);
+        	menuPanel.add(l3);
+        	menuPanel.add(l4);
+        	menuPanel.add(l5);
+        }else if(name.equals("priority")){
+        	Label l1 = new Label("HIGH");
+        	Label l2 = new Label("MEDIUM");
+        	Label l3 = new Label("LOW");
+        	
+        	l1.addStyleName("subMenuItem");
+        	l2.addStyleName("subMenuItem");
+        	l3.addStyleName("subMenuItem");
+        	
+        	menuPanel.add(l1);
+        	menuPanel.add(l2);
+        	menuPanel.add(l3);
+        }else if(name.equals("assigned to")){
+        	userService.getUsers(new AsyncCallback<List<UserDTO>>(){
+
+				@Override
+				public void onFailure(Throwable caught) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void onSuccess(List<UserDTO> userDTOs) {
+					for(UserDTO user: userDTOs){
+						Label label = new Label(user.getName());
+						label.addStyleName("subMenuItem");
+						menuPanel.add(label);
+					}
+				}
+        		
+        	});
+        }else if(name.equals("project")){
+        	productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>(){
+
+				@Override
+				public void onFailure(Throwable caught) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void onSuccess(List<ProductDTO> products) {
+					for(ProductDTO product: products){
+						Label label = new Label(product.getName());
+						label.addStyleName("subMenuItem");
+						menuPanel.add(label);
+					}
+				}
+        		
+        	});
+        }else if(name.equals("module")){
+        	moduleService.getModules(new AsyncCallback<List<ModuleDTO>>(){
+
+				@Override
+				public void onFailure(Throwable caught) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void onSuccess(List<ModuleDTO> modules) {
+					for(ModuleDTO module: modules){
+						Label label = new Label(module.getName());
+						label.addStyleName("subMenuItem");
+						menuPanel.add(label);
+					}
+				}
+        		
+        	});
+        }
+        
+        int left = filterIcon.getAbsoluteLeft();
+        int top = filterIcon.getAbsoluteTop() + filterIcon.getOffsetHeight();
+        popup.setPopupPosition(left, top);
+        popup.add(menuPanel);
+        popup.show();
 	}
 }
 
