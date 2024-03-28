@@ -1,4 +1,4 @@
-package com.assetsense.assetsoft.dao;
+package com.assetsense.assetsoft.daoImpl;
 
 import java.util.HashSet;
 import java.util.Set;

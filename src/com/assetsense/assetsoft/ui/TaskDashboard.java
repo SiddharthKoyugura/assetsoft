@@ -102,7 +102,7 @@ public class TaskDashboard {
 	// Task Table section
 	private DoubleClickTable flexTable;
 	private PopupPanel popupPanel;
-	
+
 	private int rowIndex = 1;
 	private Set<Integer> selectedRows = new HashSet<>();
 	private int editableRow = -1;
@@ -1219,8 +1219,7 @@ public class TaskDashboard {
 		flexTableRow.getElement(0).getStyle().setProperty("cursor", "pointer");
 		flexTableRow.getElement(0).getStyle().setProperty("textAlign", "left");
 		flexTableRow.getElement(0).getStyle().setProperty("padding", "10px");
-		
-		
+
 		flexTable.setText(0, 0, "ID");
 		flexTable.setWidget(0, 1, createLabelFilterPanel("Type"));
 		flexTable.setText(0, 2, "Title");
@@ -1376,13 +1375,13 @@ public class TaskDashboard {
 		}
 	}
 
-	private void clearFlexTableRows(){
+	private void clearFlexTableRows() {
 		rowIndex = 1;
 		while (flexTable.getRowCount() != 1) {
 			flexTable.removeRow(1);
 		}
 	}
-	
+
 	// Method to convert cells in a row to editable fields
 	private void convertRowToEditable(final int row, final FlexTable flexTable, List<UserDTO> users,
 			List<ProductDTO> products) {
@@ -1822,163 +1821,164 @@ public class TaskDashboard {
 
 		return hpanel;
 	}
-	
-	private HorizontalPanel createLabelFilterPanel(final String text){
+
+	private HorizontalPanel createLabelFilterPanel(final String text) {
 		HorizontalPanel hpanel = new HorizontalPanel();
 		hpanel.addStyleName("set-pad-zero");
-		
+
 		final HTML filterIcon = new HTML("<i class='bi bi-funnel-fill'></i>");
 		filterIcon.getElement().getStyle().setProperty("marginLeft", "10px");
-		
-		filterIcon.addClickHandler(new ClickHandler(){
+
+		filterIcon.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				showPopup(text, filterIcon);
 			}
-			
+
 		});
 		hpanel.add(new Label(text));
 		hpanel.add(filterIcon);
-		
+
 		return hpanel;
 	}
-	
-	private void showPopup(String name, HTML filterIcon){
+
+	private void showPopup(String name, HTML filterIcon) {
 		popupPanel = new PopupPanel(true);
 		popupPanel.setStyleName("popupPanelStyle");
-		
-        final VerticalPanel menuPanel = new VerticalPanel();
-        name = name.toLowerCase();
-        if(name.equals("type")){
-        	Label l1 = new Label("TASK");
-        	Label l2 = new Label("BUG");
-        	Label l3 = new Label("FEATURE");
-        	
-        	l1.addStyleName("subMenuItem");
-        	l2.addStyleName("subMenuItem");
-        	l3.addStyleName("subMenuItem");
-        	
-        	lookupFilterClickHandler(name, l1);
-        	lookupFilterClickHandler(name, l2);
-        	lookupFilterClickHandler(name, l3);
-        	
-        	menuPanel.add(l1);
-        	menuPanel.add(l2);
-        	menuPanel.add(l3);
-        }else if(name.equals("work flow step")){
-        	Label l1 = new Label("NEW");
-        	Label l2 = new Label("APPROVED");
-        	Label l3 = new Label("IN_PROGRESS");
-        	Label l4 = new Label("DEV_COMPLETE");
-        	Label l5 = new Label("READY_FOR_TESTING");
-        	
-        	l1.addStyleName("subMenuItem");
-        	l2.addStyleName("subMenuItem");
-        	l3.addStyleName("subMenuItem");
-        	l4.addStyleName("subMenuItem");
-        	l5.addStyleName("subMenuItem");
-        	
-        	lookupFilterClickHandler("status", l1);
-        	lookupFilterClickHandler("status", l2);
-        	lookupFilterClickHandler("status", l3);
-        	lookupFilterClickHandler("status", l4);
-        	lookupFilterClickHandler("status", l5);
-        	
-        	menuPanel.add(l1);
-        	menuPanel.add(l2);
-        	menuPanel.add(l3);
-        	menuPanel.add(l4);
-        	menuPanel.add(l5);
-        }else if(name.equals("priority")){
-        	Label l1 = new Label("HIGH");
-        	Label l2 = new Label("MEDIUM");
-        	Label l3 = new Label("LOW");
-        	
-        	l1.addStyleName("subMenuItem");
-        	l2.addStyleName("subMenuItem");
-        	l3.addStyleName("subMenuItem");
-        	
-        	lookupFilterClickHandler(name, l1);
-        	lookupFilterClickHandler(name, l2);
-        	lookupFilterClickHandler(name, l3);
-        	
-        	menuPanel.add(l1);
-        	menuPanel.add(l2);
-        	menuPanel.add(l3);
-        }else if(name.equals("assigned to")){
-        	userService.getUsers(new AsyncCallback<List<UserDTO>>(){
+
+		final VerticalPanel menuPanel = new VerticalPanel();
+		name = name.toLowerCase();
+		if (name.equals("type")) {
+			Label l1 = new Label("TASK");
+			Label l2 = new Label("BUG");
+			Label l3 = new Label("FEATURE");
+
+			l1.addStyleName("subMenuItem");
+			l2.addStyleName("subMenuItem");
+			l3.addStyleName("subMenuItem");
+
+			lookupFilterClickHandler(name, l1);
+			lookupFilterClickHandler(name, l2);
+			lookupFilterClickHandler(name, l3);
+
+			menuPanel.add(l1);
+			menuPanel.add(l2);
+			menuPanel.add(l3);
+		} else if (name.equals("work flow step")) {
+			Label l1 = new Label("NEW");
+			Label l2 = new Label("APPROVED");
+			Label l3 = new Label("IN_PROGRESS");
+			Label l4 = new Label("DEV_COMPLETE");
+			Label l5 = new Label("READY_FOR_TESTING");
+
+			l1.addStyleName("subMenuItem");
+			l2.addStyleName("subMenuItem");
+			l3.addStyleName("subMenuItem");
+			l4.addStyleName("subMenuItem");
+			l5.addStyleName("subMenuItem");
+
+			lookupFilterClickHandler("status", l1);
+			lookupFilterClickHandler("status", l2);
+			lookupFilterClickHandler("status", l3);
+			lookupFilterClickHandler("status", l4);
+			lookupFilterClickHandler("status", l5);
+
+			menuPanel.add(l1);
+			menuPanel.add(l2);
+			menuPanel.add(l3);
+			menuPanel.add(l4);
+			menuPanel.add(l5);
+		} else if (name.equals("priority")) {
+			Label l1 = new Label("HIGH");
+			Label l2 = new Label("MEDIUM");
+			Label l3 = new Label("LOW");
+
+			l1.addStyleName("subMenuItem");
+			l2.addStyleName("subMenuItem");
+			l3.addStyleName("subMenuItem");
+
+			lookupFilterClickHandler(name, l1);
+			lookupFilterClickHandler(name, l2);
+			lookupFilterClickHandler(name, l3);
+
+			menuPanel.add(l1);
+			menuPanel.add(l2);
+			menuPanel.add(l3);
+		} else if (name.equals("assigned to")) {
+			userService.getUsers(new AsyncCallback<List<UserDTO>>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void onSuccess(List<UserDTO> userDTOs) {
-					for(UserDTO user: userDTOs){
+					for (UserDTO user : userDTOs) {
 						Label label = new Label(user.getName());
 						label.addStyleName("subMenuItem");
+						userFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
-        		
-        	});
-        }else if(name.equals("project")){
-        	productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>(){
+
+			});
+		} else if (name.equals("project")) {
+			productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void onSuccess(List<ProductDTO> products) {
-					for(ProductDTO product: products){
+					for (ProductDTO product : products) {
 						Label label = new Label(product.getName());
 						label.addStyleName("subMenuItem");
 						menuPanel.add(label);
 					}
 				}
-        		
-        	});
-        }else if(name.equals("module")){
-        	moduleService.getModules(new AsyncCallback<List<ModuleDTO>>(){
+
+			});
+		} else if (name.equals("module")) {
+			moduleService.getModules(new AsyncCallback<List<ModuleDTO>>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
 				public void onSuccess(List<ModuleDTO> modules) {
-					for(ModuleDTO module: modules){
+					for (ModuleDTO module : modules) {
 						Label label = new Label(module.getName());
 						label.addStyleName("subMenuItem");
 						menuPanel.add(label);
 					}
 				}
-        		
-        	});
-        }
-        
-        int left = filterIcon.getAbsoluteLeft();
-        int top = filterIcon.getAbsoluteTop() + filterIcon.getOffsetHeight();
-        popupPanel.setPopupPosition(left, top);
-        popupPanel.add(menuPanel);
-        popupPanel.show();
+
+			});
+		}
+
+		int left = filterIcon.getAbsoluteLeft();
+		int top = filterIcon.getAbsoluteTop() + filterIcon.getOffsetHeight();
+		popupPanel.setPopupPosition(left, top);
+		popupPanel.add(menuPanel);
+		popupPanel.show();
 	}
-	
-	private void lookupFilterClickHandler(final String name, final Label label){
-		label.addClickHandler(new ClickHandler(){
+
+	private void lookupFilterClickHandler(final String name, final Label label) {
+		label.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
 				String value = label.getText();
-				taskService.getTasksByLookupValue(name, value, new AsyncCallback<List<TaskDTO>>(){
+				taskService.getTasksByLookupValue(name, value, new AsyncCallback<List<TaskDTO>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -1991,12 +1991,25 @@ public class TaskDashboard {
 						clearFlexTableRows();
 						loadTableRows(tasks);
 					}
-					
+
 				});
 			}
-			
+
 		});
 	}
+
+	private void userFilterClickHandler(final Label label) {
+		label.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				popupPanel.hide();
+				selectedUserName = label.getText();
+				filterTasks();
+			}
+		});
+	}
+
 }
 
 class DoubleClickTable extends FlexTable {

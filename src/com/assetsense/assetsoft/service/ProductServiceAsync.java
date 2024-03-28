@@ -8,10 +8,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ProductServiceAsync {
 	void saveProduct(Product product, AsyncCallback<ProductDTO> callback);
+
 	void deleteProduct(Product product, AsyncCallback<Void> callback);
+
 	void getProductById(long id, AsyncCallback<Product> callaback);
+
 	void getProducts(AsyncCallback<List<ProductDTO>> callaback);
+
 	void getProductByName(String name, AsyncCallback<ProductDTO> callback);
+
 	void getChildProductsByParentId(long id, AsyncCallback<List<ProductDTO>> callback);
+
 	void getTopMostParentProducts(AsyncCallback<List<ProductDTO>> callaback);
 }

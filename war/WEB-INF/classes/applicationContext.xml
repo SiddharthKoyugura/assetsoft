@@ -68,27 +68,27 @@
 	</bean>
 
 	<!-- DAO beans -->
-	<bean id="userDao" class="com.assetsense.assetsoft.dao.UserDao">
+	<bean id="userDao" class="com.assetsense.assetsoft.daoImpl.UserDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-	<bean id="teamDao" class="com.assetsense.assetsoft.dao.TeamDao">
+	<bean id="teamDao" class="com.assetsense.assetsoft.daoImpl.TeamDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-	<bean id="taskDao" class="com.assetsense.assetsoft.dao.TaskDao">
+	<bean id="taskDao" class="com.assetsense.assetsoft.daoImpl.TaskDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-	<bean id="productDao" class="com.assetsense.assetsoft.dao.ProductDao">
+	<bean id="productDao" class="com.assetsense.assetsoft.daoImpl.ProductDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
-	<bean id="lookupDao" class="com.assetsense.assetsoft.dao.LookupDao">
+	<bean id="lookupDao" class="com.assetsense.assetsoft.daoImpl.LookupDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 	
-	<bean id="moduleDao" class="com.assetsense.assetsoft.dao.ModuleDao">
+	<bean id="moduleDao" class="com.assetsense.assetsoft.daoImpl.ModuleDaoImpl">
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
