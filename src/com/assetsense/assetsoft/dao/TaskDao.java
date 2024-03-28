@@ -25,6 +25,8 @@ public interface TaskDao {
 	List<TaskDTO> getTasksByProductName(String name);
 	
 	List<TaskDTO> getTasksByModuleName(String name);
+	
+	List<TaskDTO> getTasksByLookupOrder(String lookupName, Boolean asc);
 
 	List<TaskDTO> getTasks();
 

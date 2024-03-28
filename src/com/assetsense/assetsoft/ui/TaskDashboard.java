@@ -1,6 +1,7 @@
 package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -103,6 +104,8 @@ public class TaskDashboard {
 	// Task Table section
 	private DoubleClickTable flexTable;
 	private PopupPanel popupPanel;
+	private Boolean isIdASCOrder = true;
+	private Boolean isLookupASCOrder = true;
 
 	private int rowIndex = 1;
 	private Set<Integer> selectedRows = new HashSet<>();
@@ -1221,7 +1224,17 @@ public class TaskDashboard {
 		flexTableRow.getElement(0).getStyle().setProperty("textAlign", "left");
 		flexTableRow.getElement(0).getStyle().setProperty("padding", "10px");
 
-		flexTable.setText(0, 0, "ID");
+		Label label = new Label("ID");
+		label.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				isIdASCOrder = !isIdASCOrder;
+				allTasksRendered = false;
+				filterTasks();
+			}
+		});
+
+		flexTable.setWidget(0, 0, label);
 		flexTable.setWidget(0, 1, createLabelFilterPanel("Type"));
 		flexTable.setText(0, 2, "Title");
 		flexTable.setWidget(0, 3, createLabelFilterPanel("Work flow step"));
@@ -1238,6 +1251,9 @@ public class TaskDashboard {
 	}
 
 	private void loadTableRows(List<TaskDTO> tasks) {
+		if (!isIdASCOrder) {
+			Collections.reverse(tasks);
+		}
 		for (final TaskDTO task : tasks) {
 			flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 			int col = 0;
@@ -1320,6 +1336,7 @@ public class TaskDashboard {
 					public void onSuccess(List<TaskDTO> tasks) {
 						loadTableRows(tasks);
 						allTasksRendered = false;
+						selectedUserName = null;
 					}
 
 				});
@@ -1742,13 +1759,26 @@ public class TaskDashboard {
 		hpanel.add(l1);
 		hpanel.add(icon);
 
+		Button resetBtn = new Button("Reset");
 		addBtn = new Button("Add");
 		editBtn = new Button("Edit");
 		deleteBtn = new Button("Delete");
 
+		resetBtn.setStyleName("customBtn");
 		addBtn.setStyleName("customBtn");
 		editBtn.setStyleName("customBtn");
 		deleteBtn.setStyleName("customBtn");
+		
+		resetBtn.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent event) {
+				isIdASCOrder = true;
+				allTasksRendered = false;
+				filterTasks();
+			}
+			
+		});
 
 		editBtn.addClickHandler(new ClickHandler() {
 			@Override
@@ -1793,7 +1823,7 @@ public class TaskDashboard {
 		});
 
 		headerPanel.addWest(hpanel, 300);
-		headerPanel.addEast(createButtonsPanel(addBtn, editBtn, deleteBtn), 300);
+		headerPanel.addEast(createButtonsPanel(resetBtn, addBtn, editBtn, deleteBtn), 400);
 
 		return headerPanel;
 	}
@@ -1838,7 +1868,11 @@ public class TaskDashboard {
 			}
 
 		});
-		hpanel.add(new Label(text));
+
+		Label label = new Label(text);
+		lookupSortClickHandler(label);
+
+		hpanel.add(label);
 		hpanel.add(filterIcon);
 
 		return hpanel;
@@ -1975,6 +2009,7 @@ public class TaskDashboard {
 		popupPanel.show();
 	}
 
+	// Filter section
 	private void lookupFilterClickHandler(final String name, final Label label) {
 		label.addClickHandler(new ClickHandler() {
 
@@ -2064,6 +2099,36 @@ public class TaskDashboard {
 		});
 	}
 
+	// Sort section
+	private void lookupSortClickHandler(final Label label) {
+		final String lookupName = label.getText().toLowerCase().contains("step") ? "status"
+				: label.getText().toLowerCase();
+
+		if (lookupName.equals("type") || lookupName.equals("status") || lookupName.equals("priority")) {
+			label.addClickHandler(new ClickHandler() {
+
+				@Override
+				public void onClick(ClickEvent event) {
+					taskService.getTasksByLookupOrder(lookupName, isLookupASCOrder, new AsyncCallback<List<TaskDTO>>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+
+						}
+
+						@Override
+						public void onSuccess(List<TaskDTO> tasks) {
+							clearFlexTableRows();
+							loadTableRows(tasks);
+							isLookupASCOrder = !isLookupASCOrder;
+						}
+
+					});
+				}
+
+			});
+		}
+	}
 }
 
 class DoubleClickTable extends FlexTable {

@@ -291,10 +291,10 @@ public class TaskDaoImpl implements TaskDao {
 
 		return taskDTOs;
 	}
-	
+
 	@SuppressWarnings({ "deprecation", "unchecked" })
 	@Override
-	public List<TaskDTO> getTasksByModuleName(String name){
+	public List<TaskDTO> getTasksByModuleName(String name) {
 		List<TaskDTO> taskDTOs = new ArrayList<>();
 		Session session = sessionFactory.openSession();
 		Transaction tx = null;
@@ -317,6 +317,58 @@ public class TaskDaoImpl implements TaskDao {
 				}
 			}
 
+			tx.commit();
+
+		} catch (HibernateException e) {
+			if (tx != null) {
+				tx.rollback();
+			}
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+
+		return taskDTOs;
+	}
+
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	@Override
+	public List<TaskDTO> getTasksByLookupOrder(String lookupName, Boolean asc) {
+		lookupName = lookupName.toLowerCase();
+		List<TaskDTO> taskDTOs = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction tx = null;
+		try {
+			tx = session.beginTransaction();
+
+			List<Lookup> lookups = null;
+			Criteria criteria = session.createCriteria(Lookup.class);
+			if (lookupName.equals("type")) {
+				criteria.add(Restrictions.eq("catId", 1000L));
+			} else if (lookupName.equals("priority")) {
+				criteria.add(Restrictions.eq("catId", 2000L));
+			} else if (lookupName.equals("status")) {
+				criteria.add(Restrictions.eq("catId", 3000L));
+			}
+
+			if (asc) {
+				criteria.addOrder(Order.asc("lookupId"));
+			} else {
+				criteria.addOrder(Order.desc("lookupId"));
+			}
+
+			lookups = criteria.list();
+
+			for (Lookup lookup : lookups) {
+				criteria = session.createCriteria(Task.class);
+				criteria.add(Restrictions.eq(lookupName, lookup));
+				List<Task> tasks = criteria.list();
+				for (Task task : tasks) {
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
+				}
+			}
+
+			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
 				tx.rollback();
