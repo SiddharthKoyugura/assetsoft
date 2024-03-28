@@ -16,10 +16,11 @@ import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.domain.Task;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.TaskDTO;
+import com.assetsense.assetsoft.util.TypeConverter;
 
 public class TaskDaoImpl implements TaskDao {
 	private SessionFactory sessionFactory;
-	private DaoToDto daoToDto = new DaoToDto();
+	private TypeConverter typeConverter = new TypeConverter();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -125,7 +126,7 @@ public class TaskDaoImpl implements TaskDao {
 		try {
 			tx = session.beginTransaction();
 			Task task = session.get(Task.class, id);
-			taskDTO = daoToDto.convertToTaskDTO(task);
+			taskDTO = typeConverter.convertToTaskDTO(task);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -150,7 +151,7 @@ public class TaskDaoImpl implements TaskDao {
 			Query<Task> query = session.createQuery("from Task where user_id=" + userId, Task.class);
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
-				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+				taskDTOs.add(typeConverter.convertToTaskDTO(task));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -174,7 +175,7 @@ public class TaskDaoImpl implements TaskDao {
 			Query<Task> query = session.createQuery("from Task where priority_id=" + priorityId, Task.class);
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
-				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+				taskDTOs.add(typeConverter.convertToTaskDTO(task));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -203,7 +204,7 @@ public class TaskDaoImpl implements TaskDao {
 				query.setParameter("userId", user.getUserId());
 				List<Task> tasks = query.getResultList();
 				for (Task task : tasks) {
-					taskDTOs.add(daoToDto.convertToTaskDTO(task));
+					taskDTOs.add(typeConverter.convertToTaskDTO(task));
 				}
 			}
 			tx.commit();
@@ -236,7 +237,7 @@ public class TaskDaoImpl implements TaskDao {
 			
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
-				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+				taskDTOs.add(typeConverter.convertToTaskDTO(task));
 			}
 			
 		} catch (HibernateException e) {
@@ -261,7 +262,7 @@ public class TaskDaoImpl implements TaskDao {
 			Query<Task> query = (Query<Task>) session.createQuery("from Task ORDER BY id ASC", Task.class);
 			List<Task> tasks = query.getResultList();
 			for (Task task : tasks) {
-				taskDTOs.add(daoToDto.convertToTaskDTO(task));
+				taskDTOs.add(typeConverter.convertToTaskDTO(task));
 			}
 			tx.commit();
 		} catch (HibernateException e) {

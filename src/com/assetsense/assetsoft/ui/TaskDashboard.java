@@ -28,6 +28,7 @@ import com.assetsense.assetsoft.service.TeamService;
 import com.assetsense.assetsoft.service.TeamServiceAsync;
 import com.assetsense.assetsoft.service.UserService;
 import com.assetsense.assetsoft.service.UserServiceAsync;
+import com.assetsense.assetsoft.util.TypeConverter;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
@@ -66,7 +67,7 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class TaskDashboard {
-	private final DtoToDao typeConverter = new DtoToDao();
+	private final TypeConverter typeConverter = new TypeConverter();
 
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final TeamServiceAsync teamService = GWT.create(TeamService.class);

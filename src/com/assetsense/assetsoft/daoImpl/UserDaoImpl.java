@@ -13,10 +13,11 @@ import com.assetsense.assetsoft.dao.UserDao;
 import com.assetsense.assetsoft.domain.Team;
 import com.assetsense.assetsoft.domain.User;
 import com.assetsense.assetsoft.dto.UserDTO;
+import com.assetsense.assetsoft.util.TypeConverter;
 
 public class UserDaoImpl implements UserDao {
 	private SessionFactory sessionFactory;
-	private DaoToDto daoToDto = new DaoToDto();
+	private TypeConverter typeConverter = new TypeConverter();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -95,7 +96,7 @@ public class UserDaoImpl implements UserDao {
 			query.setParameter("email", email);
 			user = query.uniqueResult();
 			if (user != null) {
-				userDTO = daoToDto.convertToUserDTO(user);
+				userDTO = typeConverter.convertToUserDTO(user);
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -119,7 +120,7 @@ public class UserDaoImpl implements UserDao {
 			query.setParameter("name", name);
 			User user = query.uniqueResult();
 			if (user != null) {
-				userDTO = daoToDto.convertToUserDTO(user);
+				userDTO = typeConverter.convertToUserDTO(user);
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -144,7 +145,7 @@ public class UserDaoImpl implements UserDao {
 			Query<User> query = (Query<User>) session.createQuery("from User", User.class);
 			List<User> users = query.getResultList();
 			for (User user : users) {
-				userDTOs.add(daoToDto.convertToUserDTO(user));
+				userDTOs.add(typeConverter.convertToUserDTO(user));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -188,7 +189,7 @@ public class UserDaoImpl implements UserDao {
 			List<User> users = query.getResultList();
 			if (users != null) {
 				for (User user : users) {
-					usersDTO.add(daoToDto.convertToUserDTO(user));
+					usersDTO.add(typeConverter.convertToUserDTO(user));
 				}
 			}
 			tx.commit();

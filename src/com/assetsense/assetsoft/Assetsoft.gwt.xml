@@ -11,6 +11,7 @@
 	<source path="service" />
 	<source path="domain" />
 	<source path="dto" />
+	<source path="util" />
 	
 	<public path="public" />
 

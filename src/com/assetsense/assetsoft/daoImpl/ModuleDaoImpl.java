@@ -15,10 +15,11 @@ import com.assetsense.assetsoft.dao.ModuleDao;
 import com.assetsense.assetsoft.domain.Module;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.dto.ModuleDTO;
+import com.assetsense.assetsoft.util.TypeConverter;
 
 public class ModuleDaoImpl implements ModuleDao {
 	private SessionFactory sessionFactory;
-	private DaoToDto daoToDto = new DaoToDto();
+	private TypeConverter typeConverter = new TypeConverter();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -40,7 +41,7 @@ public class ModuleDaoImpl implements ModuleDao {
 			query.setParameter("name", module.getName());
 			Long productId = module.getProduct().getProductId();
 			query.setParameter("productId", productId);
-			moduleInDB = daoToDto.convertToModuleDTO(query.getSingleResult());
+			moduleInDB = typeConverter.convertToModuleDTO(query.getSingleResult());
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -64,7 +65,7 @@ public class ModuleDaoImpl implements ModuleDao {
 			List<Module> modules = moduleQuery.getResultList();
 			
 			for(Module module: modules){
-				moduleDTOs.add(daoToDto.convertToModuleDTO(module));
+				moduleDTOs.add(typeConverter.convertToModuleDTO(module));
 			}
 
 			tx.commit();
@@ -96,7 +97,7 @@ public class ModuleDaoImpl implements ModuleDao {
 				moduleQuery.setParameter("id", product.getProductId());
 				List<Module> modules = moduleQuery.getResultList();
 				for (Module module : modules) {
-					moduleDTOs.add(daoToDto.convertToModuleDTO(module));
+					moduleDTOs.add(typeConverter.convertToModuleDTO(module));
 				}
 			}
 			tx.commit();
@@ -128,7 +129,7 @@ public class ModuleDaoImpl implements ModuleDao {
 				moduleQuery.setParameter("id", module.getModuleId());
 				List<Module> modules = moduleQuery.getResultList();
 				for (Module moduleDAO : modules) {
-					moduleDTOs.add(daoToDto.convertToModuleDTO(moduleDAO));
+					moduleDTOs.add(typeConverter.convertToModuleDTO(moduleDAO));
 				}
 
 			}
@@ -159,7 +160,7 @@ public class ModuleDaoImpl implements ModuleDao {
 			moduleQuery.setParameter("id", id);
 			List<Module> modules = moduleQuery.getResultList();
 			for (Module moduleDAO : modules) {
-				moduleDTOs.add(daoToDto.convertToModuleDTO(moduleDAO));
+				moduleDTOs.add(typeConverter.convertToModuleDTO(moduleDAO));
 			}
 
 			tx.commit();
@@ -187,7 +188,7 @@ public class ModuleDaoImpl implements ModuleDao {
 			query.setParameter("name", moduleName);
 			Module module = query.getSingleResult();
 			if (module != null) {
-				moduleDTO = daoToDto.convertToModuleDTO(module);
+				moduleDTO = typeConverter.convertToModuleDTO(module);
 			}
 
 			tx.commit();

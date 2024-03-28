@@ -12,10 +12,11 @@ import org.hibernate.Transaction;
 import com.assetsense.assetsoft.dao.ProductDao;
 import com.assetsense.assetsoft.domain.Product;
 import com.assetsense.assetsoft.dto.ProductDTO;
+import com.assetsense.assetsoft.util.TypeConverter;
 
 public class ProductDaoImpl implements ProductDao {
 	private SessionFactory sessionFactory;
-	private DaoToDto daoToDto = new DaoToDto();
+	private TypeConverter typeConverter = new TypeConverter();
 
 	public SessionFactory getSessionFactory() {
 		return sessionFactory;
@@ -38,7 +39,7 @@ public class ProductDaoImpl implements ProductDao {
 			query.setParameter("name", product.getName());
 			Long pid = product.getParentProduct() != null ? product.getParentProduct().getProductId() : null;
 			query.setParameter("pid", pid);
-			productInDB = daoToDto.convertToProductDTO(query.getSingleResult());
+			productInDB = typeConverter.convertToProductDTO(query.getSingleResult());
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -99,7 +100,7 @@ public class ProductDaoImpl implements ProductDao {
 			Query<Product> query = (Query<Product>) session.createQuery("from Product", Product.class);
 			List<Product> products = query.getResultList();
 			for (Product product : products) {
-				productDTOs.add(daoToDto.convertToProductDTO(product));
+				productDTOs.add(typeConverter.convertToProductDTO(product));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -124,7 +125,7 @@ public class ProductDaoImpl implements ProductDao {
 			query.setParameter("name", name);
 			// Product product = query.getResultList().get(0);
 			Product product = query.uniqueResult();
-			productDTO = daoToDto.convertToProductDTO(product);
+			productDTO = typeConverter.convertToProductDTO(product);
 			tx.commit();
 		} catch (HibernateException e) {
 			if (tx != null) {
@@ -149,7 +150,7 @@ public class ProductDaoImpl implements ProductDao {
 			query.setParameter("parent_product_id", id);
 			List<Product> products = query.getResultList();
 			for (Product product : products) {
-				productDTOs.add(daoToDto.convertToProductDTO(product));
+				productDTOs.add(typeConverter.convertToProductDTO(product));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
@@ -173,7 +174,7 @@ public class ProductDaoImpl implements ProductDao {
 					Product.class);
 			List<Product> products = query.getResultList();
 			for (Product product : products) {
-				productDTOs.add(daoToDto.convertToProductDTO(product));
+				productDTOs.add(typeConverter.convertToProductDTO(product));
 			}
 			tx.commit();
 		} catch (HibernateException e) {
