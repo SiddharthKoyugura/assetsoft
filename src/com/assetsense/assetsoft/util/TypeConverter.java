@@ -35,6 +35,8 @@ public class TypeConverter {
 		taskDTO.setPercentComplete(task.getPercentComplete());
 
 		taskDTO.setRemainingEstimate(task.getRemainingEstimate());
+		
+		taskDTO.setStartDate(task.getStartDate());
 
 		taskDTO.setDueDate(task.getDueDate());
 

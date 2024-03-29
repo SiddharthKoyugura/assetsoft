@@ -51,6 +51,7 @@ public class TaskDaoImpl implements TaskDao {
 				taskInDB.setInitialEstimate(task.getInitialEstimate());
 				taskInDB.setPercentComplete(task.getPercentComplete());
 				taskInDB.setRemainingEstimate(task.getRemainingEstimate());
+				taskInDB.setStartDate(task.getStartDate());
 				taskInDB.setDueDate(task.getDueDate());
 				taskInDB.setPriority(task.getPriority());
 				taskInDB.setStatus(task.getStatus());
