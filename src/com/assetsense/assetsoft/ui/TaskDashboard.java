@@ -2066,24 +2066,49 @@ public class TaskDashboard {
 
 			});
 		} else if (name.equals("project")) {
-			productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
+//			productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
+//
+//				@Override
+//				public void onFailure(Throwable caught) {
+//					// TODO Auto-generated method stub
+//
+//				}
+//
+//				@Override
+//				public void onSuccess(List<ProductDTO> products) {
+//					for (ProductDTO product : products) {
+//						Label label = new Label(product.getName());
+//						label.addStyleName("subMenuItem");
+//						productFilterClickHandler(label);
+//						menuPanel.add(label);
+//					}
+//				}
+//
+//			});
+			productService.getProducts(new AsyncCallback<List<ProductDTO>>(){
 
 				@Override
 				public void onFailure(Throwable caught) {
-					// TODO Auto-generated method stub
 
 				}
 
 				@Override
 				public void onSuccess(List<ProductDTO> products) {
 					for (ProductDTO product : products) {
-						Label label = new Label(product.getName());
+						String topMostParentName = product.getTopMostParent().getName();
+						String childName = product.getName();
+						Label label;
+						if (topMostParentName.equals(childName)) {
+							label = new Label(childName);
+						} else {
+							label = new Label(topMostParentName + " >> " + childName);
+						}
 						label.addStyleName("subMenuItem");
 						productFilterClickHandler(label);
 						menuPanel.add(label);
 					}
 				}
-
+				
 			});
 		} else if (name.equals("module")) {
 			moduleService.getModules(new AsyncCallback<List<ModuleDTO>>() {
@@ -2186,8 +2211,11 @@ public class TaskDashboard {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				String value = label.getText();
+				String product = label.getText();
 				popupPanel.hide();
+				
+				String[] wordsArray = product.split(" >> ");
+				String value = wordsArray[wordsArray.length - 1];
 
 				List<TaskDTO> tasksWithFilteredProductName = new ArrayList<>();
 				for(TaskDTO task: currentStateTasks){

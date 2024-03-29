@@ -168,13 +168,25 @@ public class AddEditForm {
 				String selectedUser = task.getUser().getName();
 				selectListBoxItem(assignedToField, selectedUser);
 
-				String selectedProduct = task.getProduct().getName();
+				String selectedProduct = "";
+				
+				ProductDTO product = task.getProduct();
+				String topMostParentName = product.getTopMostParent().getName();
+				String childName = product.getName();
+				if (topMostParentName.equals(childName)) {
+					selectedProduct += childName;
+				} else {
+					selectedProduct += topMostParentName + " >> " + childName;
+				}
+				
 				selectListBoxItem(productField, selectedProduct);
 
 				String selectedPriority = task.getPriority().getValue();
 				selectListBoxItem(priorityField, selectedPriority);
+				
+				String productName = task.getProduct().getTopMostParent().getName();
 
-				moduleService.getModulesByProductName(selectedProduct, new AsyncCallback<List<ModuleDTO>>() {
+				moduleService.getModulesByProductName(productName, new AsyncCallback<List<ModuleDTO>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -289,8 +301,11 @@ public class AddEditForm {
 						}
 
 						task.setUser(user);
+						
+						String[] wordsArray = product.split(" >> ");
+						String productName = wordsArray[wordsArray.length - 1];
 
-						productService.getProductByName(product, new AsyncCallback<ProductDTO>() {
+						productService.getProductByName(productName, new AsyncCallback<ProductDTO>() {
 
 							@Override
 							public void onFailure(Throwable caught) {
@@ -445,7 +460,7 @@ public class AddEditForm {
 		l5.setStyleName("mr-5");
 		titleField = new TextBox();
 		titleField.setStyleName("listBoxStyle");
-		
+
 		Label l6 = new Label("Start Date:");
 		l6.setStyleName("mr-5");
 		startDateField = new TextBox();
@@ -547,7 +562,7 @@ public class AddEditForm {
 		moduleField = new ListBox();
 		moduleField.addItem("<Select>");
 		moduleField.setStyleName("listBoxStyle");
-		
+
 		Label l6 = new Label("Due Date:");
 		l6.setStyleName("mr-5");
 		dueDateField = new TextBox();
@@ -577,19 +592,25 @@ public class AddEditForm {
 		grid.setWidget(3, 1, remainingEstField);
 		grid.setWidget(4, 1, percentField);
 		grid.setWidget(5, 1, dueDateField);
-		
 
-		productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
+		productService.getProducts(new AsyncCallback<List<ProductDTO>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
 				// TODO Auto-generated method stub
+
 			}
 
 			@Override
 			public void onSuccess(List<ProductDTO> products) {
 				for (ProductDTO product : products) {
-					productField.addItem(product.getName());
+					String topMostParentName = product.getTopMostParent().getName();
+					String childName = product.getName();
+					if (topMostParentName.equals(childName)) {
+						productField.addItem(childName);
+					} else {
+						productField.addItem(topMostParentName + " >> " + childName);
+					}
 				}
 				grid.setWidget(0, 1, productField);
 			}
@@ -616,7 +637,9 @@ public class AddEditForm {
 	}
 
 	private void updateModuleField() {
-		String productName = productField.getSelectedValue();
+		String product = productField.getSelectedValue();
+		String[] wordsArray = product.split(" >> ");
+		String productName = wordsArray[0];
 		moduleField.clear();
 		moduleField.addItem("<Select>");
 		moduleService.getModulesByProductName(productName, new AsyncCallback<List<ModuleDTO>>() {
