@@ -2,6 +2,7 @@ package com.assetsense.assetsoft.ui;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,6 +107,8 @@ public class TaskDashboard {
 	private TextBox searchField;
 	private ListBox itemSearch;
 	private String attrName;
+
+	private List<TaskDTO> currentStateTasks;
 
 	// Task Table section
 	private DoubleClickTable flexTable;
@@ -1235,8 +1238,22 @@ public class TaskDashboard {
 			@Override
 			public void onClick(ClickEvent event) {
 				isIdASCOrder = !isIdASCOrder;
-				allTasksRendered = false;
-				filterTasks();
+				if (isIdASCOrder) {
+					Collections.sort(currentStateTasks, new Comparator<TaskDTO>() {
+						@Override
+						public int compare(TaskDTO task1, TaskDTO task2) {
+							return Long.compare(task1.getTaskId(), task2.getTaskId());
+						}
+					});
+				} else {
+					Collections.sort(currentStateTasks, new Comparator<TaskDTO>() {
+						@Override
+						public int compare(TaskDTO task1, TaskDTO task2) {
+							return Long.compare(task2.getTaskId(), task1.getTaskId());
+						}
+					});
+				}
+				loadTableRows();
 			}
 		});
 
@@ -1256,13 +1273,11 @@ public class TaskDashboard {
 		return vpanel;
 	}
 
-	private void loadTableRows(List<TaskDTO> tasks) {
-		if (!isIdASCOrder) {
-			Collections.reverse(tasks);
-		}
+	private void loadTableRows() {
+		clearFlexTableRows();
 		editableRow = -1;
 		selectedRows.clear();
-		for (final TaskDTO task : tasks) {
+		for (final TaskDTO task : currentStateTasks) {
 			flexTable.getRowFormatter().setStyleName(rowIndex, "taskCell");
 			int col = 0;
 
@@ -1342,7 +1357,8 @@ public class TaskDashboard {
 
 					@Override
 					public void onSuccess(List<TaskDTO> tasks) {
-						loadTableRows(tasks);
+						currentStateTasks = tasks;
+						loadTableRows();
 						allTasksRendered = false;
 						selectedUserName = null;
 					}
@@ -1358,7 +1374,8 @@ public class TaskDashboard {
 
 						@Override
 						public void onSuccess(List<TaskDTO> tasks) {
-							loadTableRows(tasks);
+							currentStateTasks = tasks;
+							loadTableRows();
 							allTasksRendered = true;
 						}
 
@@ -1388,7 +1405,8 @@ public class TaskDashboard {
 
 							@Override
 							public void onSuccess(List<TaskDTO> tasks) {
-								loadTableRows(tasks);
+								currentStateTasks = tasks;
+								loadTableRows();
 								allTasksRendered = false;
 								isTeamSelected = false;
 							}
@@ -1892,7 +1910,8 @@ public class TaskDashboard {
 						public void onSuccess(List<TaskDTO> tasks) {
 							clearFlexTableRows();
 							if (tasks != null) {
-								loadTableRows(tasks);
+								currentStateTasks = tasks;
+								loadTableRows();
 							}
 						}
 
@@ -1956,7 +1975,7 @@ public class TaskDashboard {
 		});
 
 		Label label = new Label(text);
-		lookupSortClickHandler(label);
+//		lookupSortClickHandler(label);
 
 		hpanel.add(label);
 		hpanel.add(filterIcon);
@@ -2098,25 +2117,45 @@ public class TaskDashboard {
 	// Filter section
 	private void lookupFilterClickHandler(final String name, final Label label) {
 		label.addClickHandler(new ClickHandler() {
-
 			@Override
 			public void onClick(ClickEvent event) {
 				String value = label.getText();
-				taskService.getTasksByLookupValue(name, value, new AsyncCallback<List<TaskDTO>>() {
+				popupPanel.hide();
+				
+				if(name.equals("type")){
+					List<TaskDTO> tasksWithTypeTask = new ArrayList<>();
 
-					@Override
-					public void onFailure(Throwable caught) {
-						Window.alert("Got error in lookup filter");
-					}
+			        for (TaskDTO task : currentStateTasks) {
+			            if (task.getType() != null && value.equals(task.getType().getValue())) {
+			                tasksWithTypeTask.add(task);
+			            }
+			        }
+			        
+			        currentStateTasks = tasksWithTypeTask;
+			        loadTableRows();
+				}else if(name.equals("status")){
+					List<TaskDTO> tasksWithStatusTask = new ArrayList<>();
 
-					@Override
-					public void onSuccess(List<TaskDTO> tasks) {
-						popupPanel.hide();
-						clearFlexTableRows();
-						loadTableRows(tasks);
-					}
+			        for (TaskDTO task : currentStateTasks) {
+			            if (task.getStatus() != null && value.equals(task.getStatus().getValue())) {
+			                tasksWithStatusTask.add(task);
+			            }
+			        }
+			        
+			        currentStateTasks = tasksWithStatusTask;
+			        loadTableRows();
+				}else if(name.equals("priority")){
+					List<TaskDTO> tasksWithPriorityTask = new ArrayList<>();
 
-				});
+			        for (TaskDTO task : currentStateTasks) {
+			            if (task.getPriority() != null && value.equals(task.getStatus().getValue())) {
+			                tasksWithPriorityTask.add(task);
+			            }
+			        }
+			        
+			        currentStateTasks = tasksWithPriorityTask;
+			        loadTableRows();
+				}
 			}
 
 		});
@@ -2128,8 +2167,16 @@ public class TaskDashboard {
 			@Override
 			public void onClick(ClickEvent event) {
 				popupPanel.hide();
-				selectedUserName = label.getText();
-				filterTasks();
+				String value = label.getText();
+				
+				List<TaskDTO> tasksWithFilteredUserName = new ArrayList<>();
+				for(TaskDTO task: currentStateTasks){
+					if(task.getUser() != null && value.equals(task.getUser().getName())){
+						tasksWithFilteredUserName.add(task);
+					}
+				}
+				currentStateTasks = tasksWithFilteredUserName;
+				loadTableRows();
 			}
 		});
 	}
@@ -2139,21 +2186,17 @@ public class TaskDashboard {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				taskService.getTasksByProductName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+				String value = label.getText();
+				popupPanel.hide();
 
-					@Override
-					public void onFailure(Throwable caught) {
-
+				List<TaskDTO> tasksWithFilteredProductName = new ArrayList<>();
+				for(TaskDTO task: currentStateTasks){
+					if(task.getPriority() != null && value.equals(task.getProduct().getName())){
+						tasksWithFilteredProductName.add(task);
 					}
-
-					@Override
-					public void onSuccess(List<TaskDTO> tasks) {
-						popupPanel.hide();
-						clearFlexTableRows();
-						loadTableRows(tasks);
-					}
-
-				});
+				}
+				currentStateTasks = tasksWithFilteredProductName;
+				loadTableRows();
 			}
 
 		});
@@ -2164,57 +2207,53 @@ public class TaskDashboard {
 
 			@Override
 			public void onClick(ClickEvent event) {
-				taskService.getTasksByModuleName(label.getText(), new AsyncCallback<List<TaskDTO>>() {
+				String value = label.getText();
+				popupPanel.hide();
 
-					@Override
-					public void onFailure(Throwable caught) {
-						// TODO Auto-generated method stub
-
+				List<TaskDTO> tasksWithFilteredModuleName = new ArrayList<>();
+				for(TaskDTO task: currentStateTasks){
+					if(task.getModule() != null && value.equals(task.getModule().getName())){
+						tasksWithFilteredModuleName.add(task);
 					}
-
-					@Override
-					public void onSuccess(List<TaskDTO> tasks) {
-						popupPanel.hide();
-						clearFlexTableRows();
-						loadTableRows(tasks);
-					}
-
-				});
+				}
+				currentStateTasks = tasksWithFilteredModuleName;
+				loadTableRows();
 			}
 
 		});
 	}
 
 	// Sort section
-	private void lookupSortClickHandler(final Label label) {
-		final String lookupName = label.getText().toLowerCase().contains("step") ? "status"
-				: label.getText().toLowerCase();
-
-		if (lookupName.equals("type") || lookupName.equals("status") || lookupName.equals("priority")) {
-			label.addClickHandler(new ClickHandler() {
-
-				@Override
-				public void onClick(ClickEvent event) {
-					taskService.getTasksByLookupOrder(lookupName, isLookupASCOrder, new AsyncCallback<List<TaskDTO>>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-
-						}
-
-						@Override
-						public void onSuccess(List<TaskDTO> tasks) {
-							clearFlexTableRows();
-							loadTableRows(tasks);
-							isLookupASCOrder = !isLookupASCOrder;
-						}
-
-					});
-				}
-
-			});
-		}
-	}
+//	private void lookupSortClickHandler(final Label label) {
+//		final String lookupName = label.getText().toLowerCase().contains("step") ? "status"
+//				: label.getText().toLowerCase();
+//
+//		if (lookupName.equals("type") || lookupName.equals("status") || lookupName.equals("priority")) {
+//			label.addClickHandler(new ClickHandler() {
+//
+//				@Override
+//				public void onClick(ClickEvent event) {
+//					taskService.getTasksByLookupOrder(lookupName, isLookupASCOrder, new AsyncCallback<List<TaskDTO>>() {
+//
+//						@Override
+//						public void onFailure(Throwable caught) {
+//
+//						}
+//
+//						@Override
+//						public void onSuccess(List<TaskDTO> tasks) {
+//							clearFlexTableRows();
+//							currentStateTasks = tasks;
+//							loadTableRows();
+//							isLookupASCOrder = !isLookupASCOrder;
+//						}
+//
+//					});
+//				}
+//
+//			});
+//		}
+//	}
 }
 
 class DoubleClickTable extends FlexTable {
