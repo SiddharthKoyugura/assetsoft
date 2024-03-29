@@ -67,6 +67,7 @@ public class AddEditForm {
 	private ListBox moduleField;
 	private TextBox initialEstField;
 	private TextBox dueDateField;
+	private TextBox startDateField;
 	private TextBox titleField;
 
 	private ListBox productField;
@@ -152,6 +153,7 @@ public class AddEditForm {
 
 				descriptionField.setText(task.getDescription());
 				initialEstField.setText(task.getInitialEstimate());
+				startDateField.setText(task.getStartDate());
 				dueDateField.setText(task.getDueDate());
 				titleField.setText(task.getTitle());
 				remainingEstField.setText(task.getRemainingEstimate());
@@ -224,6 +226,7 @@ public class AddEditForm {
 		String percent = percentField.getText();
 		String initialEst = initialEstField.getText();
 		String remainEst = remainingEstField.getText();
+		String startDate = startDateField.getText();
 		String dueDate = dueDateField.getText();
 		String description = descriptionField.getText();
 
@@ -236,6 +239,7 @@ public class AddEditForm {
 		task.setPercentComplete(percent);
 		task.setInitialEstimate(initialEst);
 		task.setRemainingEstimate(remainEst);
+		task.setStartDate(startDate);
 		task.setDueDate(dueDate);
 
 		List<String> values = new ArrayList<>();
@@ -441,11 +445,11 @@ public class AddEditForm {
 		l5.setStyleName("mr-5");
 		titleField = new TextBox();
 		titleField.setStyleName("listBoxStyle");
-
-		Label l6 = new Label("Due Date:");
+		
+		Label l6 = new Label("Start Date:");
 		l6.setStyleName("mr-5");
-		dueDateField = new TextBox();
-		dueDateField.setStyleName("listBoxStyle");
+		startDateField = new TextBox();
+		startDateField.setStyleName("listBoxStyle");
 
 		l1.setStyleName("taskLabel");
 		l2.setStyleName("taskLabel");
@@ -474,7 +478,7 @@ public class AddEditForm {
 		grid.setWidget(1, 1, workItemTypeField);
 		grid.setWidget(2, 1, workFlowStepField);
 		grid.setWidget(4, 1, initialEstField);
-		grid.setWidget(5, 1, dueDateField);
+		grid.setWidget(5, 1, startDateField);
 
 		assignedToField = new ListBox();
 		assignedToField.setStyleName("listBoxStyle");
@@ -543,12 +547,18 @@ public class AddEditForm {
 		moduleField = new ListBox();
 		moduleField.addItem("<Select>");
 		moduleField.setStyleName("listBoxStyle");
+		
+		Label l6 = new Label("Due Date:");
+		l6.setStyleName("mr-5");
+		dueDateField = new TextBox();
+		dueDateField.setStyleName("listBoxStyle");
 
 		l1.setStyleName("taskLabel");
 		l2.setStyleName("taskLabel");
 		l3.setStyleName("taskLabel");
 		l4.setStyleName("taskLabel");
 		l5.setStyleName("taskLabel");
+		l6.setStyleName("taskLabel");
 
 		final Grid grid = new Grid(6, 2);
 		grid.setCellPadding(5);
@@ -560,11 +570,14 @@ public class AddEditForm {
 		grid.setWidget(2, 0, l2);
 		grid.setWidget(3, 0, l3);
 		grid.setWidget(4, 0, l4);
+		grid.setWidget(5, 0, l6);
 
 		grid.setWidget(1, 1, moduleField);
 		grid.setWidget(2, 1, priorityField);
 		grid.setWidget(3, 1, remainingEstField);
 		grid.setWidget(4, 1, percentField);
+		grid.setWidget(5, 1, dueDateField);
+		
 
 		productService.getTopMostParentProducts(new AsyncCallback<List<ProductDTO>>() {
 
@@ -584,7 +597,6 @@ public class AddEditForm {
 		});
 
 		productField.addChangeHandler(new ChangeHandler() {
-
 			@Override
 			public void onChange(ChangeEvent event) {
 				updateModuleField();

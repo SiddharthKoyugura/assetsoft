@@ -14,6 +14,7 @@
 		<property name="initialEstimate" column="initial_estimate" not-null="false"></property>
 		<property name="percentComplete" column="percent_complete" not-null="false"></property>
 		<property name="remainingEstimate" column="remaining_estimate" not-null="false"></property>
+		<property name="startDate" column="start_date" not-null="false"></property>
 		<property name="dueDate" column="due_date" not-null="false"></property>
 		
 		<many-to-one name="user" class="com.assetsense.assetsoft.domain.User" column="user_id" not-null="false"/>

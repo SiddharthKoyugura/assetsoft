@@ -114,7 +114,7 @@ public class TaskDashboard {
 	private DoubleClickTable flexTable;
 	private PopupPanel popupPanel;
 	private Boolean isIdASCOrder = true;
-	private Boolean isLookupASCOrder = true;
+//	private Boolean isLookupASCOrder = true;
 
 	private int rowIndex = 1;
 	private Set<Integer> selectedRows = new HashSet<>();
